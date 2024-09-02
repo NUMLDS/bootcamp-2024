@@ -24,17 +24,17 @@ notes<-params$notes
 
 ## Why R?
 
-> -   R is flexible
-> -   R is customizable
 > -   R is open source
+> -   R has many statistical capabilities
+> -   R can create custom data visualizations
 > -   R has a large community of users
 
 ## What is RStudio?
 
-> -   RStudio refers to both the company and the software
 > -   RStudio is an integrated development environment (IDE) for R
+> -   RStudio provides a user-friendly interface for coding
 > -   RStudio Desktop is the most commonly used version of the software
-> -   You will also have access to RStudio Workbench through the MLDS program
+> -   Posit (formerly known as RStudio) is the company that devloped and maintains RStudio
 
 ## Exploring the IDE
 
@@ -51,10 +51,10 @@ RStudio helps you organize your workflow and keep track of your work. The top-le
 You will hear these terms often this week:
 
 > -   Objects
-> -   Packages
+> -   Variables
+> -   Data Frames
 > -   Functions
-> -   Help files
-> -   Comments (anything following `#` in a code file)
+> -   Packages
 
 ## Starting with the basics
 
@@ -71,9 +71,9 @@ The above topics are the basics you need to learn before we start working with "
 
 ## Our materials
 
-All of our materials are available at [github.com/msia/bootcamp-2024](https://www.github.com/msia/bootcamp-2024). Today, you will only need to work with two files, which are in the ZIP file linked at the top of the Github page.
+All of our materials are available at [github.com/NUMLDS/bootcamp-2024](https://www.github.com/NUMLDS/bootcamp-2024). Today, you will only need to work with two files, which are in the ZIP file linked at the top of the Github page.
 
-Starting with the R3 session tomorrow, you will be working with a much wider set of files. Tomorrow, you will learn how to make a copy of the whole bootcamp-2024 repository using Git.
+Starting with the R3 session later this week, you will be working with a much wider set of files. Tomorrow, you will learn how to make a copy of the whole bootcamp-2024 repository using Git.
 
 # Basics and data types
 
