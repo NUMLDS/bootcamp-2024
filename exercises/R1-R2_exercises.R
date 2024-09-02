@@ -28,8 +28,8 @@
 # Take the natural log of 10
 log(10)
 
-# Take the log of 10 with base-19
-log(10, base=10)
+# Take the log of 10 with base-2
+log(10, base=2)
 
 # Store the result of log(10) as a variable
 y <- log(10)
@@ -53,6 +53,16 @@ y <- log(10)
 
 
 #### Packages and Functions ####
+
+# Install the package ggplot2 (only need to run this once)
+
+
+# Load the package ggplot2
+
+
+# Open the help file for the dataset mpg
+# (Hint: remember what ? does)
+
 
 # Install the package tidyverse (only need to run this once)
 
