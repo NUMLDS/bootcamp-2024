@@ -10,7 +10,7 @@ This Github repository contains materials for the R sessions of the 2024 Masters
 | Wed, 9/18 | R3 & R4 | RMarkdown; Loops, conditionals, and functions; R and Github | [Lecture notes](https://numlds.github.io/bootcamp-2024/lecturenotes/R3-R4_lecturenotes) | [Slides](https://numlds.github.io/bootcamp-2024/lectureslides/R3-R4_slides) | [Exercises](https://github.com/NUMLDS/bootcamp-2024/blob/main/exercises/R3-R4_exercises_no_answers.html) and [Answers](https://github.com/NUMLDS/bootcamp-2024/blob/main/exercises/R3-R4_exercises_with_answers.html) |
 | Thu, 9/19 | R5 & R6 | Advanced manipulation: reshaping, merging, dplyr, and data.table | [Lecture notes, pt 1](https://numlds.github.io/bootcamp-2024/lecturenotes/R5_lecturenotes)<br />[Lecture notes, pt 2](https://numlds.github.io/bootcamp-2024/lecturenotes/R6_lecturenotes) | [Slides, pt 1](https://numlds.github.io/bootcamp-2024/lectureslides/R5_slides)<br />[Slides, pt 2](https://numlds.github.io/bootcamp-2024/lectureslides/R6_slides) | [Exercises](https://github.com/NUMLDS/bootcamp-2024/blob/main/exercises/R5-R6_exercises_no_answers.html) and [Answers](https://github.com/NUMLDS/bootcamp-2024/blob/main/exercises/R5-R6_exercises_with_answers.html) |
 | Mon, 9/23 | R7 | Data visualization with ggplot | [Lecture notes](https://numlds.github.io/bootcamp-2024/lecturenotes/R7_lecturenotes)| [Slides](https://numlds.github.io/bootcamp-2024/lectureslides/R7_slides.html) | [Exercises](https://github.com/NUMLDS/bootcamp-2024/blob/main/exercises/R7_exercises.md) |
-| Mon, 9/23 | R8 | Final exercise | | [Exercise](https://github.com/NUMLDS/bootcamp-2024/blob/main/exercises/R8_final-exercise-instructions.md) |
+| Mon, 9/23 | R8 | Final exercise | | | [Exercise](https://github.com/NUMLDS/bootcamp-2024/blob/main/exercises/R8_final-exercise-instructions.md) |
 
 ## Resources
 
@@ -51,11 +51,11 @@ The R materials used for R1-R5 are based on the [Intro to R workshop](https://gi
 
 ## Contact information: Creators
 
--   Kumar Ramanathan: [Email](mailto:kumar.ramanathan@u.northwestern.edu) \| [Website](http://www.kumar.fyi)
--   Richard Morel: [Email](mailto:richard.morel@u.northwestern.edu) \| [Website](http://ramorel.github.io)
+-   Kumar Ramanathan: [Email](mailto:kumar.ramanathan@u.northwestern.edu) \| [Website](http://www.kumar.fyi){:target="_blank"}
+-   Richard Morel: [Email](mailto:richard.morel@u.northwestern.edu)
 -   Ali Ehlen: [Email](mailto:AnnalieseEhlen2020@u.northwestern.edu)
 
 ## Contact information: Instructors
 
--   Alice Zhao: [Email](mailto:alicezhao2013@u.northwestern.edu) \| [Website](http://adashofdata.com)
+-   Alice Zhao: [Email](mailto:alicezhao2013@u.northwestern.edu) \| [Website](http://adashofdata.com){:target="_blank"}
 -   Tucker Lewis: [Email](mailto:matthewlewis2018@u.northwestern.edu)
