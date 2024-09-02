@@ -51,11 +51,11 @@ The R materials used for R1-R5 are based on the [Intro to R workshop](https://gi
 
 ## Contact information: Creators
 
--   Kumar Ramanathan: [Email](mailto:kumar.ramanathan@u.northwestern.edu) \| [Website](http://www.kumar.fyi){:target="_blank"}
+-   Kumar Ramanathan: [Email](mailto:kumar.ramanathan@u.northwestern.edu) \| [Website](http://www.kumar.fyi)
 -   Richard Morel: [Email](mailto:richard.morel@u.northwestern.edu)
 -   Ali Ehlen: [Email](mailto:AnnalieseEhlen2020@u.northwestern.edu)
 
 ## Contact information: Instructors
 
--   Alice Zhao: [Email](mailto:alicezhao2013@u.northwestern.edu) \| [Website](http://adashofdata.com){:target="_blank"}
+-   Alice Zhao: [Email](mailto:alicezhao2013@u.northwestern.edu) \| [Website](http://adashofdata.com)
 -   Tucker Lewis: [Email](mailto:matthewlewis2018@u.northwestern.edu)
