@@ -305,6 +305,15 @@ Ask students to calculate the number of mean values in their exercises script.
 > -   For categorical variables with natural ordering between categories, we often want to use *ordered factors*
 > -   Create factors with `factor()`, which includes an argument for `levels =`
 
+## Factors
+
+```{r factors}
+fac <- factor(c("red", "yellow", "green", "green","green"))
+
+class(fac)
+levels(fac)
+```
+
 <aside class="notes">
 
 We won't spend any more time reviewing factors today. If you need a refresher, check the lecture notes.
@@ -317,6 +326,18 @@ We won't spend any more time reviewing factors today. If you need a refresher, c
 > -   Lists are *heterogenous*: they can store single elements, vectors, or even lists.
 > -   You can keep multi-dimensional and ragged data in R using lists.
 > -   You can index an element in a list using double brackets: `[[1]]`. Single brackets will return the element as a list.
+
+## Lists
+
+```{r lists}
+my_list <- list(42, "Hello world!",  c(1, 2, 3, 4, 5))
+
+my_list[1]
+class(my_list[1])
+
+my_list[[1]]
+class(my_list[[1]])
+```
 
 <aside class="notes">
 
@@ -331,6 +352,15 @@ For more on lists, see the lecture notes or data camp.
 > -   You can initialize a matrix using the `matrix()` function.
 > -   Matrices are used sparingly in R, primarily for numerical calculations or explicit matrix manipulation.
 > -   Matrices are indexed as follows: `mat[row no, col no]`.
+
+## Matrices
+
+```{r matrices}
+my_matrix <- matrix(data = 1:6, nrow = 2, ncol = 3)
+my_matrix
+
+my_matrix[1, 2]
+```
 
 <aside class="notes">
 
@@ -386,8 +416,6 @@ You can go to the Files tab in the bottom right window in RStudio and find the d
 setwd("/nfs/home/krn5889/R sessions")
 ```
 
-In the exercises script file, set your working directory now.
-
 ## Reading files: read.csv()
 
 ```{r read.csv intro, eval=F}
@@ -409,22 +437,30 @@ The above code is what you will usually see and use. The below code breaks down 
 ## Reading files: exercise
 
 -   Check your working directory with `getwd()`.
--   Run the `read.csv()` code provided and see what happens in the Environment tab.
--   Load the `readr` package. <br><small>(It as has already been installed as part of `tidyverse`)</small>
+-   Import the `gapminder` data set using `read.csv()` and see what happens in the Environment tab.
+-   Take a look at the data using `head()` and `View()`
+<br></br>
+After installing `tidyverse`:
+-   Load the `readr` package
 -   Use `read_csv()` to load the gapminder data. Read the message generated in the console.
 
 ## Reading files: exercise
 
-```{r read_csv, message=TRUE}
+```{r read_csv intro, eval=F}
 getwd()
+head(gapminder5)
+View(gapminder5)
+```
+
+```{r read_csv tidyverse, message=TRUE}
 library(readr)
 gapminder <- read_csv("data/gapminder5.csv")
 ```
 
 ## Reading files
 
-> -   You can also read files from the full local path or from URLs
 > -   You can read files using RStudio's interface through the "Files" tab
+> -   You can also read files from the full local path or from URLs
 > -   For other file types, use the packages `haven` (Stata, SAS, SPSS) or `readxl` (Excel)
 
 # Roadmap

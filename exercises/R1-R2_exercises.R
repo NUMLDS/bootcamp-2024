@@ -111,26 +111,17 @@ vec <- c(1, 8, NA, 7, 3)
 
 #### Factors ####
 
-# See lecture notes and DataCamp for guidance and practice
+# See lecture notes for guidance and practice
 
 
 #### Lists ####
 
-# See lecture notes and DataCamp for guidance and practice
+# See lecture notes for guidance and practice
 
 
-#### Matricies ####
+#### Matrices ####
 
-# Generate a matrix
-mat <- matrix(c(1:51, rep(NA,4)), ncol=5)
-
-# Select row 4, column 5
-
-
-# Select column 3
-
-
-# Bonus: How many NA values are there in this matrix?
+# See lecture notes for guidance and practice
 
 
 #### Data frames ####
