@@ -1,0 +1,582 @@
+---
+title: "Advanced R - data.table"
+author: "Ali Ehlen with additions by Tucker Lewis"
+date: "`r format(Sys.Date()+1, '%B %Y')`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+params:
+  notes: no
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.height = 4.35, fig.width = 4.75, message = FALSE, warning = FALSE)
+```
+
+```{r, include=FALSE}
+notes<-params$notes
+```
+
+# Introduction
+
+## What is `data.table`?
+
+> - "`data.table` is an R package that provides an enhanced version of data.frames" 
+> - "Briefly, if you are interested in reducing programming and compute time tremendously, then this package is for you." 
+
+  > - [authors of `data.table`](https://cran.r-project.org/web/packages/data.table/vignettes/datatable-intro.html)
+  
+  
+
+
+## Why do we care?
+
+> - `data.table` is popular
+![](figures/cran_downloads_2019.png)
+data pulled using `cranlogs` package
+
+## 
+
+- `data.table` is fast (especially on larger data)
+![](figures/benchmarks.png)
+https://h2oai.github.io/db-benchmark/
+
+## Why do we care?
+
+> - `data.table` comes with other features (file i/o, reshape functions)
+> - no need for multiple package dependencies
+> - syntax is clean, compact, and consistent
+> - `data.tables` are compatible with any function that takes `data.frame`s
+
+# `data.table` basics
+
+## Load data
+
+```{r, echo=TRUE, results = 'hide', message=FALSE}
+
+# import data.table library
+library(data.table)
+
+data_file <- here::here("data", "ca_energy_generation.csv")
+
+# read in two versions of data, one as a data.frame and one as a data.table
+generation_df <- read.csv(data_file, stringsAsFactors = F)
+
+generation_dt <- fread(data_file)
+
+```
+
+## `data.table` inherits from a `data.frame`.
+
+```{r, echo=TRUE}
+
+class(generation_df) 
+class(generation_dt) 
+
+```
+
+```{r, echo=TRUE, eval=FALSE}
+
+View(generation_df)
+View(generation_dt)
+generation_df
+generation_dt
+str(generation_df)
+str(generation_dt)
+
+```
+
+
+# How to use `data.table`s
+
+## `data.table` syntax
+
+> - `dplyr` syntax: depends on a small set of verbs
+> - `data.table` syntax: small set of consistent rules input into `dt[]`
+> - column names are variables inside `dt[]`
+  ![](figures/dt_structure.png)
+  
+  > - https://github.com/Rdatatable/data.table/wiki
+  
+# `i`: "on which rows" (row filtering)
+
+- logical operations filter rows
+
+```{r dt-filter1}
+
+generation_dt[wind > 4400]
+
+```
+
+- logical operations filter rows
+
+```{r dt-filter2}
+
+generation_dt[wind > 4400 & mday(datetime) == 7]
+
+```
+
+**Exercise:**
+
+- **try it!** select rows for which natural gas generation is less than or equal to 5,000 MW and large hydro generation is greater than 2,000 MW
+- **bonus:** select rows for which coal generation is greater than 10 MW and solar generation is greater than the median value of solar generation
+
+**Answers:**
+```{r dt-filter-exercise}
+
+generation_dt[natural_gas <= 5000 & large_hydro > 2000]
+
+generation_dt[coal > 10 & solar > median(solar)]
+
+```
+
+# `j`: "what to do" (column operations)
+
+- perform any operation in `j`
+
+```{r dt-columns0}
+
+generation_dt[,wind + solar]
+
+```
+
+- perform any operation in `j`
+
+```{r dt-columns1}
+
+generation_dt[,3*wind + solar*biogas/2]
+
+```
+
+- new columns may be assigned in `j` or a new table can be created
+
+```{r}
+
+generation_dt[,newcol := 3*wind + solar*biogas/2]
+
+generation_dt[,.(newcol = 3*wind + solar*biogas/2)]
+```
+
+- columns may be deleted in `j`
+
+```{r}
+generation_dt[,newcol := NULL]
+
+```
+
+**Exercise:**
+
+- **try it!** add a column called "total_hydro" that is the sum of the `small_hydro` and `large_hydro` columns 
+- **try it!** find the mean of the `nuclear` and `biogas` columns 
+- **bonus:** create a new table: for the hours when solar generation is zero, get the `datetime` and `total_thermal` (sum of natural gas and coal generation)
+
+**Answers**
+```{r dt-cols-exercise}
+
+generation_dt[,total_hydro := small_hydro + large_hydro]
+
+# generation_dt[,mean(nuclear)]
+# generation_dt[,mean(biogas)]
+# or
+generation_dt[,.(mean(nuclear), mean(biogas))]
+# or, with column names
+# generation_dt[,.(mean_nuc = mean(nuclear), mean_biogas = mean(biogas))]
+
+generation_dt[solar == 0, .(datetime, total_thermal = natural_gas + coal)]
+
+```
+
+
+# `by`: "grouped by what"
+
+- add grouping to any operation
+
+```{r dt-group}
+
+generation_dt[,mean(nuclear), by = mday(datetime)]
+
+
+```
+  
+  
+- combine with everything we've learned about `i` and `j`
+
+```{r dt-group2}
+
+generation_dt[,.(mean_nuc = mean(nuclear), mean_wind = mean(wind)), 
+              by = mday(datetime)]
+
+```
+  
+  
+- combine with everything we've learned about `i` and `j`
+
+```{r dt-group3}
+
+generation_dt[hour(datetime) > 19,
+              .(mean_nuc = mean(nuclear), mean_wind = mean(wind)), 
+              by = mday(datetime)]
+
+```
+    
+**Exercise:**
+
+- **try it!** find the median solar generation by hour. 
+- **try it!** for hours when the solar generation is greater than zero, find the maximum natural gas generation by day
+
+**Answers:**
+
+```{r dt-ex}
+
+generation_dt[,median(solar), by = hour(datetime)]
+
+generation_dt[solar > 0, max(natural_gas), by = mday(datetime)]
+
+```
+
+## `data.table` syntax recap
+
+> - column names are variables inside `dt[]`
+  ![](figures/dt_structure.png)
+
+> - the combination of `i`, `j`, and `by` is very powerful
+> - few other components; outside scope of this review
+
+# `data.table` upgrades to other functions
+
+`data.table` co-opts some functions we've already talked about
+
+> - `melt`
+> - `dcast`
+> - `merge`
+> - `order`
+> - This means we can repeat what we did with dplyr almost exactly
+
+## `dplyr` -> `data.table`
+
+**Exercise:**
+
+**try it!** Convert this `dplyr` syntax into `data.table` syntax (remember that this created
+the columns `day`, `log_output`, and `per_output`)
+
+```{r, eval=FALSE, echo=TRUE}
+
+long_ca_energy <- long_ca_energy %>%
+  mutate(day = as_date(datetime),
+         log_output = log(output)) %>%
+  group_by(day) %>%
+  mutate(total_daily_output = sum(output, na.rm = T)) %>% 
+  ungroup() %>% 
+  mutate(per_output = output/total_daily_output)
+
+```
+
+
+**Answers**
+
+```{r, eval=FALSE, echo=TRUE}
+
+long_ca_energy <- long_ca_energy %>%
+  mutate(day = as_date(datetime),
+         log_output = log(output)) %>%
+  group_by(day) %>%
+  mutate(total_daily_output = sum(output, na.rm = T)) %>% 
+  ungroup() %>% 
+  mutate(per_output = output/total_daily_output)
+
+# becomes
+all_generation_long[,day := as_date(datetime)]
+all_generation_long[,log_output := log(value)]
+all_generation_long[,per_output := value/sum(value), by = day]
+```
+
+## `dplyr` -> `data.table`
+
+```{r, eval=FALSE, echo=TRUE}
+
+long_ca_energy <- long_ca_energy %>%
+  mutate(day = as_date(datetime),
+         log_output = log(output)) %>%
+  group_by(day) %>%
+  mutate(total_daily_output = sum(output, na.rm = T)) %>% 
+  ungroup() %>% 
+  mutate(per_output = output/total_daily_output)
+
+# becomes
+all_generation_long[,day := as_date(datetime)]
+all_generation_long[,log_output := log(value)]
+all_generation_long[,per_output := value/sum(value), by = day]
+```
+
+It is also possible to do this in one command:
+```{r, eval=FALSE, echo=TRUE}
+
+all_generation_long[,`:=`(day2 = as_date(datetime), 
+                          log_output2 = log(value), 
+                          per_output2 = value/sum(value)), 
+                    by = day]
+
+```
+
+# A few bonus features
+
+# `fread` and `fwrite`
+
+> - "Fast and friendly file finagler" - _help file_
+> - "Similar to read.table but faster and more convenient" - _help file_
+> - `stringsAsFactors=FALSE` already set
+
+## fread benchmarks
+
+```{r, eval=FALSE, echo=TRUE}
+
+# example, no need to run this
+library(rbenchmark)
+
+# this will run each command 100 times and report the average time taken
+
+# 168 lines
+data_file <- "generation.csv"
+benchmark(read.csv(data_file, stringsAsFactors = F), 
+          fread(data_file), 
+          replications = 500)
+
+#                                        test replications elapsed relative user.self sys.self user.child sys.child
+# 2                          fread(data_file)          500    0.62    1.000      0.50     0.12         NA        NA
+# 1 read.csv(data_file, stringsAsFactors = F)          500    0.67    1.081      0.54     0.13         NA        NA
+
+# 12,600 lines
+data_file_medium <- "generation_medium.csv"
+benchmark(read.csv(data_file_medium, stringsAsFactors = F), 
+          fread(data_file_medium))
+
+#                                               test replications elapsed relative user.self sys.self user.child sys.child
+# 2                          fread(data_file_medium)          100    0.77    1.000      0.72     0.05         NA        NA
+# 1 read.csv(data_file_medium, stringsAsFactors = F)          100    4.28    5.558      4.22     0.06         NA        NA
+
+# 1,008,000 lines
+data_file_large <- "generation_large.csv"
+benchmark(read.csv(data_file_large, stringsAsFactors = F), 
+          fread(data_file_large),
+          replications = 20)
+
+#                                              test replications elapsed relative user.self sys.self user.child sys.child
+# 2                          fread(data_file_large)           20    2.67    1.000      7.07     1.10         NA        NA
+# 1 read.csv(data_file_large, stringsAsFactors = F)           20   74.59   27.936     71.53     3.05         NA        NA
+
+```
+
+# `set` functions
+
+- `set` functions update properties of the `data.table` by reference
+
+```{r, eval=FALSE, echo=TRUE}
+# set column names
+setnames(dt, "old", "new")
+
+# set row order
+setorder(dt, col1, -col2, ...)
+
+# set anything
+set(dt, i, j)
+
+# set colum
+dt[,col1 := 2*col2]
+
+```
+
+# Special variables
+
+`data.table`s also contain some special read-only symbols that are often useful: 
+
+- `.N`: number of rows in the current group
+- `.I`: a vector, `1:nrow(dt)`, usually used for more advanced operations
+
+```{r, eval=FALSE, echo=TRUE}
+
+# for .N: convenient
+all_generation_long[,.N] 
+all_generation_long[,.N, by = type]
+
+# for .I: more advanced syntax
+all_generation_long[,.I]
+
+```
+
+# Other features: keys
+
+- keys: one or more columns, pre-sorted index of the table.
+
+```{r, eval=FALSE, echo=TRUE}
+
+# check the current key
+key(generation_dt)
+
+# set key
+setkey(generation_dt, datetime)
+key(generation_dt)
+
+```
+
+# Other features: joins
+
+- joins: `data.table` has a special join syntax
+
+```{r, echo=TRUE}
+
+imports_dt <- fread(here::here("data", "ca_energy_imports.csv"))
+
+imports_dt
+
+```
+
+- joins: `data.table` has a special join syntax
+
+```{r, echo=TRUE}
+
+# set key or specify on 
+imports_dt[generation_dt, on = "datetime"]
+
+```
+
+- joins: `data.table` has a special join syntax
+
+```{r}
+# operations can be performed in the same step as the merge
+imports_dt[generation_dt, on = "datetime", imports_gas := imports + i.natural_gas]
+
+imports_dt
+```
+
+- joins: `data.table` has a special join syntax
+
+```{r}
+# operations can be performed in the same step as the merge
+imports_dt[generation_dt[hour(datetime) == 2], on = "datetime", imports_gas_2 := imports + i.natural_gas]
+
+imports_dt
+```
+
+# Library Management
+
+- dplyr, data.table, and reshape2 not only share similar functions, but sometimes share function names
+- in these cases, the package loaded most recently will be the function used
+- this is important for many reasons, but especially when working between data.frame and data.table
+- let's look at the function 'melt'
+
+# Library Management
+
+- let's look at the function 'melt'
+- we know that melt is a data.table function
+- we've been working a lot with data.tables
+- what package do we expect melt to be loading from?
+
+```{r, echo=FALSE, results = 'hide', message=FALSE}
+#knit output will have different loaded packaged than active rstudio session
+library(reshape2)
+```
+
+# Library Management
+
+- what package do we expect melt to be loading from?
+
+```{r}
+melt
+```
+
+# Library Management
+
+- and if we use this function, what object do we receive?
+
+```{r}
+cat('is.data.table: ', is.data.table(melt(imports_dt, 0)),
+    '\nis.data.frame: ', is.data.frame(melt(imports_dt, 0)))
+```
+
+# Library Management
+
+- how to specify functions
+- explicit function name
+- the function is still there, but given a verbose reference
+
+```{r}
+is.data.table(
+  melt.data.table(imports_dt,
+                          id.vars = "datetime",
+                          variable.name = "source",
+                          value.name = "output"))
+```
+
+# Library Management
+
+- how to specify functions
+- reference intended library
+
+```{r}
+is.data.table(
+  data.table::melt(imports_dt,
+                          id.vars = "datetime",
+                          variable.name = "source",
+                          value.name = "output"))
+```
+## Library Management
+
+- how to specify functions
+- set function reference
+
+```{r}
+melt <- data.table::melt
+
+is.data.table(
+              melt(imports_dt,
+                          id.vars = "datetime",
+                          variable.name = "source",
+                          value.name = "output"))
+```
+# Library Management
+
+- how to specify functions
+- reload libraries in desired order
+
+```{r, echo = TRUE,  results = 'hide', message=FALSE}
+#knit is crashing here, but the output is in slides
+#unloadNamespace("reshape2")
+#unloadNamespace("data.table")
+#library(reshape2)
+#library(data.table)
+```
+
+```{r}
+is.data.table(
+  melt(imports_dt,
+                          id.vars = "datetime",
+                          variable.name = "source",
+                          value.name = "output"))
+```
+# Library Management
+
+-lastly, a function to review all overwritten functions
+
+```{r}
+conflicted <- base::conflicts()
+
+which_packages_by_function <- lapply(conflicted, utils::find)
+
+names(which_packages_by_function) <- conflicted
+
+which_packages_by_function[0:5]
+```
+
+
+# Final thoughts
+
+- developers: Matt Dowle, Arun Srinivasan (look out for them on stack overflow)
+- useful [introduction](https://cran.r-project.org/web/packages/data.table/vignettes/datatable-intro.html) to `data.table`
+- also  useful `data.table` [FAQ](https://cran.r-project.org/web/packages/data.table/vignettes/datatable-faq.html)
+- [Intro to advanced features](https://cran.r-project.org/web/packages/data.table/vignettes/datatable-reshape.html) of `data.table` `melt` and `dcast` functions
+- or any other vignette
+
+
+

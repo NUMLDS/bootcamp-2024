@@ -1,0 +1,29 @@
+---
+title: "Rmd Exercise Template"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## The question you are answering
+
+You use the `##` to create a header. Use the header to indicate the question you are answering. After the header, in this space here, annotate your answer, telling us what you did.
+
+```{r chunk name}
+# Here is where your R code goes. ``` opens the code chunk, followed by {r}. Then ``` closes the chunk. When you 'knit' the file, the codes will evaluate.
+
+dat <- read.csv("path/to/data/data.csv")
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r another chunk name}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

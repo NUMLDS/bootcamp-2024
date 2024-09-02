@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Ali Ehlen with additions by Tucker Lewis" />
+  <title>Advanced R - data.table</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="R6_slides_files/reveal.js-3.3.0.1/css/reveal.css"/>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<link rel="stylesheet" href="R6_slides_files/reveal.js-3.3.0.1/css/theme/simple.css" id="theme">
+
+
+  <!-- some tweaks to reveal css -->
+  <style type="text/css">
+    .reveal h1 { font-size: 2.0em; }
+    .reveal h2 { font-size: 1.5em;  }
+    .reveal h3 { font-size: 1.25em;	}
+    .reveal h4 { font-size: 1em;	}
+
+    .reveal .slides>section,
+    .reveal .slides>section>section {
+      padding: 0px 0px;
+    }
+
+
+
+    .reveal table {
+      border-width: 1px;
+      border-spacing: 2px;
+      border-style: dotted;
+      border-color: gray;
+      border-collapse: collapse;
+      font-size: 0.7em;
+    }
+
+    .reveal table th {
+      border-width: 1px;
+      padding-left: 10px;
+      padding-right: 25px;
+      font-weight: bold;
+      border-style: dotted;
+      border-color: gray;
+    }
+
+    .reveal table td {
+      border-width: 1px;
+      padding-left: 10px;
+      padding-right: 25px;
+      border-style: dotted;
+      border-color: gray;
+    }
+
+
+  </style>
+
+    <style type="text/css">code{white-space: pre;}</style>
+
+
+<!-- Printing and PDF exports -->
+<script id="paper-css" type="application/dynamic-css">
+
+/* Default Print Stylesheet Template
+   by Rob Glazebrook of CSSnewbie.com
+   Last Updated: June 4, 2008
+
+   Feel free (nay, compelled) to edit, append, and
+   manipulate this file as you see fit. */
+
+
+@media print {
+
+	/* SECTION 1: Set default width, margin, float, and
+	   background. This prevents elements from extending
+	   beyond the edge of the printed page, and prevents
+	   unnecessary background images from printing */
+	html {
+		background: #fff;
+		width: auto;
+		height: auto;
+		overflow: visible;
+	}
+	body {
+		background: #fff;
+		font-size: 20pt;
+		width: auto;
+		height: auto;
+		border: 0;
+		margin: 0 5%;
+		padding: 0;
+		overflow: visible;
+		float: none !important;
+	}
+
+	/* SECTION 2: Remove any elements not needed in print.
+	   This would include navigation, ads, sidebars, etc. */
+	.nestedarrow,
+	.controls,
+	.fork-reveal,
+	.share-reveal,
+	.state-background,
+	.reveal .progress,
+	.reveal .backgrounds {
+		display: none !important;
+	}
+
+	/* SECTION 3: Set body font face, size, and color.
+	   Consider using a serif font for readability. */
+	body, p, td, li, div {
+		font-size: 20pt!important;
+		font-family: Georgia, "Times New Roman", Times, serif !important;
+		color: #000;
+	}
+
+	/* SECTION 4: Set heading font face, sizes, and color.
+	   Differentiate your headings from your body text.
+	   Perhaps use a large sans-serif for distinction. */
+	h1,h2,h3,h4,h5,h6 {
+		color: #000!important;
+		height: auto;
+		line-height: normal;
+		font-family: Georgia, "Times New Roman", Times, serif !important;
+		text-shadow: 0 0 0 #000 !important;
+		text-align: left;
+		letter-spacing: normal;
+	}
+	/* Need to reduce the size of the fonts for printing */
+	h1 { font-size: 28pt !important;  }
+	h2 { font-size: 24pt !important; }
+	h3 { font-size: 22pt !important; }
+	h4 { font-size: 22pt !important; font-variant: small-caps; }
+	h5 { font-size: 21pt !important; }
+	h6 { font-size: 20pt !important; font-style: italic; }
+
+	/* SECTION 5: Make hyperlinks more usable.
+	   Ensure links are underlined, and consider appending
+	   the URL to the end of the link for usability. */
+	a:link,
+	a:visited {
+		color: #000 !important;
+		font-weight: bold;
+		text-decoration: underline;
+	}
+	/*
+	.reveal a:link:after,
+	.reveal a:visited:after {
+		content: " (" attr(href) ") ";
+		color: #222 !important;
+		font-size: 90%;
+	}
+	*/
+
+
+	/* SECTION 6: more reveal.js specific additions by @skypanther */
+	ul, ol, div, p {
+		visibility: visible;
+		position: static;
+		width: auto;
+		height: auto;
+		display: block;
+		overflow: visible;
+		margin: 0;
+		text-align: left !important;
+	}
+	.reveal pre,
+	.reveal table {
+		margin-left: 0;
+		margin-right: 0;
+	}
+	.reveal pre code {
+		padding: 20px;
+		border: 1px solid #ddd;
+	}
+	.reveal blockquote {
+		margin: 20px 0;
+	}
+	.reveal .slides {
+		position: static !important;
+		width: auto !important;
+		height: auto !important;
+
+		left: 0 !important;
+		top: 0 !important;
+		margin-left: 0 !important;
+		margin-top: 0 !important;
+		padding: 0 !important;
+		zoom: 1 !important;
+
+		overflow: visible !important;
+		display: block !important;
+
+		text-align: left !important;
+		-webkit-perspective: none;
+		   -moz-perspective: none;
+		    -ms-perspective: none;
+		        perspective: none;
+
+		-webkit-perspective-origin: 50% 50%;
+		   -moz-perspective-origin: 50% 50%;
+		    -ms-perspective-origin: 50% 50%;
+		        perspective-origin: 50% 50%;
+	}
+	.reveal .slides section {
+		visibility: visible !important;
+		position: static !important;
+		width: auto !important;
+		height: auto !important;
+		display: block !important;
+		overflow: visible !important;
+
+		left: 0 !important;
+		top: 0 !important;
+		margin-left: 0 !important;
+		margin-top: 0 !important;
+		padding: 60px 20px !important;
+		z-index: auto !important;
+
+		opacity: 1 !important;
+
+		page-break-after: always !important;
+
+		-webkit-transform-style: flat !important;
+		   -moz-transform-style: flat !important;
+		    -ms-transform-style: flat !important;
+		        transform-style: flat !important;
+
+		-webkit-transform: none !important;
+		   -moz-transform: none !important;
+		    -ms-transform: none !important;
+		        transform: none !important;
+
+		-webkit-transition: none !important;
+		   -moz-transition: none !important;
+		    -ms-transition: none !important;
+		        transition: none !important;
+	}
+	.reveal .slides section.stack {
+		padding: 0 !important;
+	}
+	.reveal section:last-of-type {
+		page-break-after: avoid !important;
+	}
+	.reveal section .fragment {
+		opacity: 1 !important;
+		visibility: visible !important;
+
+		-webkit-transform: none !important;
+		   -moz-transform: none !important;
+		    -ms-transform: none !important;
+		        transform: none !important;
+	}
+	.reveal section img {
+		display: block;
+		margin: 15px 0px;
+		background: rgba(255,255,255,1);
+		border: 1px solid #666;
+		box-shadow: none;
+	}
+
+	.reveal section small {
+		font-size: 0.8em;
+	}
+
+}  
+</script>
+
+
+<script id="pdf-css" type="application/dynamic-css">
+    
+/**
+ * This stylesheet is used to print reveal.js
+ * presentations to PDF.
+ *
+ * https://github.com/hakimel/reveal.js#pdf-export
+ */
+
+* {
+	-webkit-print-color-adjust: exact;
+}
+
+body {
+	margin: 0 auto !important;
+	border: 0;
+	padding: 0;
+	float: none !important;
+	overflow: visible;
+}
+
+html {
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+}
+
+/* Remove any elements not needed in print. */
+.nestedarrow,
+.reveal .controls,
+.reveal .progress,
+.reveal .playback,
+.reveal.overview,
+.fork-reveal,
+.share-reveal,
+.state-background {
+	display: none !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	text-shadow: 0 0 0 #000 !important;
+}
+
+.reveal pre code {
+	overflow: hidden !important;
+	font-family: Courier, 'Courier New', monospace !important;
+}
+
+ul, ol, div, p {
+	visibility: visible;
+	position: static;
+	width: auto;
+	height: auto;
+	display: block;
+	overflow: visible;
+	margin: auto;
+}
+.reveal {
+	width: auto !important;
+	height: auto !important;
+	overflow: hidden !important;
+}
+.reveal .slides {
+	position: static;
+	width: 100%;
+	height: auto;
+
+	left: auto;
+	top: auto;
+	margin: 0 !important;
+	padding: 0 !important;
+
+	overflow: visible;
+	display: block;
+
+	-webkit-perspective: none;
+	   -moz-perspective: none;
+	    -ms-perspective: none;
+	        perspective: none;
+
+	-webkit-perspective-origin: 50% 50%; /* there isn't a none/auto value but 50-50 is the default */
+	   -moz-perspective-origin: 50% 50%;
+	    -ms-perspective-origin: 50% 50%;
+	        perspective-origin: 50% 50%;
+}
+
+.reveal .slides section {
+	page-break-after: always !important;
+
+	visibility: visible !important;
+	position: relative !important;
+	display: block !important;
+	position: relative !important;
+
+	margin: 0 !important;
+	padding: 0 !important;
+	box-sizing: border-box !important;
+	min-height: 1px;
+
+	opacity: 1 !important;
+
+	-webkit-transform-style: flat !important;
+	   -moz-transform-style: flat !important;
+	    -ms-transform-style: flat !important;
+	        transform-style: flat !important;
+
+	-webkit-transform: none !important;
+	   -moz-transform: none !important;
+	    -ms-transform: none !important;
+	        transform: none !important;
+}
+
+.reveal section.stack {
+	margin: 0 !important;
+	padding: 0 !important;
+	page-break-after: avoid !important;
+	height: auto !important;
+	min-height: auto !important;
+}
+
+.reveal img {
+	box-shadow: none;
+}
+
+.reveal .roll {
+	overflow: visible;
+	line-height: 1em;
+}
+
+/* Slide backgrounds are placed inside of their slide when exporting to PDF */
+.reveal section .slide-background {
+	display: block !important;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	z-index: -1;
+}
+
+/* All elements should be above the slide-background */
+.reveal section>* {
+	position: relative;
+	z-index: 1;
+}
+
+/* Display slide speaker notes when 'showNotes' is enabled */
+.reveal .speaker-notes-pdf {
+	display: block;
+	width: 100%;
+	max-height: none;
+	left: auto;
+	top: auto;
+	z-index: 100;
+}
+
+/* Display slide numbers when 'slideNumber' is enabled */
+.reveal .slide-number-pdf {
+	display: block;
+	position: absolute;
+	font-size: 14px;
+}
+
+</script>
+
+
+<script>
+var style = document.createElement( 'style' );
+style.type = 'text/css';
+var style_script_id = window.location.search.match( /print-pdf/gi ) ? 'pdf-css' : 'paper-css';
+var style_script = document.getElementById(style_script_id).text;
+style.innerHTML = style_script;
+document.getElementsByTagName('head')[0].appendChild(style);
+</script>
+
+    <script src="R6_slides_files/header-attrs-2.24/header-attrs.js"></script>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section>
+    <h1 class="title">Advanced R - data.table</h1>
+    <h2 class="author">Ali Ehlen with additions by Tucker Lewis</h2>
+    <h3 class="date">September 2024</h3>
+</section>
+
+<section>
+<section id="introduction" class="title-slide slide level1">
+<h1>Introduction</h1>
+
+</section>
+<section id="what-is-data.table" class="slide level2">
+<h2>What is <code>data.table</code>?</h2>
+<ul>
+<li class="fragment">“<code>data.table</code> is an R package that
+provides an enhanced version of data.frames”</li>
+<li class="fragment">“Briefly, if you are interested in reducing
+programming and compute time tremendously, then this package is for
+you.”</li>
+</ul>
+<ul>
+<li class="fragment"><a
+href="https://cran.r-project.org/web/packages/data.table/vignettes/datatable-intro.html">authors
+of <code>data.table</code></a></li>
+</ul>
+</section>
+<section id="why-do-we-care" class="slide level2">
+<h2>Why do we care?</h2>
+<ul>
+<li class="fragment"><code>data.table</code> is popular <img
+data-src="figures/cran_downloads_2019.png" /> data pulled using
+<code>cranlogs</code> package</li>
+</ul>
+</section>
+<section id="section" class="slide level2">
+<h2></h2>
+<ul>
+<li><code>data.table</code> is fast (especially on larger data) <img
+data-src="figures/benchmarks.PNG" /> <a
+href="https://h2oai.github.io/db-benchmark/"
+class="uri">https://h2oai.github.io/db-benchmark/</a></li>
+</ul>
+</section>
+<section id="why-do-we-care-1" class="slide level2">
+<h2>Why do we care?</h2>
+<ul>
+<li class="fragment"><code>data.table</code> comes with other features
+(file i/o, reshape functions)</li>
+<li class="fragment">no need for multiple package dependencies</li>
+<li class="fragment">syntax is clean, compact, and consistent</li>
+<li class="fragment"><code>data.tables</code> are compatible with any
+function that takes <code>data.frame</code>s</li>
+</ul>
+</section></section>
+<section>
+<section id="data.table-basics" class="title-slide slide level1">
+<h1><code>data.table</code> basics</h1>
+
+</section>
+<section id="load-data" class="slide level2">
+<h2>Load data</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># import data.table library</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(data.table)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>data_file <span class="ot">&lt;-</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;ca_energy_generation.csv&quot;</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># read in two versions of data, one as a data.frame and one as a data.table</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>generation_df <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(data_file, <span class="at">stringsAsFactors =</span> F)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>generation_dt <span class="ot">&lt;-</span> <span class="fu">fread</span>(data_file)</span></code></pre></div>
+</section>
+<section id="data.table-inherits-from-a-data.frame."
+class="slide level2">
+<h2><code>data.table</code> inherits from a
+<code>data.frame</code>.</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(generation_df) </span></code></pre></div>
+<pre><code>## [1] &quot;data.frame&quot;</code></pre>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(generation_dt) </span></code></pre></div>
+<pre><code>## [1] &quot;data.table&quot; &quot;data.frame&quot;</code></pre>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">View</span>(generation_df)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">View</span>(generation_dt)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>generation_df</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>generation_dt</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(generation_df)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(generation_dt)</span></code></pre></div>
+</section></section>
+<section>
+<section id="how-to-use-data.tables" class="title-slide slide level1">
+<h1>How to use <code>data.table</code>s</h1>
+
+</section>
+<section id="data.table-syntax" class="slide level2">
+<h2><code>data.table</code> syntax</h2>
+<ul>
+<li class="fragment"><code>dplyr</code> syntax: depends on a small set
+of verbs</li>
+<li class="fragment"><code>data.table</code> syntax: small set of
+consistent rules input into <code>dt[]</code></li>
+<li class="fragment">column names are variables inside <code>dt[]</code>
+<img data-src="figures/dt_structure.PNG" /></li>
+</ul>
+<ul>
+<li class="fragment"><a
+href="https://github.com/Rdatatable/data.table/wiki"
+class="uri">https://github.com/Rdatatable/data.table/wiki</a></li>
+</ul>
+</section></section>
+<section>
+<section id="i-on-which-rows-row-filtering"
+class="title-slide slide level1">
+<h1><code>i</code>: “on which rows” (row filtering)</h1>
+
+</section>
+<section id="i-on-which-rows-row-filtering-1" class="slide level2">
+<h2><code>i</code>: “on which rows” (row filtering)</h2>
+<ul>
+<li>logical operations filter rows</li>
+</ul>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>generation_dt[wind <span class="sc">&gt;</span> <span class="dv">4400</span>]</span></code></pre></div>
+<pre><code>##                datetime   biogas  biomass      coal geothermal large_hydro
+##  1: 2019-09-07 17:00:00 237.5000 395.1667  5.083333   956.1667    2626.250
+##  2: 2019-09-07 21:00:00 236.8333 390.3333  6.000000   964.5000    3395.917
+##  3: 2019-09-07 22:00:00 236.9167 390.8333  6.000000   968.1667    3101.333
+##  4: 2019-09-08 18:00:00 235.0833 369.0833 14.166667   960.5000    3981.000
+##  5: 2019-09-08 19:00:00 233.5833 368.6667 14.000000   963.6667    4308.500
+##  6: 2019-09-09 17:00:00 233.9167 389.4167 13.750000   974.6667    3075.417
+##  7: 2019-09-09 18:00:00 230.1667 390.0833 12.833333   975.9167    4215.917
+##  8: 2019-09-09 19:00:00 228.0000 388.4167 12.000000   978.5000    4413.583
+##  9: 2019-09-09 20:00:00 227.8333 386.4167 12.583333   979.7500    4414.667
+## 10: 2019-09-09 21:00:00 231.1667 383.1667 12.333333   980.5833    3771.417
+## 11: 2019-09-09 22:00:00 231.1667 368.9167 13.083333   980.5833    3305.167
+## 12: 2019-09-09 23:00:00 231.5000 358.9167 13.750000   980.3333    2704.583
+##     natural_gas  nuclear other small_hydro      solar     wind
+##  1:   10375.833 2257.250     0    394.5833 6680.25000 4434.000
+##  2:    9712.000 2250.167     0    409.1667    0.00000 4409.583
+##  3:    8878.417 2249.083     0    406.9167    0.00000 4408.667
+##  4:    7189.500 2261.750     0    445.2500 1975.66667 4427.250
+##  5:    7809.333 2263.417     0    470.1667   31.58333 4578.083
+##  6:    8239.750 2267.083     0    446.4167 6408.91667 4426.667
+##  7:    9688.667 2268.167     0    458.1667 1722.00000 4616.583
+##  8:    9761.583 2269.000     0    480.6667   19.75000 4894.417
+##  9:    9210.583 2267.583     0    467.1667    0.00000 4824.750
+## 10:    8475.083 2265.417     0    471.7500    0.00000 4677.917
+## 11:    8056.750 2265.417     0    435.6667    0.00000 4681.917
+## 12:    6895.417 2266.000     0    413.1667    0.00000 4571.417</code></pre>
+</section>
+<section id="i-on-which-rows-row-filtering-2" class="slide level2">
+<h2><code>i</code>: “on which rows” (row filtering)</h2>
+<ul>
+<li>logical operations filter rows</li>
+</ul>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>generation_dt[wind <span class="sc">&gt;</span> <span class="dv">4400</span> <span class="sc">&amp;</span> <span class="fu">mday</span>(datetime) <span class="sc">==</span> <span class="dv">7</span>]</span></code></pre></div>
+<pre><code>##               datetime   biogas  biomass     coal geothermal large_hydro
+## 1: 2019-09-07 17:00:00 237.5000 395.1667 5.083333   956.1667    2626.250
+## 2: 2019-09-07 21:00:00 236.8333 390.3333 6.000000   964.5000    3395.917
+## 3: 2019-09-07 22:00:00 236.9167 390.8333 6.000000   968.1667    3101.333
+##    natural_gas  nuclear other small_hydro   solar     wind
+## 1:   10375.833 2257.250     0    394.5833 6680.25 4434.000
+## 2:    9712.000 2250.167     0    409.1667    0.00 4409.583
+## 3:    8878.417 2249.083     0    406.9167    0.00 4408.667</code></pre>
+</section>
+<section id="i-on-which-rows-row-filtering-3" class="slide level2">
+<h2><code>i</code>: “on which rows” (row filtering)</h2>
+<ul>
+<li><strong>try it!</strong> select rows for which natural gas
+generation is less than or equal to 5,000 MW and large hydro generation
+is greater than 2,000 MW</li>
+<li><strong>bonus:</strong> select rows for which coal generation is
+greater than 10 MW and solar generation is greater than the median value
+of solar generation</li>
+</ul>
+</section>
+<section id="i-on-which-rows-row-filtering-4" class="slide level2">
+<h2><code>i</code>: “on which rows” (row filtering)</h2>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>generation_dt[natural_gas <span class="sc">&lt;=</span> <span class="dv">5000</span> <span class="sc">&amp;</span> large_hydro <span class="sc">&gt;</span> <span class="dv">2000</span>]</span></code></pre></div>
+<pre><code>##               datetime   biogas  biomass     coal geothermal large_hydro
+## 1: 2019-09-08 02:00:00 237.1667 374.3333 4.083333   969.9167    2217.667
+## 2: 2019-09-08 03:00:00 237.8333 342.5000 4.000000   972.5000    2090.917
+##    natural_gas  nuclear other small_hydro solar     wind
+## 1:     4530.75 2255.583     0    385.0833     0 2928.083
+## 2:     4079.50 2257.500     0    377.5000     0 2726.583</code></pre>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>generation_dt[coal <span class="sc">&gt;</span> <span class="dv">10</span> <span class="sc">&amp;</span> solar <span class="sc">&gt;</span> <span class="fu">median</span>(solar)]</span></code></pre></div>
+<pre><code>##                datetime   biogas  biomass     coal geothermal large_hydro
+##  1: 2019-09-08 18:00:00 235.0833 369.0833 14.16667   960.5000    3981.000
+##  2: 2019-09-09 07:00:00 218.5833 375.8333 13.00000   978.5833    2704.333
+##  3: 2019-09-09 08:00:00 215.1667 374.5000 13.08333   975.8333    1841.333
+##  4: 2019-09-09 09:00:00 214.5000 378.3333 13.00000   970.8333    1289.500
+##  5: 2019-09-09 10:00:00 217.7500 381.5000 13.25000   967.3333    1631.250
+##  6: 2019-09-09 11:00:00 217.4167 376.9167 12.66667   965.2500    1633.583
+##  7: 2019-09-09 12:00:00 224.8333 379.5000 10.83333   965.0833    1679.000
+##  8: 2019-09-09 13:00:00 231.0833 383.1667 11.50000   964.2500    1790.500
+##  9: 2019-09-09 14:00:00 230.9167 383.5000 12.16667   968.8333    1851.667
+## 10: 2019-09-09 15:00:00 231.3333 383.4167 11.91667   969.0000    2081.833
+## 11: 2019-09-09 16:00:00 233.8333 389.0000 13.16667   970.7500    2340.917
+## 12: 2019-09-09 17:00:00 233.9167 389.4167 13.75000   974.6667    3075.417
+## 13: 2019-09-09 18:00:00 230.1667 390.0833 12.83333   975.9167    4215.917
+##     natural_gas  nuclear other small_hydro     solar     wind
+##  1:    7189.500 2261.750     0    445.2500  1975.667 4427.250
+##  2:    6226.417 2265.583     0    389.8333  2518.333 2910.750
+##  3:    5214.250 2266.333     0    360.7500  7190.083 2882.083
+##  4:    4615.167 2265.417     0    380.2500  9542.917 2948.000
+##  5:    4147.250 2263.583     0    405.0833 10451.333 2666.417
+##  6:    4174.167 2264.417     0    406.6667 10780.500 2308.833
+##  7:    4239.667 2264.667     0    408.3333 10760.917 1942.750
+##  8:    4693.667 2265.583     0    409.0833 10629.333 2760.000
+##  9:    4919.750 2265.417     0    406.0833 10655.167 3554.750
+## 10:    5748.917 2266.583     0    438.5833 10067.250 3882.667
+## 11:    7001.917 2266.583     0    446.3333  9051.583 4076.917
+## 12:    8239.750 2267.083     0    446.4167  6408.917 4426.667
+## 13:    9688.667 2268.167     0    458.1667  1722.000 4616.583</code></pre>
+</section></section>
+<section>
+<section id="j-what-to-do-column-operations"
+class="title-slide slide level1">
+<h1><code>j</code>: “what to do” (column operations)</h1>
+
+</section>
+<section id="j-what-to-do-column-operations-1" class="slide level2">
+<h2><code>j</code>: “what to do” (column operations)</h2>
+<ul>
+<li>perform any operation in <code>j</code></li>
+</ul>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>generation_dt[,wind <span class="sc">+</span> solar]</span></code></pre></div>
+<pre><code>##   [1]  2670.1667  2778.8333  2795.2500  2582.5833  2397.4167  2327.0000
+##   [7]  2126.0000  4249.8333  8343.7500 10104.5833 10781.7500 11175.4167
+##  [13] 10895.1667 10635.0000 10480.1667 10241.2500  9942.6667  8699.4167
+##  [19]  5307.5000  3776.0000  3408.4167  3097.4167  3059.3333  2893.5000
+##  [25]  2523.5833  2415.9167  2206.0833  1649.6667   991.5000   714.9167
+##  [31]   578.5833  2986.0833  7418.0000  9533.1667 10372.3333 10615.9167
+##  [37] 10469.1667 10261.6667 10352.5833  9811.7500  8002.6667  5165.4167
+##  [43]  2507.4167  1695.5000  1832.7500  2062.9167  1996.0833  1735.4167
+##  [49]  1622.5000  1723.5000  1849.0833  1552.1667  1425.1667  1363.3333
+##  [55]  1326.6667  2620.3333  5961.3333  8104.1667  8849.3333  9843.5833
+##  [61]  9907.4167  9185.5833  9527.7500  9888.7500  9072.5833  6852.8333
+##  [67]  3443.2500  2118.6667  2189.3333  2078.9167  2027.2500  1928.6667
+##  [73]  2227.0833  2092.5833  1837.6667  1886.5833  1822.4167  1663.6667
+##  [79]  1527.5833  3717.2500  8016.8333 10204.8333 10926.2500 11134.8333
+##  [85] 11271.8333 11483.9167 11843.9167 12003.3333 11428.9167  8994.5000
+##  [91]  5060.3333  3684.5000  4054.5833  4049.4167  4154.1667  4107.7500
+##  [97]  4078.8333  3859.2500  3878.7500  3809.9167  3812.6667  3672.5000
+## [103]  3711.5833  6138.2500 10841.7500 12954.9167 13769.2500 14285.5833
+## [109] 14550.0833 14712.9167 14774.4167 14117.0000 13483.0833 11114.2500
+## [115]  6067.6667  3600.3333  4045.8333  4409.5833  4408.6667  4294.0833
+## [121]  3628.0833  3118.0833  2928.0833  2726.5833  2677.9167  2772.1667
+## [127]  2887.3333  6014.0833 10932.0000 13178.7500 14233.3333 14432.0000
+## [133] 14629.0000 14842.8333 14834.3333 14302.6667 13498.8333 11223.0833
+## [139]  6402.9167  4609.6667  4364.6667  4007.0833  4198.9167  4175.6667
+## [145]  4023.4167  4062.1667  4153.3333  3959.5833  3683.6667  3523.8333
+## [151]  3275.3333  5429.0833 10072.1667 12490.9167 13117.7500 13089.3333
+## [157] 12703.6667 13389.3333 14209.9167 13949.9167 13128.5000 10835.5833
+## [163]  6338.5833  4914.1667  4824.7500  4677.9167  4681.9167  4571.4167</code></pre>
+</section>
+<section id="j-what-to-do-column-operations-2" class="slide level2">
+<h2><code>j</code>: “what to do” (column operations)</h2>
+<ul>
+<li>perform any operation in <code>j</code></li>
+</ul>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>generation_dt[,<span class="dv">3</span><span class="sc">*</span>wind <span class="sc">+</span> solar<span class="sc">*</span>biogas<span class="sc">/</span><span class="dv">2</span>]</span></code></pre></div>
+<pre><code>##   [1]    8010.500    8336.500    8385.750    7747.750    7192.250    6981.000
+##   [7]   15281.104  299488.556  834963.403 1067313.865 1152190.219 1224516.809
+##  [13] 1208937.063 1167009.750 1144680.503 1057525.139  940937.062  720226.851
+##  [19]  253363.437   36299.972   20083.757    9292.250    9178.000    8680.500
+##  [25]    7570.750    7247.750    6618.250    4949.000    2974.500    2144.750
+##  [31]   11623.257  301048.875  818965.771 1070041.833 1162682.375 1186467.375
+##  [37] 1158653.917 1130800.819 1101875.361 1012419.097  774473.892  459216.771
+##  [43]  130539.844    8291.333    5498.250    6188.750    5988.250    5206.250
+##  [49]    4867.500    5170.500    5547.250    4656.500    4275.500    4090.000
+##  [55]    7679.552  174050.236  542303.764  778465.625  896767.083 1025437.618
+##  [61] 1039308.708  962964.028 1006242.375 1047985.944  923123.903  622641.361
+##  [67]  205340.479    9971.083    6568.000    6236.750    6081.750    5786.000
+##  [73]    6681.250    6277.750    5513.000    5659.750    5467.250    4991.000
+##  [79]   12171.083  288830.812  821286.694 1074298.962 1169842.569 1208043.875
+##  [85] 1196018.538 1192192.736 1167777.531 1148957.292 1033514.406  730203.069
+##  [91]  240335.312   15614.528   12163.750   12148.250   12462.500   12323.250
+##  [97]   12236.500   11577.750   11636.250   11429.750   11438.000   11017.500
+## [103]   19031.681  329184.885  898422.906 1160500.597 1243934.573 1269358.573
+## [109] 1263524.375 1258327.448 1259339.399 1225493.201 1124938.833  806581.688
+## [115]  243456.469   14963.181   12137.500   13228.750   13226.000   12882.250
+## [121]   10884.250    9354.250    8784.250    8179.750    8033.750    8316.500
+## [127]   19276.000  342521.979  870872.969 1129279.528 1252038.667 1270701.833
+## [133] 1281800.875 1295271.087 1289723.847 1240913.569 1120508.222  821549.778
+## [139]  245504.903   17422.920   13094.000   12021.250   12596.750   12527.000
+## [145]   12070.250   12186.500   12460.000   11878.750   11051.000   10571.500
+## [151]   16690.240  283965.097  782179.382 1032321.813 1145888.167 1178856.688
+## [157] 1215534.632 1236410.889 1240892.035 1176093.250 1070511.701  762856.212
+## [163]  212023.250   16934.750   14474.250   14033.750   14045.750   13714.250</code></pre>
+</section>
+<section id="j-what-to-do-column-operations-3" class="slide level2">
+<h2><code>j</code>: “what to do” (column operations)</h2>
+<ul>
+<li>new columns may be assigned in <code>j</code> or a new table can be
+created</li>
+</ul>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>generation_dt[,newcol <span class="sc">:=</span> <span class="dv">3</span><span class="sc">*</span>wind <span class="sc">+</span> solar<span class="sc">*</span>biogas<span class="sc">/</span><span class="dv">2</span>]</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>generation_dt[,.(<span class="at">newcol =</span> <span class="dv">3</span><span class="sc">*</span>wind <span class="sc">+</span> solar<span class="sc">*</span>biogas<span class="sc">/</span><span class="dv">2</span>)]</span></code></pre></div>
+<pre><code>##        newcol
+##   1:  8010.50
+##   2:  8336.50
+##   3:  8385.75
+##   4:  7747.75
+##   5:  7192.25
+##  ---         
+## 164: 16934.75
+## 165: 14474.25
+## 166: 14033.75
+## 167: 14045.75
+## 168: 13714.25</code></pre>
+</section>
+<section id="j-what-to-do-column-operations-4" class="slide level2">
+<h2><code>j</code>: “what to do” (column operations)</h2>
+<ul>
+<li>columns may be deleted in <code>j</code></li>
+</ul>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>generation_dt[,newcol <span class="sc">:=</span> <span class="cn">NULL</span>]</span></code></pre></div>
+</section>
+<section id="j-what-to-do-column-operations-5" class="slide level2">
+<h2><code>j</code>: “what to do” (column operations)</h2>
+<ul>
+<li><strong>try it!</strong> add a column called “total_hydro” that is
+the sum of the <code>small_hydro</code> and <code>large_hydro</code>
+columns</li>
+<li><strong>try it!</strong> find the mean of the <code>nuclear</code>
+and <code>biogas</code> columns</li>
+<li><strong>bonus:</strong> create a new table: for the hours when solar
+generation is zero, get the <code>datetime</code> and
+<code>total_thermal</code> (sum of natural gas and coal generation)</li>
+</ul>
+</section>
+<section id="j-what-to-do-column-operations-6" class="slide level2">
+<h2><code>j</code>: “what to do” (column operations)</h2>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>generation_dt[,total_hydro <span class="sc">:=</span> small_hydro <span class="sc">+</span> large_hydro]</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co"># generation_dt[,mean(nuclear)]</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="co"># generation_dt[,mean(biogas)]</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="co"># or</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>generation_dt[,.(<span class="fu">mean</span>(nuclear), <span class="fu">mean</span>(biogas))]</span></code></pre></div>
+<pre><code>##          V1       V2
+## 1: 2253.677 234.6855</code></pre>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># or, with column names</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="co"># generation_dt[,.(mean_nuc = mean(nuclear), mean_biogas = mean(biogas))]</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>generation_dt[solar <span class="sc">==</span> <span class="dv">0</span>, .(datetime, <span class="at">total_thermal =</span> natural_gas <span class="sc">+</span> coal)]</span></code></pre></div>
+<pre><code>##                datetime total_thermal
+##  1: 2019-09-03 00:00:00      9719.833
+##  2: 2019-09-03 01:00:00      9164.000
+##  3: 2019-09-03 02:00:00      8087.333
+##  4: 2019-09-03 03:00:00      7811.083
+##  5: 2019-09-03 04:00:00      7753.750
+##  6: 2019-09-03 05:00:00      8634.583
+##  7: 2019-09-03 21:00:00     16464.917
+##  8: 2019-09-03 22:00:00     14814.333
+##  9: 2019-09-03 23:00:00     12597.417
+## 10: 2019-09-04 00:00:00     10715.333
+## 11: 2019-09-04 01:00:00      9714.750
+## 12: 2019-09-04 02:00:00      9464.667
+## 13: 2019-09-04 03:00:00      9293.583
+## 14: 2019-09-04 04:00:00      9670.417
+## 15: 2019-09-04 05:00:00     10579.500
+## 16: 2019-09-04 20:00:00     21270.917
+## 17: 2019-09-04 21:00:00     18865.083
+## 18: 2019-09-04 22:00:00     16497.833
+## 19: 2019-09-04 23:00:00     14906.833
+## 20: 2019-09-05 00:00:00     13842.833
+## 21: 2019-09-05 01:00:00     12685.167
+## 22: 2019-09-05 02:00:00     11825.583
+## 23: 2019-09-05 03:00:00     11482.667
+## 24: 2019-09-05 04:00:00     11611.250
+## 25: 2019-09-05 05:00:00     12050.667
+## 26: 2019-09-05 20:00:00     19771.667
+## 27: 2019-09-05 21:00:00     17745.750
+## 28: 2019-09-05 22:00:00     16040.000
+## 29: 2019-09-05 23:00:00     13673.583
+## 30: 2019-09-06 00:00:00     11800.250
+## 31: 2019-09-06 01:00:00     10891.583
+## 32: 2019-09-06 02:00:00     10426.833
+## 33: 2019-09-06 03:00:00      9857.417
+## 34: 2019-09-06 04:00:00      9825.583
+## 35: 2019-09-06 05:00:00     10215.583
+## 36: 2019-09-06 20:00:00     16236.000
+## 37: 2019-09-06 21:00:00     14701.583
+## 38: 2019-09-06 22:00:00     13441.000
+## 39: 2019-09-06 23:00:00     11082.333
+## 40: 2019-09-07 00:00:00      9504.833
+## 41: 2019-09-07 01:00:00      8625.500
+## 42: 2019-09-07 02:00:00      7402.583
+## 43: 2019-09-07 03:00:00      6676.583
+## 44: 2019-09-07 04:00:00      6518.167
+## 45: 2019-09-07 05:00:00      6547.083
+## 46: 2019-09-07 20:00:00     10502.000
+## 47: 2019-09-07 21:00:00      9718.000
+## 48: 2019-09-07 22:00:00      8884.417
+## 49: 2019-09-07 23:00:00      8062.917
+## 50: 2019-09-08 00:00:00      6369.750
+## 51: 2019-09-08 01:00:00      5042.667
+## 52: 2019-09-08 02:00:00      4534.833
+## 53: 2019-09-08 03:00:00      4083.500
+## 54: 2019-09-08 04:00:00      3846.250
+## 55: 2019-09-08 05:00:00      3931.000
+## 56: 2019-09-08 20:00:00      7844.917
+## 57: 2019-09-08 21:00:00      7701.583
+## 58: 2019-09-08 22:00:00      6840.917
+## 59: 2019-09-08 23:00:00      6039.417
+## 60: 2019-09-09 00:00:00      5538.333
+## 61: 2019-09-09 01:00:00      5246.417
+## 62: 2019-09-09 02:00:00      5101.667
+## 63: 2019-09-09 03:00:00      5389.167
+## 64: 2019-09-09 04:00:00      5557.333
+## 65: 2019-09-09 05:00:00      5805.083
+## 66: 2019-09-09 20:00:00      9223.167
+## 67: 2019-09-09 21:00:00      8487.417
+## 68: 2019-09-09 22:00:00      8069.833
+## 69: 2019-09-09 23:00:00      6909.167
+##                datetime total_thermal</code></pre>
+</section></section>
+<section>
+<section id="by-grouped-by-what" class="title-slide slide level1">
+<h1><code>by</code>: “grouped by what”</h1>
+
+</section>
+<section id="by-grouped-by-what-1" class="slide level2">
+<h2><code>by</code>: “grouped by what”</h2>
+<ul>
+<li>add grouping to any operation</li>
+</ul>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>generation_dt[,<span class="fu">mean</span>(nuclear), by <span class="ot">=</span> <span class="fu">mday</span>(datetime)]</span></code></pre></div>
+<pre><code>##    mday       V1
+## 1:    3 2246.920
+## 2:    4 2246.087
+## 3:    5 2253.396
+## 4:    6 2252.580
+## 5:    7 2254.882
+## 6:    8 2257.490
+## 7:    9 2264.385</code></pre>
+</section>
+<section id="by-grouped-by-what-2" class="slide level2">
+<h2><code>by</code>: “grouped by what”</h2>
+<ul>
+<li>combine with everything we’ve learned about <code>i</code> and
+<code>j</code></li>
+</ul>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>generation_dt[,.(<span class="at">mean_nuc =</span> <span class="fu">mean</span>(nuclear), <span class="at">mean_wind =</span> <span class="fu">mean</span>(wind)), </span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>              by <span class="ot">=</span> <span class="fu">mday</span>(datetime)]</span></code></pre></div>
+<pre><code>##    mday mean_nuc mean_wind
+## 1:    3 2246.920  2095.382
+## 2:    4 2246.087  1190.125
+## 3:    5 2253.396  1504.118
+## 4:    6 2252.580  2225.656
+## 5:    7 2254.882  3907.955
+## 6:    8 2257.490  3696.674
+## 7:    9 2264.385  3718.628</code></pre>
+</section>
+<section id="by-grouped-by-what-3" class="slide level2">
+<h2><code>by</code>: “grouped by what”</h2>
+<ul>
+<li>combine with everything we’ve learned about <code>i</code> and
+<code>j</code></li>
+</ul>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>generation_dt[<span class="fu">hour</span>(datetime) <span class="sc">&gt;</span> <span class="dv">19</span>,</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>              .(<span class="at">mean_nuc =</span> <span class="fu">mean</span>(nuclear), <span class="at">mean_wind =</span> <span class="fu">mean</span>(wind)), </span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>              by <span class="ot">=</span> <span class="fu">mday</span>(datetime)]</span></code></pre></div>
+<pre><code>##    mday mean_nuc mean_wind
+## 1:    3 2247.146  3093.312
+## 2:    4 2249.604  1906.792
+## 3:    5 2257.021  2056.042
+## 4:    6 2255.146  4091.479
+## 5:    7 2250.583  4289.542
+## 6:    8 2259.500  4186.583
+## 7:    9 2266.104  4689.000</code></pre>
+</section>
+<section id="by-grouped-by-what-4" class="slide level2">
+<h2><code>by</code>: “grouped by what”</h2>
+<ul>
+<li><strong>try it!</strong> find the median solar generation by
+hour.</li>
+<li><strong>try it!</strong> for hours when the solar generation is
+greater than zero, find the maximum natural gas generation by day</li>
+</ul>
+</section>
+<section id="by-grouped-by-what-5" class="slide level2">
+<h2><code>by</code>: “grouped by what”</h2>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>generation_dt[,<span class="fu">median</span>(solar), by <span class="ot">=</span> <span class="fu">hour</span>(datetime)]</span></code></pre></div>
+<pre><code>##     hour          V1
+##  1:    0     0.00000
+##  2:    1     0.00000
+##  3:    2     0.00000
+##  4:    3     0.00000
+##  5:    4     0.00000
+##  6:    5     0.00000
+##  7:    6    67.83333
+##  8:    7  2518.33333
+##  9:    8  7055.75000
+## 10:    9  9271.00000
+## 11:   10 10088.25000
+## 12:   11 10474.08333
+## 13:   12 10284.16667
+## 14:   13 10063.66667
+## 15:   14  9899.41667
+## 16:   15  9688.33333
+## 17:   16  8736.41667
+## 18:   17  6269.41667
+## 19:   18  1939.75000
+## 20:   19    31.58333
+## 21:   20     0.00000
+## 22:   21     0.00000
+## 23:   22     0.00000
+## 24:   23     0.00000
+##     hour          V1</code></pre>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>generation_dt[solar <span class="sc">&gt;</span> <span class="dv">0</span>, <span class="fu">max</span>(natural_gas), by <span class="ot">=</span> <span class="fu">mday</span>(datetime)]</span></code></pre></div>
+<pre><code>##    mday        V1
+## 1:    3 20725.667
+## 2:    4 23359.583
+## 3:    5 22071.667
+## 4:    6 18611.000
+## 5:    7 11380.083
+## 6:    8  7809.333
+## 7:    9  9761.583</code></pre>
+</section>
+<section id="data.table-syntax-recap" class="slide level2">
+<h2><code>data.table</code> syntax recap</h2>
+<ul>
+<li class="fragment">column names are variables inside <code>dt[]</code>
+<img data-src="figures/dt_structure.PNG" /></li>
+</ul>
+<ul>
+<li class="fragment">the combination of <code>i</code>, <code>j</code>,
+and <code>by</code> is very powerful</li>
+<li class="fragment">few other components; outside scope of this
+review</li>
+</ul>
+</section></section>
+<section>
+<section id="data.table-upgrades-to-other-functions"
+class="title-slide slide level1">
+<h1><code>data.table</code> upgrades to other functions</h1>
+
+</section>
+<section id="data.table-upgrades-to-other-functions-1"
+class="slide level2">
+<h2><code>data.table</code> upgrades to other functions</h2>
+<p><code>data.table</code> co-opts some functions we’ve already talked
+about</p>
+<ul>
+<li class="fragment"><code>melt</code></li>
+<li class="fragment"><code>dcast</code></li>
+<li class="fragment"><code>merge</code></li>
+<li class="fragment"><code>order</code></li>
+<li class="fragment">This means we can repeat what we did with dplyr
+almost exactly</li>
+</ul>
+</section>
+<section id="dplyr---data.table" class="slide level2">
+<h2><code>dplyr</code> -&gt; <code>data.table</code></h2>
+<p><strong>try it!</strong> Convert this <code>dplyr</code> syntax into
+<code>data.table</code> syntax (remember that this created the columns
+<code>day</code>, <code>log_output</code>, and
+<code>per_output</code>)</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>long_ca_energy <span class="ot">&lt;-</span> long_ca_energy <span class="sc">%&gt;%</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">day =</span> <span class="fu">as_date</span>(datetime),</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">log_output =</span> <span class="fu">log</span>(output)) <span class="sc">%&gt;%</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(day) <span class="sc">%&gt;%</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">total_daily_output =</span> <span class="fu">sum</span>(output, <span class="at">na.rm =</span> T)) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">per_output =</span> output<span class="sc">/</span>total_daily_output)</span></code></pre></div>
+</section>
+<section id="dplyr---data.table-1" class="slide level2">
+<h2><code>dplyr</code> -&gt; <code>data.table</code></h2>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>long_ca_energy <span class="ot">&lt;-</span> long_ca_energy <span class="sc">%&gt;%</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">day =</span> <span class="fu">as_date</span>(datetime),</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">log_output =</span> <span class="fu">log</span>(output)) <span class="sc">%&gt;%</span></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(day) <span class="sc">%&gt;%</span></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">total_daily_output =</span> <span class="fu">sum</span>(output, <span class="at">na.rm =</span> T)) <span class="sc">%&gt;%</span> </span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">per_output =</span> output<span class="sc">/</span>total_daily_output)</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a><span class="co"># becomes</span></span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>all_generation_long[,day <span class="sc">:=</span> <span class="fu">as_date</span>(datetime)]</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>all_generation_long[,log_output <span class="sc">:=</span> <span class="fu">log</span>(value)]</span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>all_generation_long[,per_output <span class="sc">:=</span> value<span class="sc">/</span><span class="fu">sum</span>(value), by <span class="ot">=</span> day]</span></code></pre></div>
+</section>
+<section id="dplyr---data.table-2" class="slide level2">
+<h2><code>dplyr</code> -&gt; <code>data.table</code></h2>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>long_ca_energy <span class="ot">&lt;-</span> long_ca_energy <span class="sc">%&gt;%</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">day =</span> <span class="fu">as_date</span>(datetime),</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">log_output =</span> <span class="fu">log</span>(output)) <span class="sc">%&gt;%</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(day) <span class="sc">%&gt;%</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">total_daily_output =</span> <span class="fu">sum</span>(output, <span class="at">na.rm =</span> T)) <span class="sc">%&gt;%</span> </span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">per_output =</span> output<span class="sc">/</span>total_daily_output)</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a><span class="co"># becomes</span></span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>all_generation_long[,day <span class="sc">:=</span> <span class="fu">as_date</span>(datetime)]</span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>all_generation_long[,log_output <span class="sc">:=</span> <span class="fu">log</span>(value)]</span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>all_generation_long[,per_output <span class="sc">:=</span> value<span class="sc">/</span><span class="fu">sum</span>(value), by <span class="ot">=</span> day]</span></code></pre></div>
+<p>It is also possible to do this in one command:</p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>all_generation_long[,<span class="st">`</span><span class="at">:=</span><span class="st">`</span>(<span class="at">day2 =</span> <span class="fu">as_date</span>(datetime), </span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>                          <span class="at">log_output2 =</span> <span class="fu">log</span>(value), </span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">per_output2 =</span> value<span class="sc">/</span><span class="fu">sum</span>(value)), </span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>                    by <span class="ot">=</span> day]</span></code></pre></div>
+</section></section>
+<section>
+<section id="a-few-bonus-features" class="title-slide slide level1">
+<h1>A few bonus features</h1>
+
+</section>
+<section id="fread-and-fwrite" class="slide level2">
+<h2><code>fread</code> and <code>fwrite</code></h2>
+<ul>
+<li class="fragment">“Fast and friendly file finagler” - <em>help
+file</em></li>
+<li class="fragment">“Similar to read.table but faster and more
+convenient” - <em>help file</em></li>
+<li class="fragment"><code>stringsAsFactors=FALSE</code> already
+set</li>
+</ul>
+</section>
+<section id="fread-benchmarks" class="slide level2">
+<h2>fread benchmarks</h2>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># example, no need to run this</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rbenchmark)</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a><span class="co"># this will run each command 100 times and report the average time taken</span></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 168 lines</span></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>data_file <span class="ot">&lt;-</span> <span class="st">&quot;generation.csv&quot;</span></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a><span class="fu">benchmark</span>(<span class="fu">read.csv</span>(data_file, <span class="at">stringsAsFactors =</span> F), </span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>          <span class="fu">fread</span>(data_file), </span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>          <span class="at">replications =</span> <span class="dv">500</span>)</span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a><span class="co">#                                        test replications elapsed relative user.self sys.self user.child sys.child</span></span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 2                          fread(data_file)          500    0.62    1.000      0.50     0.12         NA        NA</span></span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a><span class="co"># 1 read.csv(data_file, stringsAsFactors = F)          500    0.67    1.081      0.54     0.13         NA        NA</span></span>
+<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a><span class="co"># 12,600 lines</span></span>
+<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a>data_file_medium <span class="ot">&lt;-</span> <span class="st">&quot;generation_medium.csv&quot;</span></span>
+<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a><span class="fu">benchmark</span>(<span class="fu">read.csv</span>(data_file_medium, <span class="at">stringsAsFactors =</span> F), </span>
+<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a>          <span class="fu">fread</span>(data_file_medium))</span>
+<span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-21"><a href="#cb40-21" aria-hidden="true" tabindex="-1"></a><span class="co">#                                               test replications elapsed relative user.self sys.self user.child sys.child</span></span>
+<span id="cb40-22"><a href="#cb40-22" aria-hidden="true" tabindex="-1"></a><span class="co"># 2                          fread(data_file_medium)          100    0.77    1.000      0.72     0.05         NA        NA</span></span>
+<span id="cb40-23"><a href="#cb40-23" aria-hidden="true" tabindex="-1"></a><span class="co"># 1 read.csv(data_file_medium, stringsAsFactors = F)          100    4.28    5.558      4.22     0.06         NA        NA</span></span>
+<span id="cb40-24"><a href="#cb40-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-25"><a href="#cb40-25" aria-hidden="true" tabindex="-1"></a><span class="co"># 1,008,000 lines</span></span>
+<span id="cb40-26"><a href="#cb40-26" aria-hidden="true" tabindex="-1"></a>data_file_large <span class="ot">&lt;-</span> <span class="st">&quot;generation_large.csv&quot;</span></span>
+<span id="cb40-27"><a href="#cb40-27" aria-hidden="true" tabindex="-1"></a><span class="fu">benchmark</span>(<span class="fu">read.csv</span>(data_file_large, <span class="at">stringsAsFactors =</span> F), </span>
+<span id="cb40-28"><a href="#cb40-28" aria-hidden="true" tabindex="-1"></a>          <span class="fu">fread</span>(data_file_large),</span>
+<span id="cb40-29"><a href="#cb40-29" aria-hidden="true" tabindex="-1"></a>          <span class="at">replications =</span> <span class="dv">20</span>)</span>
+<span id="cb40-30"><a href="#cb40-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-31"><a href="#cb40-31" aria-hidden="true" tabindex="-1"></a><span class="co">#                                              test replications elapsed relative user.self sys.self user.child sys.child</span></span>
+<span id="cb40-32"><a href="#cb40-32" aria-hidden="true" tabindex="-1"></a><span class="co"># 2                          fread(data_file_large)           20    2.67    1.000      7.07     1.10         NA        NA</span></span>
+<span id="cb40-33"><a href="#cb40-33" aria-hidden="true" tabindex="-1"></a><span class="co"># 1 read.csv(data_file_large, stringsAsFactors = F)           20   74.59   27.936     71.53     3.05         NA        NA</span></span></code></pre></div>
+</section>
+<section id="set-functions" class="slide level2">
+<h2><code>set</code> functions</h2>
+<ul>
+<li><code>set</code> functions update properties of the
+<code>data.table</code> by reference</li>
+</ul>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># set column names</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="fu">setnames</span>(dt, <span class="st">&quot;old&quot;</span>, <span class="st">&quot;new&quot;</span>)</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="co"># set row order</span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a><span class="fu">setorder</span>(dt, col1, <span class="sc">-</span>col2, ...)</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a><span class="co"># set anything</span></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a><span class="fu">set</span>(dt, i, j)</span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a><span class="co"># set colum</span></span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>dt[,col1 <span class="sc">:=</span> <span class="dv">2</span><span class="sc">*</span>col2]</span></code></pre></div>
+</section>
+<section id="special-variables" class="slide level2">
+<h2>Special variables</h2>
+<p><code>data.table</code>s also contain some special read-only symbols
+that are often useful:</p>
+<ul>
+<li><code>.N</code>: number of rows in the current group</li>
+<li><code>.I</code>: a vector, <code>1:nrow(dt)</code>, usually used for
+more advanced operations</li>
+</ul>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># for .N: convenient</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>all_generation_long[,.N] </span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>all_generation_long[,.N, by <span class="ot">=</span> type]</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a><span class="co"># for .I: more advanced syntax</span></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>all_generation_long[,.I]</span></code></pre></div>
+</section>
+<section id="other-features-keys" class="slide level2">
+<h2>Other features: keys</h2>
+<ul>
+<li>keys: one or more columns, pre-sorted index of the table.</li>
+</ul>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># check the current key</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="fu">key</span>(generation_dt)</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="co"># set key</span></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a><span class="fu">setkey</span>(generation_dt, datetime)</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a><span class="fu">key</span>(generation_dt)</span></code></pre></div>
+</section>
+<section id="other-features-joins" class="slide level2">
+<h2>Other features: joins</h2>
+<ul>
+<li>joins: <code>data.table</code> has a special join syntax</li>
+</ul>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>imports_dt <span class="ot">&lt;-</span> <span class="fu">fread</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;ca_energy_imports.csv&quot;</span>))</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>imports_dt</span></code></pre></div>
+<pre><code>##                 datetime   imports
+##   1: 2019-09-03 00:00:00  7527.333
+##   2: 2019-09-03 01:00:00  6930.333
+##   3: 2019-09-03 02:00:00  7005.833
+##   4: 2019-09-03 03:00:00  7080.583
+##   5: 2019-09-03 04:00:00  7421.667
+##  ---                              
+## 164: 2019-09-09 19:00:00 10002.667
+## 165: 2019-09-09 20:00:00  9994.083
+## 166: 2019-09-09 21:00:00  9690.167
+## 167: 2019-09-09 22:00:00  7998.000
+## 168: 2019-09-09 23:00:00  7570.750</code></pre>
+</section>
+<section id="other-features-joins-1" class="slide level2">
+<h2>Other features: joins</h2>
+<ul>
+<li>joins: <code>data.table</code> has a special join syntax</li>
+</ul>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># set key or specify on </span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>imports_dt[generation_dt, on <span class="ot">=</span> <span class="st">&quot;datetime&quot;</span>]</span></code></pre></div>
+<pre><code>##                 datetime   imports   biogas  biomass      coal geothermal
+##   1: 2019-09-03 00:00:00  7527.333 238.9167 407.0833  9.000000   967.2500
+##   2: 2019-09-03 01:00:00  6930.333 239.0000 406.5000  9.000000   970.3333
+##   3: 2019-09-03 02:00:00  7005.833 239.0000 406.8333  9.000000   973.1667
+##   4: 2019-09-03 03:00:00  7080.583 238.9167 407.1667  9.833333   973.8333
+##   5: 2019-09-03 04:00:00  7421.667 237.9167 406.0833  9.416667   974.6667
+##  ---                                                                     
+## 164: 2019-09-09 19:00:00 10002.667 228.0000 388.4167 12.000000   978.5000
+## 165: 2019-09-09 20:00:00  9994.083 227.8333 386.4167 12.583333   979.7500
+## 166: 2019-09-09 21:00:00  9690.167 231.1667 383.1667 12.333333   980.5833
+## 167: 2019-09-09 22:00:00  7998.000 231.1667 368.9167 13.083333   980.5833
+## 168: 2019-09-09 23:00:00  7570.750 231.5000 358.9167 13.750000   980.3333
+##      large_hydro natural_gas  nuclear other small_hydro solar     wind
+##   1:    3152.500    9710.833 2248.750     0    401.6667  0.00 2670.167
+##   2:    2724.333    9155.000 2250.583     0    400.9167  0.00 2778.833
+##   3:    2630.000    8078.333 2250.833     0    413.5833  0.00 2795.250
+##   4:    2611.250    7801.250 2245.000     0    359.9167  0.00 2582.583
+##   5:    2651.333    7744.333 2242.833     0    382.0833  0.00 2397.417
+##  ---                                                                  
+## 164:    4413.583    9761.583 2269.000     0    480.6667 19.75 4894.417
+## 165:    4414.667    9210.583 2267.583     0    467.1667  0.00 4824.750
+## 166:    3771.417    8475.083 2265.417     0    471.7500  0.00 4677.917
+## 167:    3305.167    8056.750 2265.417     0    435.6667  0.00 4681.917
+## 168:    2704.583    6895.417 2266.000     0    413.1667  0.00 4571.417
+##      total_hydro
+##   1:    3554.167
+##   2:    3125.250
+##   3:    3043.583
+##   4:    2971.167
+##   5:    3033.417
+##  ---            
+## 164:    4894.250
+## 165:    4881.833
+## 166:    4243.167
+## 167:    3740.833
+## 168:    3117.750</code></pre>
+</section>
+<section id="other-features-joins-2" class="slide level2">
+<h2>Other features: joins</h2>
+<ul>
+<li>joins: <code>data.table</code> has a special join syntax</li>
+</ul>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># operations can be performed in the same step as the merge</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>imports_dt[generation_dt, on <span class="ot">=</span> <span class="st">&quot;datetime&quot;</span>, imports_gas <span class="sc">:=</span> imports <span class="sc">+</span> i.natural_gas]</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>imports_dt</span></code></pre></div>
+<pre><code>##                 datetime   imports imports_gas
+##   1: 2019-09-03 00:00:00  7527.333    17238.17
+##   2: 2019-09-03 01:00:00  6930.333    16085.33
+##   3: 2019-09-03 02:00:00  7005.833    15084.17
+##   4: 2019-09-03 03:00:00  7080.583    14881.83
+##   5: 2019-09-03 04:00:00  7421.667    15166.00
+##  ---                                          
+## 164: 2019-09-09 19:00:00 10002.667    19764.25
+## 165: 2019-09-09 20:00:00  9994.083    19204.67
+## 166: 2019-09-09 21:00:00  9690.167    18165.25
+## 167: 2019-09-09 22:00:00  7998.000    16054.75
+## 168: 2019-09-09 23:00:00  7570.750    14466.17</code></pre>
+</section>
+<section id="other-features-joins-3" class="slide level2">
+<h2>Other features: joins</h2>
+<ul>
+<li>joins: <code>data.table</code> has a special join syntax</li>
+</ul>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># operations can be performed in the same step as the merge</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>imports_dt[generation_dt[<span class="fu">hour</span>(datetime) <span class="sc">==</span> <span class="dv">2</span>], on <span class="ot">=</span> <span class="st">&quot;datetime&quot;</span>, imports_gas_2 <span class="sc">:=</span> imports <span class="sc">+</span> i.natural_gas]</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>imports_dt</span></code></pre></div>
+<pre><code>##                 datetime   imports imports_gas imports_gas_2
+##   1: 2019-09-03 00:00:00  7527.333    17238.17            NA
+##   2: 2019-09-03 01:00:00  6930.333    16085.33            NA
+##   3: 2019-09-03 02:00:00  7005.833    15084.17      15084.17
+##   4: 2019-09-03 03:00:00  7080.583    14881.83            NA
+##   5: 2019-09-03 04:00:00  7421.667    15166.00            NA
+##  ---                                                        
+## 164: 2019-09-09 19:00:00 10002.667    19764.25            NA
+## 165: 2019-09-09 20:00:00  9994.083    19204.67            NA
+## 166: 2019-09-09 21:00:00  9690.167    18165.25            NA
+## 167: 2019-09-09 22:00:00  7998.000    16054.75            NA
+## 168: 2019-09-09 23:00:00  7570.750    14466.17            NA</code></pre>
+</section></section>
+<section>
+<section id="library-management" class="title-slide slide level1">
+<h1>Library Management</h1>
+
+</section>
+<section id="library-management-1" class="slide level2">
+<h2>Library Management</h2>
+<ul>
+<li>dplyr, data.table, and reshape2 not only share similar functions,
+but sometimes share function names</li>
+<li>in these cases, the package loaded most recently will be the
+function used</li>
+<li>this is important for many reasons, but especially when working
+between data.frame and data.table</li>
+<li>let’s look at the function ‘melt’</li>
+</ul>
+</section>
+<section id="library-management-2" class="slide level2">
+<h2>Library Management</h2>
+<ul>
+<li>let’s look at the function ‘melt’</li>
+<li>we know that melt is a data.table function</li>
+<li>we’ve been working a lot with data.tables</li>
+<li>what package do we expect melt to be loading from?</li>
+</ul>
+</section>
+<section id="library-management-3" class="slide level2">
+<h2>Library Management</h2>
+<ul>
+<li>what package do we expect melt to be loading from?</li>
+</ul>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>melt</span></code></pre></div>
+<pre><code>## function (data, ..., na.rm = FALSE, value.name = &quot;value&quot;) 
+## {
+##     UseMethod(&quot;melt&quot;, data)
+## }
+## &lt;bytecode: 0x7fb9a0df6f08&gt;
+## &lt;environment: namespace:reshape2&gt;</code></pre>
+</section>
+<section id="library-management-4" class="slide level2">
+<h2>Library Management</h2>
+<ul>
+<li>and if we use this function, what object do we receive?</li>
+</ul>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&#39;is.data.table: &#39;</span>, <span class="fu">is.data.table</span>(<span class="fu">melt</span>(imports_dt, <span class="dv">0</span>)),</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;</span><span class="sc">\n</span><span class="st">is.data.frame: &#39;</span>, <span class="fu">is.data.frame</span>(<span class="fu">melt</span>(imports_dt, <span class="dv">0</span>)))</span></code></pre></div>
+<pre><code>## is.data.table:  FALSE 
+## is.data.frame:  TRUE</code></pre>
+</section>
+<section id="library-management-5" class="slide level2">
+<h2>Library Management</h2>
+<ul>
+<li>how to specify functions</li>
+<li>explicit function name</li>
+<li>the function is still there, but given a verbose reference</li>
+</ul>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">is.data.table</span>(</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">melt.data.table</span>(imports_dt,</span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">id.vars =</span> <span class="st">&quot;datetime&quot;</span>,</span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>                          <span class="at">variable.name =</span> <span class="st">&quot;source&quot;</span>,</span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>                          <span class="at">value.name =</span> <span class="st">&quot;output&quot;</span>))</span></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+</section>
+<section id="library-management-6" class="slide level2">
+<h2>Library Management</h2>
+<ul>
+<li>how to specify functions</li>
+<li>reference intended library</li>
+</ul>
+<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">is.data.table</span>(</span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>  data.table<span class="sc">::</span><span class="fu">melt</span>(imports_dt,</span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">id.vars =</span> <span class="st">&quot;datetime&quot;</span>,</span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>                          <span class="at">variable.name =</span> <span class="st">&quot;source&quot;</span>,</span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a>                          <span class="at">value.name =</span> <span class="st">&quot;output&quot;</span>))</span></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+</section>
+<section id="library-management-7" class="slide level2">
+<h2>Library Management</h2>
+<ul>
+<li>how to specify functions</li>
+<li>set function reference</li>
+</ul>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>melt <span class="ot">&lt;-</span> data.table<span class="sc">::</span>melt</span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a><span class="fu">is.data.table</span>(</span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>              <span class="fu">melt</span>(imports_dt,</span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>                          <span class="at">id.vars =</span> <span class="st">&quot;datetime&quot;</span>,</span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a>                          <span class="at">variable.name =</span> <span class="st">&quot;source&quot;</span>,</span>
+<span id="cb60-7"><a href="#cb60-7" aria-hidden="true" tabindex="-1"></a>                          <span class="at">value.name =</span> <span class="st">&quot;output&quot;</span>))</span></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+</section>
+<section id="library-management-8" class="slide level2">
+<h2>Library Management</h2>
+<ul>
+<li>how to specify functions</li>
+<li>reload libraries in desired order</li>
+</ul>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unloadNamespace</span>(<span class="st">&quot;reshape2&quot;</span>)</span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a><span class="fu">unloadNamespace</span>(<span class="st">&quot;data.table&quot;</span>)</span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(reshape2)</span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(data.table)</span></code></pre></div>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="co"># is.data.table(</span></span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   melt(imports_dt,</span></span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a><span class="co">#                           id.vars = &quot;datetime&quot;,</span></span>
+<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a><span class="co">#                           variable.name = &quot;source&quot;,</span></span>
+<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a><span class="co">#                           value.name = &quot;output&quot;))</span></span></code></pre></div>
+</section>
+<section id="library-management-9" class="slide level2">
+<h2>Library Management</h2>
+<p>-lastly, a function to review all overwritten functions</p>
+<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>conflicted <span class="ot">&lt;-</span> base<span class="sc">::</span><span class="fu">conflicts</span>()</span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a>which_packages_by_function <span class="ot">&lt;-</span> <span class="fu">lapply</span>(conflicted, utils<span class="sc">::</span>find)</span>
+<span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-5"><a href="#cb64-5" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(which_packages_by_function) <span class="ot">&lt;-</span> conflicted</span>
+<span id="cb64-6"><a href="#cb64-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-7"><a href="#cb64-7" aria-hidden="true" tabindex="-1"></a>which_packages_by_function[<span class="dv">0</span><span class="sc">:</span><span class="dv">5</span>]</span></code></pre></div>
+<pre><code>## $melt
+## [1] &quot;.GlobalEnv&quot;         &quot;package:data.table&quot; &quot;package:reshape2&quot;  
+## 
+## $dcast
+## [1] &quot;package:data.table&quot; &quot;package:reshape2&quot;  
+## 
+## $melt
+## [1] &quot;.GlobalEnv&quot;         &quot;package:data.table&quot; &quot;package:reshape2&quot;  
+## 
+## $`body&lt;-`
+## [1] &quot;package:methods&quot; &quot;package:base&quot;   
+## 
+## $kronecker
+## [1] &quot;package:methods&quot; &quot;package:base&quot;</code></pre>
+</section></section>
+<section>
+<section id="final-thoughts" class="title-slide slide level1">
+<h1>Final thoughts</h1>
+
+</section>
+<section id="final-thoughts-1" class="slide level2">
+<h2>Final thoughts</h2>
+<ul>
+<li>developers: Matt Dowle, Arun Srinivasan (look out for them on stack
+overflow)</li>
+<li>useful <a
+href="https://cran.r-project.org/web/packages/data.table/vignettes/datatable-intro.html">introduction</a>
+to <code>data.table</code></li>
+<li>also useful <code>data.table</code> <a
+href="https://cran.r-project.org/web/packages/data.table/vignettes/datatable-faq.html">FAQ</a></li>
+<li><a
+href="https://cran.r-project.org/web/packages/data.table/vignettes/datatable-reshape.html">Intro
+to advanced features</a> of <code>data.table</code> <code>melt</code>
+and <code>dcast</code> functions</li>
+<li>or any other vignette</li>
+</ul>
+</section></section>
+    </div>
+  </div>
+
+  <script src="R6_slides_files/reveal.js-3.3.0.1/lib/js/head.min.js"></script>
+  <script src="R6_slides_files/reveal.js-3.3.0.1/js/reveal.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        // Display controls in the bottom right corner
+        controls: true,
+        // Display a presentation progress bar
+        progress: true,
+        // Push each slide change to the browser history
+        history: true,
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+        // Enable the slide overview mode
+        overview: true,
+        // Vertical centering of slides
+        center: false,
+        // Enables touch navigation on devices with touch input
+        touch: true,
+        // Turns fragments on and off globally
+        fragments: true,
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+        // Transition style
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        // Transition speed
+        transitionSpeed: 'default', // default/fast/slow
+        // Transition style for full page slide backgrounds
+        backgroundTransition: 'default', // none/fade/slide/convex/concave/zoom
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'R6_slides_files/reveal.js-3.3.0.1/plugin/notes/notes.js', async: true },
+        ]
+      });
+    </script>
+  <!-- dynamically load mathjax for compatibility with self-contained -->
+  <script>
+    (function () {
+      var script = document.createElement("script");
+      script.type = "text/javascript";
+      script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+      document.getElementsByTagName("head")[0].appendChild(script);
+    })();
+  </script>
+
+<script>
+  (function() {
+    if (window.jQuery) {
+      Reveal.addEventListener( 'slidechanged', function(event) {  
+        window.jQuery(event.previousSlide).trigger('hidden');
+        window.jQuery(event.currentSlide).trigger('shown');
+      });
+    }
+  })();
+</script>
+
+
+  </body>
+</html>

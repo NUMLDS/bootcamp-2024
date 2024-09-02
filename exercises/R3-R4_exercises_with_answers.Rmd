@@ -1,0 +1,145 @@
+---
+title: "Exercises R3 and R4"
+author: "Richard Paquin Morel, adapted from exercises by Christina Maimone"
+date: "`r Sys.Date()`"
+output: html_document
+params:
+    answers: TRUE
+---
+
+
+```{r, echo=FALSE, eval=TRUE}
+answers<-params$answers
+```
+
+```{r global_options, echo = FALSE, include = FALSE}
+knitr::opts_chunk$set(echo=answers, eval=answers,
+                      warning = FALSE, message = FALSE,
+                      cache = FALSE, tidy = FALSE)
+```
+
+## Load the data
+
+Load the `gapminder` dataset.
+
+```{asis}
+### Answer
+```
+
+```{r}
+gapminder <- read.csv(here::here("data/gapminder5.csv"), stringsAsFactors=FALSE)
+```
+
+
+## If Statement
+
+Use an if() statement to print a suitable message reporting whether there are any records from 2002 in the gapminder dataset. Now do the same for 2012.
+
+Hint: use the `any` function.
+
+```{asis}
+### Answer
+```
+
+```{r}
+year<-2002
+if(any(gapminder$year == year)){
+   print(paste("Record(s) for the year",year,"found."))
+} else {
+  print(paste("No records for year",year))
+}
+```
+
+
+## Loop and If Statements
+
+Write a script that finds the mean life expectancy by country for countries whose population is below the mean for the dataset
+
+Write a script that loops through the `gapminder` data by continent and prints out whether the mean life expectancy is smaller than 50, between 50 and 70, or greater than 70.
+
+```{asis}
+### Answer
+```
+
+```{r}
+overall_mean <- mean(gapminder$pop)
+
+for (i in unique(gapminder$country)) {
+   country_mean <- mean(gapminder$pop[gapminder$country==i])
+   
+   if (country_mean < overall_mean) {
+     mean_le <- mean(gapminder$lifeExp[gapminder$country==i])
+     print(paste("Mean Life Expectancy in", i, "is", mean_le))
+   } 
+} # end for loop
+```
+
+```{r}
+lower_threshold <- 50
+upper_threshold <- 70
+ 
+for (i in unique(gapminder$continent)){
+    tmp <- mean(gapminder$lifeExp[gapminder$continent==i])
+    
+    if (tmp < lower_threshold){
+        print(paste("Average Life Expectancy in", i, "is less than", lower_threshold))
+    }
+    else if (tmp > lower_threshold & tmp < upper_threshold){
+        print(paste("Average Life Expectancy in", i, "is between", lower_threshold, "and", upper_threshold))
+    }
+    else {
+        print(paste("Average Life Expectancy in", i, "is greater than", upper_threshold))
+    }
+   
+}
+```
+
+
+## Writing Functions
+
+Create a function that given a data frame will print the name of each column and the class of data it contains. Use the gapminder dataset.  Hint: Use `mode()` or `class()` to get the class of the data in each column. Remember that `names()` or `colnames()` returns the name of the columns in a dataset.
+
+```{asis}
+### Answer
+
+Note: Some of these were taken or modified from https://www.r-bloggers.com/functions-exercises/
+```
+
+```{r}
+data_frame_info <- function(df) {
+  cols <- names(df)
+  for (i in cols) {
+    print(paste0(i, ": ", mode(df[, i])))
+  }
+}
+data_frame_info(gapminder)
+```
+
+Create a function that given a vector will print the mean and the standard deviation of a **vector**, it will optionally also print the median. Hint: include an argument that takes a boolean (`TRUE`/`FALSE`) operator and then include an `if` statement.
+
+```{asis}
+### Answer
+
+```
+
+```{r}
+vector_info <- function(x, include_median=FALSE) {
+  print(paste("Mean:", mean(x)))
+  print(paste("Standard Deviation:", sd(x)))
+  if (include_median) {
+    print(paste("Median:", median(x)))
+  }
+}
+
+le <- gapminder$lifeExp
+vector_info(le, include_median = F)
+vector_info(le, include_median = T)
+```
+
+## Analyzing the relationship between GDP per capita and life expectancy
+
+Use what you've learned so far to answer the following questions using the `gapminder` dataset. Be sure to include some visualizations!
+
+1. What is the relationship between GDP per capita and life expectancy? Does this relationship change over time? (Hint: Use the natural log of both variables.)
+
+2. Does the relationship between GDP per capita and life expectacy vary by continent? Make sure you divide the Americas into North and South America.

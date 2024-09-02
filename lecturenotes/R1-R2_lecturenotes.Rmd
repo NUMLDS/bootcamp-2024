@@ -1,0 +1,1017 @@
+---
+title: "R1 & R2: Intro to R"
+author: "Kumar Ramanathan (based on materials by Christina Maimone)"
+date: "`r format(Sys.Date()+1, '%B %Y')`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+params:
+  notes: no
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = normalizePath("../"))
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+```
+
+```{r, include=FALSE}
+notes<-params$notes
+```
+
+# Getting acquainted with R
+
+## Why R?
+
+R is a free software environment for statistical computing and graphics. It is supported by the R Foundation for Statistical Computing and was initially developed in the late 1990s. As a full programming language, it is more flexible and capacious than alternatives for statistical computing such as Stata. Since it is designed for data analysis, it is particularly well suited to the needs of data scientists compared to most other programming languages. Since it is open source, it is a customizable and extensible tool, for which thousands of useful and tailored packages have been written by users worldwide. Finally, it is widely used and a large community has grown around R, meaning that help is always around the corner.
+
+For more information, see the [R project website](https://www.r-project.org/). You can get a taste for the R community at [R-bloggers](https://www.r-bloggers.com/), the [RStudio community forum](https://community.rstudio.com/), [R-Ladies](https://rladies.org/), and [Stack Overflow](https://stackoverflow.com/questions/tagged/r).
+
+Here are a few things to remember about R:
+- "R" refers to both the language and the environment (application).
+- R runs in memory, objects are loaded in memory.
+- It's expected that you'll install and use additional packages
+- Packages are open source and user contributed, so use established packages or evaluate quality.
+- There are multiple ways to do most things. Some ways are better than others, but sometimes it is a question of style and preference.
+- You can, and often will, have more than one dataset open in R at the same time.
+
+## RStudio and RStudio Server
+
+RStudio is a software program that makes working in R easier, developed and maintained by a company with the same name. It provides an integrated development environment, or IDE, for R. RStudio helps you organize your workflow and keep track of your work. The top-left pane is where you open, work on, and save script files. The bottom-left pane includes the console, which is where your code actually "runs" -- you can run code here directly, or from a script file. The right-hand side panes include tools for manging your environment, workspace, and packages; for plotting and graphics; for accessing help files; and more.
+
+At MSiA, you have access to RStudio Server, which allows you to access RStudio through a web browser and do computation on a server rather than your personal computer. 
+
+## Installing and loading packages
+
+Much of R's power comes from contributed packages. You can install and manage packages using the Packages tab in the bottom right pane in RStudio. Or you can install packages with a command:
+
+```{r, eval=FALSE}
+install.packages("tidyverse")
+```
+
+When you install R and RStudio Desktop on your local computer, "base R" packages are already installed and you will need to install any other packages you want touse. When you access RStudio Server Pro through the MSIA server, some common packages are already installed at the system-level, so you will not actually need to do this step. You can easily check what packages have been installed already in the "Packages" tab on the bottom-right pane.
+
+Note that `tidyverse` is a composite package that will install multiple component packages and their dependencies. It includes `dplyr` and `ggplot2`, which we will use extensively on Day 3 of the boot camp. You'll get a lot of messages as the installation happens.
+
+CRAN (Comprehensive R Archive Network) is the name of the package repository. There are [mirrors](https://cran.r-project.org/mirrors.html) around the world. You can also install packages that are not on CRAN using the `devtools` package.
+
+If you have trouble or get errors when trying to install a package, you might need to specify the repository mirror to download from:
+
+```{r, eval=FALSE}
+install.packages("tidyverse", repos="http://cran.wustl.edu/")
+```
+
+After you install a package, you have to load it with the `library` function to actually use it.
+
+```{r}
+library(tidyverse)
+```
+
+## Functions and help files
+
+Functions are called with `functionName(parameters)`. Multiple paramters are comma-separated. Paramters can be named. For unnamed parameters, the order matters. R functions don't change the objects passed to them (more on this later). Instead, to store the result of a function, you need to assign its output to an object using the assignment operator `<-`. For example: `object <- functionName(parameter1, parameter2)`.
+
+Remember that all functions come with *help files*. Well-written packages will include extensive help files which explain the kinds of inputs the function takes, the purpose of each parameter or "argument" in addition to the inputs, and the kinds of output the function produces. They will also often include examples.
+
+To access a help file, enter `?functionName` into the console or use the Help tab in the bottom-right pane of RStudio.
+
+Sometimes different packages will include functions with the same name. To make sure you are using the function from the right package, you can use the following syntax: `packageName::functionName()`.
+
+# Basics and data types
+
+A good reference for R Basics is the [Base R Cheat Sheet](https://www.rstudio.com/wp-content/uploads/2016/10/r-cheat-sheet-3.pdf).
+
+Remember, to run a line of code from a script file in RStudio:
+
+* *MAC*: `command + return`
+* *PC*: `Ctrl + r`
+
+## Arithmetic
+
+Here are the basic arithmetic operators in R:
+
+```{r}
+# Addition 
+2+2
+
+# Subtraction
+6-2
+
+# Multiplication
+3.452*6
+
+# Division
+5/2
+
+# Exponent
+2^4
+
+# Modulo (returns remainder after division)
+5%%2
+```
+
+You can use `?Arithmetic` to pull up the help for arithmetic operators.
+
+## A few functions
+
+Functions are called with `functionName(parameters)`.  Multiple paramters are comma-separated.  Paramters can be named. For unnamed parameters, the order matters.  R functions don't change the objects passed to them (more on this later).
+
+```{r}
+log(10)
+log(16, base=2)
+log10(10)
+sqrt(10)
+exp(10)
+sin(1)
+```
+
+## Comparisons
+
+```{r}
+1 < 2
+TRUE == FALSE
+'a' != "Boy" # not equal
+```
+
+Note that character vectors/strings can use single or double quotes.
+
+## Logical Operators
+
+`&` is and, and `|` is or, and `!` is not: 
+
+```{r}
+TRUE & FALSE
+!TRUE & FALSE
+TRUE | FALSE
+(2 > 1) & (3 > 2)
+```
+
+You use these to join together conditions.
+
+## Variables
+
+Use the `<-` operator to assign values to variables.  `=` also works but is bad practice and less common.
+
+The right hand side of the assignment can be any valid R expression. The right hand side is fully evaluated before the assignment occurs.
+
+Variable names can contain letters, numbers, underscores and periods. They cannot start with a number; they should not start with an underscore or period in regular use.  They cannot contain spaces. Different people use different conventions for long variable names, these include
+
+- periods.between.words
+- underscores_between_words
+- camelCaseToSeparateWords
+
+```{r}
+x <- 4
+x
+y <- 3/10
+y
+x + y
+myVariable <- x <- 3 + 4 + 7
+```
+
+Note that when you create a variable in RStudio, it shows up in the environment tab in the top-right pane.
+
+## Data Types
+
+There are a few types of data in R:
+
+* logical: `TRUE` or `FALSE`
+* integer: a specific type; most numbers are numeric instead
+* numeric: real or decimal 
+* complex: ex: `2+5i`
+* character: `"text data"`, denoted with single or double quotes
+
+```{r}
+class(TRUE)
+class("foo")
+```
+
+# Data structures
+
+## Vectors
+
+Vectors store multiple values of a single data type. You can create a vector by combining values with the `c()` function.
+
+```{r}
+x<-c(1,2,3,4,5)
+x<-1:5
+```
+
+Vectors can only have one type of values in them. The order depends on what types can be converted to other types. If there's multiple types, everything in a vector will be converted to the type of the lowest in this list:
+
+* logical
+* integer
+* numeric
+* complex
+* character
+
+```{r}
+x<-c(TRUE, 2, 4.3)
+x
+x<-c(4, "alpha", TRUE)
+x
+```
+
+Functions and arithmetic operators can apply to vectors as well:
+
+```{r}
+x <- c(1,2,3,4,5)
+x+1
+x*2
+x*x
+log(x)
+x < 5
+```
+
+Some functions will apply to each element of a vector, but others take a vector as a parameter:
+
+```{r}
+log(x)
+sum(x)
+```
+
+Vectors are one-dimensional and can't be nested:
+
+```{r}
+c(c(1,2,3), 4, 5)
+```
+
+Vector indexes (and all other indexes in R) start with 1, not 0:
+
+```{r}
+x <- c('a', 'b', 'c', 'd', 'e')
+x[1]
+```
+
+You can take "slices" of vectors using index brackets:
+
+```{r}
+x[1:3]
+```
+
+Or exclude values with a negative sign:
+
+```{r}
+x[-1]
+```
+
+Elements are returned in the order that the indices are supplied:
+
+```{r}
+y <- c(5,1)
+y
+```
+
+You can use a vector of integers or booleans to select from a vector as well:
+
+```{r}
+x[x<'c']
+x[c(1,3,5)]
+```
+
+Get the length of a vector with `length`:
+
+```{r}
+length(x)
+```
+
+See if a value is in a vector with the `%in%` operator:
+
+```{r}
+'b' %in% x
+```
+
+Or get the first position of one or more elements in a vector with the `match` function:
+
+```{r}
+match(c('b', 'd', 'k'), x)
+```
+
+Use `which` to find all positions:
+
+```{r}
+y <- c('a','b','c','a','b','c')
+which(y == 'c')
+```
+
+You can also name the elements of a vector:
+
+```{r}
+x<-1:5
+names(x)<-c("Ohio","Illinois","Indiana","Michigan","Wisconsin")
+x
+```
+
+Which allows you to select values from the vector using the names:
+
+```{r}
+x["Ohio"]
+x[c("Illinois", "Indiana")]
+```
+
+## Missing Data (`NA`)
+
+Before we move onto other data structures, let's pause to consider how to deal with missing values in a vector (or, later, a data frame). Missing data in R is encoded as `NA`. Some functions will ignore `NA` when doing computations.  Others will ignore missing values if you tell them to.  Others will process `NA` and give you a result of `NA`.
+
+```{r}
+tmp <- c(1,2,5,NA,6,NA,2,5,1,1,NA,5)
+```
+
+You can test for `NA` (`is.na`). Or you can get the index location of the missing observations within the vector (useful for later selecting observations in your dataset).
+
+```{r}
+is.na(tmp)
+which(is.na(tmp))
+```
+
+It can also be useful to count the number of `NA`s in a vector:
+
+```{r}
+sum(is.na(tmp))
+```
+
+Why does this work? How can you sum logical values? This takes advantage of the trick that TRUE=1 and FALSE=0. The function call tries to convert the logicals to numeric, and this is how the conversion works:
+
+```{r}
+as.numeric(c(TRUE, FALSE))
+```
+
+Remember that different functions treat `NA` differently. With an input vector that includes `NA` values, `mean` results in `NA`. It has an option to exclude missing:
+
+```{r}
+mean(tmp)
+mean(tmp, na.rm=TRUE)
+```
+
+`table` behaves differently. It excludes `NA` by default. You have to tell it to include `NA`.
+
+```{r}
+table(tmp)
+table(tmp, useNA = "ifany")
+```
+
+## Other Special Values
+
+### NULL
+
+`NULL` is another special type. `NULL` is usually used to mean undefined.  You might get it when a function can't compute a result.  `NULL` is a single value and can't be in a vector.  (`NA`s can be in vectors and data.frames.)  
+
+```{r}
+c()
+c(NULL, NULL)
+```
+
+The above somewhat surprisingly gives a single `NULL` because of the restrictions on how it's used.  
+
+`NULL` should not be used for missing data.
+
+### `NaN`, `Inf`
+
+`NaN` means "not a number".
+
+```{r}
+0/0
+```
+
+`Inf` and `-Inf` are "infinity" and "negative infinity".
+
+```{r}
+1/0
+-1/0
+```
+
+## Factors
+
+Factors are a special type of vector can be used for categorical variables. Why would we need them? Consider that the values of character vectors sometimes have an order, and we may want to store this information in R. For example, consider a vector containing month names. When we use `table()`, R arranges the values in alphabetical order.
+
+```{r}
+months<-c("January","March","February","December","January","March")
+table(months)
+```
+
+The `factor()` function converts a vector into a factor. Without supplying any additional information, the function infers the possible "levels" that the vector takes.
+
+```{r}
+months_fac <- factor(months)
+levels(months_fac)
+```
+
+Factors can be **ordered**, which is useful when you have categorical variables in your data. Let's create an ordered factor from the months variable. Using the `table()` function on the factor, we can see one of the benefits of using factors for categorical variables - the values are ordered in meaningful way rather than alphabetically.
+
+```{r}
+months_fac <- factor(months, levels=c("January","February","March","December"))
+table(months_fac)
+```
+
+Note that you cannot add values to a factor that are not included as one of the levels.
+
+```{r}
+months_fac[5] <- "April"
+```
+
+The best solution to this is to remake the factor. The `factor` function will convert `months_fac` in the example below back to character data before creating the new factor.
+
+```{r}
+months_fac <- factor(months, levels=c("January","February","March","April","December")) 
+months_fac[5] <- "April"
+months_fac
+```
+
+Alternatively, when you create the factor for the first time, you can include all possible levels of the factor. This has the added benefit of producing even more meaningful results when using functions such as `table()`.
+
+```{r}
+months_fac <- factor(months, levels=c("January","February","March","April","May","June","July","August","September","October","November","December"))
+table(months_fac)
+```
+
+Under the hood, factors are stored as integers, with the (ordered) levels attribute providing information about the character value associated with each integer. 
+
+```{r}
+typeof(months_fac)
+```
+
+Even if you don't plan to use categorical data, you should know that factors exist because when reading data into R, text strings can be loaded as factors.
+
+## Lists
+
+Lists are a bit like complex vectors. An element of a list can hold any other object, including another list.  You can keep multi-dimensional and ragged data in R using lists.  
+
+```{r}
+l1 <- list(1, "a", TRUE, 1+4i)
+l1
+```
+
+```{r}
+l2 <- list(title = "Research Bazaar", numbers = 1:10, data = TRUE )
+l2
+```
+
+Indexing lists is a little different.  ``[[1]]`` is the first element of the list as whatever type it was.  ``[1]`` is a subset of the list -- the first element of the list as a list. You can also access list elements by name using the `$` operator.
+
+```{r}
+l2[[2]]
+l2[2]
+l2$numbers
+```
+
+## Matrices
+
+Matrices in R are two-dimensional arrays. All values of a matrix must be of the same type. You can initialize a matrix using the `matrix()` function.
+
+```{r}
+matrix(c('a', 'b', 'c', 'd'), nrow=2)
+y<-matrix(1:25, nrow=5, byrow=TRUE)
+y
+```
+
+Matrices are used sparingly in R, primarly for numerical calculations or explicit matrix manipulation. You can attach names to rows and columns.
+
+Matrix algebra functions are available:
+
+```{r}
+y%*%y
+x<-1:5
+y%*%x
+y^-1 # matrix inversion
+y * -1
+```
+
+Elements in a matrix are indexed like `mat[row number, col number]`. Omitting a value for row or column will give you the entire column or row, respectively.
+
+```{r}
+y[1,1]
+y[1,]
+y[,1]
+y[1:2,3:4]
+y[,c(1,4)]
+```
+
+Using just a single index will get the element from the specified position, as if the matrix were turned into a vector first:
+
+```{r}
+w<-matrix(5:29, nrow=5)
+w[7]
+as.vector(w)[7]
+```
+
+## Data Frames
+
+Data frames are the core data structure in R. A data frame is a list of named vectors with the same length.  Columns are typically variables and rows are observations. Different columns can have different types of data:
+
+```{r}
+id<-1:20
+id
+color<-c(rep("red", 3), rep("green",10), rep("blue", 7))
+color
+score<-runif(20)
+score
+df<-data.frame(id, color, score)
+df
+```
+
+Instead of making individual objects first, we could do it all together:
+
+```{r}
+df<-data.frame(id=1:20, 
+               color=c(rep("red", 3), rep("green",10), rep("blue", 7)),
+               score=runif(20))
+```
+
+Data frames can be indexed like matrices to retrieve the values.  
+
+```{r}
+df[2,2]
+df[1,]
+df[,3]
+```
+
+You can use negative values when indexing to exclude values:
+
+```{r}
+df[,-2]
+df[-1:-10,]
+```
+
+You can also use the names of the columns after a `$` or in the indexing:  
+
+```{r}
+df$color
+```
+
+Indexing into a data frame with a single integer or name of the column will give you the column(s) specified as a new data frame.
+
+```{r}
+df['color']
+df[2:3]
+```
+
+Instead of index numbers or names, you can also select values by using logical statements.  This is usually done with selecting rows. 
+
+```{r}
+df[df$color == "green",]
+df[df$score > .5,]
+df[df$score > .5 & df$color == "blue",]
+```
+
+
+You can assign names to the rows of a data frame as well as to the columns, and then use those names for indexing and selecting data.
+
+```{r}
+rownames(df)
+```
+
+You can add columns or rows simply by assigning values to them.  There are also `rbind` and `cbind` (for row bind and column bind) functions that can be useful.
+
+```{r}
+df$year<-1901:1920
+df
+```
+
+```{r}
+df[22,]<-list(21, "green", 0.4, 1921)
+```
+
+Note that we had to use a list for adding a row because there are different data types.
+
+# Reading data files
+
+## Working Directory
+
+Before reading or writing files, it's often useful to set the working directory first so that you don't have specify complete file paths.  
+
+You can go to the Files tab in the bottom right window in RStudio and find the directory you want.  Then under the More menu, there is an option to set the current directory as the working directory.  Or you can use the `setwd` command like:
+
+```{r, eval=FALSE}
+setwd("~/training/intror")  # ~ stands for your home directory
+setwd("/Users/username/Documents/workshop") # mac, absolute path example
+setwd("C:\Users\username\Documents\workshop") # windows, absolute path example
+```
+
+In our case, we are working out of the directory team/bootcamp/2018 in the base directory. So we can set our working directory as follows:
+
+```{r, eval=FALSE}
+setwd("~/team/bootcamp/2018/R session materials")
+```
+
+To check where your working directory is, use `getwd()`:
+
+```{r}
+getwd()
+```
+
+## Reading
+
+Read in a csv file and save it as a data frame with a name. Below are two examples, using a CSV file and a local file stored in the working directory respectively:
+
+```{r}
+# Using a URL
+schooldata <- read.csv("https://goo.gl/f4UhMX")
+
+# Using a local file
+gapminder <- read.csv("data/gapminder5.csv")
+```
+
+You can view the data frames in RStudio using the `View()` function.
+
+```{r, eval=FALSE}
+View(schooldata)
+View(gapminder)
+```
+
+You could also use the Import Dataset option in the Environment tab in the top right window in RStudio.
+
+Looking at the help for `read.csv`, there are a number of different options and different function calls.  `read.table`, `read.csv`, and `read.delim` all work in the same basic way and take the same set of arguments, but they have different defaults. Key options to pay attention to include:
+
+* `header`: whether the first row of the file has the names of the columns
+* `sep`: the separator used (comma, tab (enter as `\t`), etc) in the file
+* `na.strings`: how is missing data encoded in your file?  "NA" are treated as missing by default; blanks are treated as missing by default in everything but character data.
+* `stringsAsFactors`: should strings (text data) be converted to factors or kept as is?  Example of this below.
+
+Let's redo the above with a better set of options:
+
+```{r}
+gapminder <- read.csv("data/gapminder5.csv", 
+                      stringsAsFactors=FALSE, 
+                      strip.white=TRUE, 
+                      na.strings=c("NA", ""))
+```
+
+The option `na.strings` is needed now because while blanks are treated as missing by default in numeric fields (which includes factors), they aren't by default missing for character data.
+
+## `readr` Package
+
+Does all of the above seem annoying or unnecessarily complicated?  Others have thought so too.
+
+Look at the `readr` package (part of the tidyverse), which attempts to smooth over some of the annoyances of reading in file in R. The main source of potential problems when using `readr` functions is that it guesses variable types from a subset of the observations, so if you have a strange value further down in your dataset, you might get an error or an unexpected value conversion.
+
+To read in the same data with the same settings as above, using `readr` (note similar function name, with `_` instead of `.`):
+
+```{r, message=TRUE}
+library(readr)
+gapminder <- read_csv("data/gapminder5.csv")
+```
+
+Options used above are defaults in `readr`. You get a long message about the column types.
+
+Learn more at the [`readr` website](http://readr.tidyverse.org/).
+
+## Reading different file formats
+
+For Stata, SAS, or SPSS files, try the `haven` or `foreign` packages. For Excel files, use the `readxl` package.
+
+## Special Data Types
+
+`data.table` package also has functions for reading in data, which you will learn about on Day 3 of the boot camp. The `fread` function is relatively fast for reading a rectangular standardized data file into R.
+
+R also has packages for reading other structured files like XML and JSON, or interfacing with databases. For more on using R with databases, see the R section of the [Databases workshop materials](https://github.com/nuitrcs/databases_workshop) from NUIT Research Computing Services.
+
+There are also multiple packages that make collecting data from APIs (either in general or specific APIs like the Census Bureau) easier. There are also packages that interface with Google docs/drive and Dropbox, although those APIs change frequently, so beware when using those packages if they haven't been updated recently.  
+
+# Data manipulation in base R
+
+## Exploring a data frame
+
+In the previous section, we imported two datasets. For the rest of today, we will focus on the Gapminder data, which is stored in our environment as `gapminder`. To refresh yourself, you can view the data frame in R using the `View()` function.
+
+```{r, eval=F}
+View(gapminder)
+```
+
+You can also see a list of variables using `names()`.
+
+```{r}
+names(gapminder)
+```
+
+Other useful functions are `dim()` which shows the dimensions of the data frame, `str()` which shows the dimensions of the data frame along with the names of variables and the first few values in each variable, `nrow()` and `ncol()` which show the number of rows and colums, and `head()` which shows the first few rows of the data frame (5 rows by default).
+
+When applied to a data frame, the `summary()` function provides useful summary statistics for each variable (i.e. column) in the data frame. Let's try it with the Gapminder data:
+
+```{r}
+summary(gapminder)
+```
+
+We can also use functions like `mean()`, `median()`, `var()`, `sd()`, and `quantile()` to calculate other summary statistics for individual variables. For example, let's calculate the mean of life expectancy. Recall that we can use the `$` operator to call up a variable within a data frame using its name.
+
+```{r}
+mean(gapminder$lifeExp)
+```
+
+A useful way to examine a discrete or categorical variable is to use a frequency table. These are easy to make in R, using the `table()` function:
+
+```{r}
+table(gapminder$continent)
+```
+
+`prop.table()` is a useful wrapper around `table()`, showing the proportion of rows in each category:
+
+```{r}
+prop.table(table(gapminder$continent))
+```
+
+You can generate a frequency table with more than one variable as well:
+
+```{r}
+table(gapminder$continent, gapminder$year)
+```
+
+## Subsetting
+
+Notice that each row in the data frame represents one country in a given year. Perhaps we are interested in analyzing only data from one year. To do this, we will have to "subset" our data frame to include only those rows that we want to keep. 
+
+The `subset()` function lets you select rows and columns you want to keep. You can either name columns or rows, or include a logical statement such that only rows/columns where the statement is true are retained.
+
+```{r, eval=FALSE}
+subset(data.frame, 
+       subset=condition indicating rows to keep,
+       select=condition indicating columns to keep)
+```
+
+For eaxmple, let's create a new data frame containing only 2007 data by subsetting the original data frame.
+
+```{r}
+gapminder07 <- subset(gapminder, subset = year==2007)
+```
+
+Look at the number of rows in the new data frame: it is only 142, whereas the original data frame has 1704 rows.
+
+```{r}
+nrow(gapminder07)
+```
+
+## Sorting
+
+The `sort()` function reorders elements, in ascending order by default. You can flip the order by using the `decreasing = TRUE` argument.
+
+```{r}
+sort(gapminder07$lifeExp)
+sort(gapminder07$lifeExp, decreasing=TRUE)
+```
+
+The `order()` function gives you the index positions in sorted order:
+
+```{r}
+order(gapminder07$lifeExp)
+```
+
+`order()` is useful for arranging data frames. Combined with `head()`, which shows the first 5 rows of a data frame, we can use this to view the rows of the data frame with the highest life expectancy:
+
+```{r}
+head(gapminder07[order(gapminder07$lifeExp, decreasing=TRUE),])
+```
+
+Sorting a table is often useful. For example:
+
+```{r}
+sort(table(gapminder07$continent))
+```
+
+## Adding and removing columns
+
+You can add variables to a data frame in several ways. Here, we will show two standard methods using base R. On Day 3, you will learn about alternatives using the `data.table` and `dplyr` approaches.
+
+To demonstrate, let's first create a vector with the same number of values as the number of rows in the data frame. If you want to learn what is going on in this code, look at the help file for the function `sample()`.
+
+```{r}
+newvar <- sample(1:5000, 1704, replace = FALSE)
+```
+
+You can add a variable/column by using the `cbind()` function:
+
+```{r}
+gapminder <- cbind(gapminder, newvar)
+```
+
+You can add a variable/column by assigning it to data frame directly:
+
+```{r}
+gapminder$newvar <- newvar
+```
+
+To remove a variable/column from a data frame, you can assign a `NULL` value to the variable:
+
+```{r}
+gapminder$newvar <- NULL
+```
+
+You can also remove a variable/column by negatively indexing the data frame:
+
+```{r, eval = F}
+gapminder <- gapminder[-"newvar"]
+gapminder <- gapminder[,-c("newvar")] 
+# The second method is equivalent to the first, but can be used to remove multiple columns at the same time.
+```
+
+To add rows, you can use the function `rbind()`. Remember that rows may include different data types, in which case you would need to use the function `list()`.
+
+## Recoding variables
+
+To recode a variable, you could make a new column, or overwrite the existing one entirely. For example, let's create a new variable for life expectancy containing rounded values, using the `round()` function.
+
+```{r}
+gapminder07$lifeExp_rounded <- round(gapminder07$lifeExp)
+```
+
+If you just want to replace part of a column (or vector), you can assign to a subset. For example, let's say we want to create a new variable that marks all cases where life expectancy is higher than the mean as "High" and those where it is lower than the mean as "Low".
+
+```{r}
+# Start by creating a new variable with all missing values
+gapminder07$lifeExp_highlow <- NA
+# Replace higher-than-mean values with "High"
+gapminder07$lifeExp_highlow[gapminder07$lifeExp>mean(gapminder07$lifeExp)] <- "High"
+# Replace lower-than-mean values with "Low"
+gapminder07$lifeExp_highlow[gapminder07$lifeExp<mean(gapminder07$lifeExp)] <- "Low"
+```
+
+There's also a `recode()` function in the `dplyr` library. You specify the reassignment of values. For example, let's create a new variable with abbreviated continent names.
+
+```{r}
+library(dplyr)
+gapminder07$continent_abrv <- recode(gapminder07$continent,
+                                     `Africa`="AF",
+                                     `Americas`="AM",
+                                     `Asia`="AS",
+                                     `Europe`="EU",
+                                     `Oceania`="OC")
+table(gapminder07$continent_abrv)
+```
+
+We will return to `recode()` and other `dplyr` functions on Day 3. The `ifelse()` function, covered in Day 2, is also useful for recoding.
+
+## Aggregating
+
+To compute summary statistics by groups in the data, one option is to use the `aggregate()` function. For example, we can calculate the mean of life expectancy for each continent:
+
+```{r}
+aggregate(gapminder07$lifeExp ~ gapminder07$continent, FUN=mean)
+```
+
+The `~` operator can be read as "by" or "as a function of", and is used in many contexts. A construction such as `y ~ x1 + x2` is referred to as a *formula*.
+
+We can also aggregate by two variables. For example, let's use the original Gapminder data (not just the 2007 data) and aggregate by continent *and* year.
+
+```{r}
+aggregate(gapminder$lifeExp ~ gapminder$year + gapminder$continent, FUN=mean)
+```
+
+## Statistics
+
+Now that we have a dataset ... we can do statistics! You will learn more about particular statistical models and methods over the course of your program. For now, let's do some basic things to get a feel for how R handles statistical analysis.
+
+### Correlations
+
+You can use the `cor()` function to calculate correlation (Pearson's r):
+
+```{r}
+cor(gapminder07$lifeExp, gapminder07$gdpPercap)
+```
+
+You can also find the covariance:
+
+```{r}
+cov(gapminder07$lifeExp, gapminder07$gdpPercap)
+```
+
+### T-test
+
+Do countries with high or low life expectancy have different GDP per capita? Apart from simply comparing the means for the two groups, we can use a T-test to evaluate the likelihood that these means are significantly different from each other.
+
+```{r}
+t.test(gapminder07$gdpPercap~gapminder07$lifeExp_highlow)
+```
+
+Remember: you can read `~` as "as a function of". So the above code reads "GDP per capita as a function of life expectancy", meaning grouped by or explained by.
+
+We don't have to use the formula syntax. We can specify data for two different groups. Let's see if GDP per capita is different when comparing the Americas and Asia.
+
+```{r}
+t.test(gapminder07$gdpPercap[gapminder07$continent=="Asia"], gapminder07$gdpPercap[gapminder07$continent=="Americas"])
+```
+
+By storing the output of the T-test (which is a list) as its own object, we can access different parts of the results.
+
+```{r}
+t1 <- t.test(gapminder07$gdpPercap~gapminder07$lifeExp_highlow)
+names(t1)
+```
+
+```{r}
+t1$p.value
+```
+
+### Regression
+
+Of course, the two life expectancy "groups" we used above to conduct a T-test are based on a continuous variable indicating life expectancy. We may be more interested in whether this variable predicts GDP per capita rather than the two "groups" that we created using an arbitrary threshold.
+
+The basic syntax for a liner regression is shown below. Note that instead of repeating `df$variablename` several times, we can indicate the data frame name using the `data = ` argument and simply use variable names.
+
+```{r, eval=FALSE}
+lm(y ~ x1 + x2 + x3, data=df_name)
+```
+
+Example: 
+
+```{r}
+lm(gdpPercap ~ lifeExp, data=gapminder07)
+```
+
+The default output isn't much. You get a lot more with `summary()`:
+
+```{r}
+r1 <- lm(gdpPercap ~ lifeExp, data=gapminder07)
+summary(r1)
+```
+
+Note that a constant (Intercept) term was added automatically.
+
+Let's try another regression with two indpendent variables. This time, we will predict life expectancy as a function of GDP per capita and population.
+
+```{r}
+r2 <- lm(lifeExp ~ gdpPercap + pop, data=gapminder07)
+summary(r2)
+```
+
+# Writing data files
+
+You will often want to save your work in R as well. There are a few different ways to save:
+
+## Writing a data file
+
+We imported the `gapminder` data earlier in CSV format, and manipulated it in several ways: we subsetted the 2007 data and added the variables `lifeExp_rounded`, `lifeExp_highlow`. and `continent_abrv`. 
+
+The best method for making your workflow and analysis reproducible is to write any data sets you create to plain text files.
+
+Let's try to save our subsetted and manipulated `gapminder07` data frame as a CSV. To write a CSV, there are `write.csv` and `write.table` functions, similar to their `read` counterparts. The one trick is that you usually want to NOT write row.names.
+
+```{r, eval=FALSE}
+write.csv(gapminder07, file="data/gapminder_2007_edited.csv", 
+          row.names=FALSE)
+```
+
+Or using `readr` package's equivalent:
+
+```{r, eval=FALSE}
+write_csv(schooldata, "data/gapminder_2007_edited.csv")
+```
+
+## Saving R objects
+
+You can use the `save` function to save multiple objects together in a file.  The standard file extension to use is `.RData`. Example:
+
+```{r, eval=FALSE}
+save(schooldata, gapminder, 
+     file = "workshopobjects.RData")
+```
+
+To later load in saved data, use the `load` function: 
+
+```{r, eval=FALSE}
+load("workshopobjects.RData")
+```
+
+This can be useful if you're working with multiple objects and want to be able to pick up your work easily later. But`.RData` files generally aren't portable to other programs, so think of them only as internal R working files -- not the format you want to keep data in long-term. Loading a `.RData` file will overwrite objects with the same name already in the environment.
+
+You can also save all the objects in your environment by using the `save.image()` function, or by clicking the "Save" icon in the Environment pane in RStudio.
+
+# Data visualization in base R
+
+We will spend a lot more time later in the boot camp on data visualization, but today we will briefly introduce some functions for visualization that are included in base R. These functions are useful to quickly visualize data in early phases of analysis, and their syntax is often incorporated into other packages. For more advanced and aesthetically pleasing data visualization, you will want to use the `ggplot2` package, which we will go over in detail on Day 3.
+
+## Histograms
+
+Histograms are a simple and useful way to visualize the distribution of a variable. For example, let's plot a histogram of life expectancy from the `gapminder07` data frame:
+
+```{r}
+hist(gapminder07$lifeExp)
+```
+
+By reading the help file for the `hist()` function, we can identify several arguments that can change the aesthetics of the plot. The `breaks = ` argument controls the number of breaks on the x-axis.
+
+```{r}
+hist(gapminder07$lifeExp, breaks=20,
+     main="Life expectancy (2007 data)", ylab="Frequency", xlab="Life expectancy")
+```
+
+## Scatterplots
+
+The simplest way to plot the relationship between two variables is a scatterplot. If you provide two variables to the `plot()` function in R, it produces a scatterplot. Let's try it with life expectancy and GDP per capita in the `gapminder07` data frame. Recall that `~` means "a function of", so we will put the y-axis variable on the left and the x-axis variable on the right.
+
+```{r}
+plot(gapminder07$lifeExp ~ gapminder07$gdpPercap)
+```
+
+Again, we can add axes and labels:
+
+```{r}
+plot(gapminder07$lifeExp ~ gapminder07$gdpPercap, main="Life expectancy as a function of GDP per capita (2007 data)", xlab="GDP per capita", ylab="Life expectancy")
+```
+
+Perhaps we want to add a line indicating the mean value of life expectancy. We can do this by using the `abline()` function to add a line after creating a plot. Adding multiple layers to a plot is much more intuitive and flexible with the `ggplot2` package, which we will explore on Day 3.
+
+```{r}
+plot(gapminder07$lifeExp ~ gapminder07$gdpPercap, main="Life expectancy as a function of GDP per capita (2007 data)", xlab="GDP per capita", ylab="Life expectancy")
+abline(h = mean(gapminder07$lifeExp))
+```
+

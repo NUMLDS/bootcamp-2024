@@ -1,0 +1,69 @@
+---
+title: "R Day 2 exercises"
+author: "Your name here!"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r global_options, echo = FALSE, include = FALSE}
+knitr::opts_chunk$set(echo=answers, eval=answers,
+                      warning = FALSE, message = FALSE,
+                      cache = FALSE, tidy = FALSE)
+```
+
+<!-- BEFORE YOU START, REMEMBER TO RENAME THE .RMD FILE AND SAVE IT AS day2_exercises_LastNameFirstName.Rmd AND THEN REMOVE THIS INSTRUCTION -->
+
+## Load the data
+
+Read both California energy datasets. Make sure the `datetime` variable is in an appropriate data type (i.e. not character). 
+
+```{r}
+
+```
+
+
+## Merge and reshape the data
+
+Merge the two datasets and then melt the resulting dataframe/datatable to make it tidy.
+
+```{r}
+
+```
+
+
+## Creating new variables
+
+Create a series of new variables: 
+
+1. `day`, which is the year-month-day, without the hour. The `lubridate` function `as_date` will do this.
+2. `log_output`, which is the natural log of the output.
+3. **Challenge**: `per_output`, which is the percent of daily output represented by each observation. You will need to use `group_by` and to create a new variable with the total output for the day. (Make sure to use `ungroup()` after this!)
+
+Bonus: If you are using `dplyr`, try to do this all in one pipe!
+
+```{r}
+
+```
+
+
+## Summarizing and analyzing data
+
+1. Which source has the greatest mean output by hour? (Hint: Use the `dplyr` verb `arrange(desc(variable))` to order the data frame so that the largest value of `variable` is first. Don't use `desc` and it arranges in ascending order. The `data.table` function is `setorder`.) Which has the least?
+2. Which source has the greatest mean output by day? Which has the least? (Do not include zero values.)
+3. Which sources has the greatest variance in usage over the course of a dataset? Which has the least? (Do not include zero values.)
+
+```{r}
+
+```
+
+
+## Analyzing renewable versus non-renewable energy sources
+
+The dataset `regroup.csv` has information about which sources are considered renewable by the state of California. Use this dataset, along with yourdata manipulation skills, to explore the use of renewable and non-renewable sources. Annotate what your descisions for the analysis.
+
+Hint: Use your merge skills to merge the CA energy data with the `regroup` data. Which variable should you join by?
+
+```{r}
+
+```
+

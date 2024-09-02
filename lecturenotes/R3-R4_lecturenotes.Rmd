@@ -1,0 +1,582 @@
+---
+title: "Intro to R: Loops, Conditionals, Functions"
+author: "Richard Paquin Morel"
+date: "`r format(Sys.Date()+1, '%B %Y')`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+params:
+  notes: no
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.height = 4.35, fig.width = 4.75)
+```
+
+```{r, include=FALSE}
+notes<-params$notes
+```
+
+## Remember our data from Monday...
+
+```{r revisiting the data}
+gapminder <- read.csv(here::here("data", "gapminder5.csv"))
+head(gapminder)
+```
+
+## Sidebar: the `here` package
+
+The `here()` function gets your current working directory and appends any strings enclosed in the function.
+
+```{r here}
+# install.packages("here")
+here::here()
+
+here::here("data", "gapminder.csv")
+```
+
+## Remember our data from Monday...
+
+```{r revisiting the data 2}
+gapminder <- read.csv(here::here("data", "gapminder5.csv"))
+head(gapminder)
+```
+
+
+## `gapminder` dataset
+
+```{r str gapminder}
+str(gapminder)
+```
+
+## `gapminder` dataset
+
+- The dataset has data on 142 countries on 5 continents for five year intervals between 1952 and 2007
+- Let's fix a few things about the data...the character variables are currently factors. Doesn't make sense!
+- Find the factor variables and change them to character vectors
+
+## `gapminder` dataset
+
+```{r recoding gapminder}
+gapminder$country <- as.character(gapminder$country)
+gapminder$continent <- as.character(gapminder$continent)
+str(gapminder)
+```
+
+## `gapminder` dataset
+- What if we want to know the mean life expectancy by country? 
+  -Or by year?
+- One approach:
+```{r one approach}
+mean(gapminder$lifeExp[gapminder$country == "Afghanistan"])
+mean(gapminder$lifeExp[gapminder$country == "Albania"])
+#...
+```
+
+## `gapminder` dataset
+- Or we could do save ourselves a lot of typing and time
+
+- Loops!
+
+# Don't repeat yourself--loop it! 
+
+## Loops in R -- `for`, `while`, and the `apply` family
+
+- Loops allow you to repeat a function based on conditions
+- There are several flavors
+  - `for`
+  - `while`
+  - the `apply` family (often preferred to loops because the code is cleaner)
+- Sneak peak: `dplyr` and `data.table` offer better approaches to loops
+
+## A word of caution about loops
+
+- It is often a good idea at avoid loops when possible in R
+  - They are slow!
+- Try to find other solutions before looping
+
+## The anatomy of a `for` loop
+
+- `for` loops repeat a function for all values in a vector  -- _don't cut and paste!_
+- The basic form is: `for (i in vector) { function(i) }`
+  - `i` is the iterator variable (could be any letter!)
+  - The loop repeats for each value in the vector, which replaces `i` for each interation
+  
+## The anatomy of a `for` loop
+
+- Let's recover the GDP for each country
+
+```{r loop example}
+# create a vector of values that you want to repeat the function for
+obs <- 1:nrow(gapminder)
+
+# initialize the for loop with `for (i in vector)` 
+for (i in obs) { # the function to repeat is enclosed in braces {}
+  gapminder[i, "gdp"] <- gapminder[i, "pop"] * gapminder[i, "gdpPercap"]
+}
+```
+
+## You try
+
+Create a new variable that finds that natural log (`log`) of the GDP per capita and of population
+ - call them `log_gdpPercap` and `log_pop`
+
+## Log gdp and log population
+
+```{r loop exercise}
+# initialize the for loop with `for (i in vector)` 
+for (i in obs) { # the function to repeat is enclosed in braces {}
+  gapminder[i, "log_gdpPercap"] <- log(gapminder[i, "gdpPercap"])
+  gapminder[i, "log_pop"] <- log(gapminder[i, "pop"])
+}
+```
+
+
+## Log gdp and log population
+
+```{r log exercise}
+head(gapminder)
+```
+
+## Avoid loops when possible
+
+- Loops are useful, but slow
+- Avoid when possible, especially when there is a vectorized function you can use
+
+```{r vectorized}
+gapminder$vec_log_gdpPercap <- log(gapminder$gdpPercap)
+all(gapminder$vec_log_gdpPercap == gapminder$log_gdpPercap)
+```
+
+
+## Let's try something a bit more substantive
+
+- Has life expectancy increased over time?
+- Find the mean life expectancy by year
+
+```{r mean by year}
+years <- unique(gapminder$year)
+
+for (i in years) {
+  mean_le <- mean(gapminder$lifeExp[gapminder$year == i], 
+                  na.rm = T)
+  print(paste0(i, ": ", mean_le))
+}
+```
+
+## Mean life expectancy by continent
+
+- Try the same, this time for continents!
+  - Which continent has the highest mean life expectancy?
+
+## Mean life expectancy by continent
+```{r mean by continent}
+conts <- unique(gapminder$continent)
+
+for (i in conts) {
+  mean_le <- mean(gapminder$lifeExp[gapminder$continent == i], 
+                  na.rm = T)
+  print(paste0(i, ": ", mean_le))
+}
+```
+
+## double up!
+
+- It is possible to make nested `for` loops by defining different iterators
+- What is the mean life expectancy for each continent for each year?
+
+## the nested `for` loop 
+
+```{r nested for loop}
+for (i in conts) {
+  print(paste0("Continent: ", i))
+  for (j in years) {
+    mean_le <- mean(gapminder$lifeExp[gapminder$continent == i & 
+                                          gapminder$year == j], 
+                      na.rm = T)
+    print(paste0(j, ": ", mean_le))
+  }
+  }
+```
+
+## nested `for` loop exercise!
+
+- Has the gap in life expectancy between countries on different continents narrowed over time?
+
+## nested `for` loop exercise!
+
+- What is the standard deviation (`sd`) for life expectancy for each continent for each year?
+
+## nested `for` loop exercise!
+
+```{r nested for loop exercise!}
+for (i in conts) {
+  print(paste0("Continent: ", i))
+  for (j in years) {
+    sd_le <- sd(gapminder$lifeExp[gapminder$continent == i & 
+                                          gapminder$year == j], 
+                    na.rm = T)
+    print(paste0(j, ": ", sd_le))
+  }
+}
+```
+
+# `for` loops can be slow...very slow
+
+## `for` loops can be slow...very slow
+
+- Sometimes, people recommend using the `apply` family of functions as a faster alternative
+  - There are _some_ efficiency gains with smaller datasets
+  - But, as Patrick Burns, the author of "R Inferno", states, the `apply` family is "loop-hiding"
+- `apply` and its relatives help you write cleaner code, but do not expect much of a speed boost
+  - do a search for "for loops versus apply in r" and get a taste for the debate
+
+## Three flavors: `apply`, `lapply`, `sapply`
+
+- Let's look at these three (there are more!): `apply`, `lapply`, `sapply`
+
+## `apply`
+
+`apply(matrix, 1 = row or 2 = column, function)`
+- Let's say we want to find the mean for each stat in `gapminder`
+
+```{r apply}
+vars <- gapminder[, c("lifeExp", "pop", "gdpPercap")]
+apply(vars, 2, mean)
+```
+
+## `apply` versus `for`
+
+```{r apply vs for}
+apply(vars, 2, mean)
+
+for (i in vars) {
+  print(mean(i))
+}
+```
+
+## `lapply` and `sapply`
+
+- Both `lapply` and `sapply` iterate over a values in a vector or list, rather than rows or columns
+  - Generally, much more common to use in data analysis
+- `lapply` returns a list
+- `sapply` returns a simplified list (i.e., a vector)
+  - Word of caution -- there is some inconsistency in how `sapply` returns results, so always check
+
+## `lapply` and `sapply`
+
+- `lapply(vector, function)`
+
+```{r lapply, warning = F, message = F}
+lapply(gapminder, mean)
+sapply(gapminder, mean)
+```
+
+## Anonymous functions in `apply`
+
+- You can do more complex functions within an `apply` call
+- Add `function(x) [function]` to the call--`x` becomes the iterator
+
+```{r anonymous function}
+sapply(years, function(x) mean(gapminder$lifeExp[gapminder$year == x]))
+```
+
+# the `while` loop
+
+- The `for` loop repeats a function for all values in vector
+- But what if we want to repeat a function until a condition is no longer met?
+  - Say hi to the `while` loop!
+  - For example, what is the standard deviation of life expectancy for years before 1987?
+
+## `while` loop syntax
+
+- Similar syntax to the `for` loop -> `while (condition) { function }`
+- Often, you define an interator that you will increase for each loop
+
+```{r while loop}
+i <-  1952 # define the interator
+
+while (i < 1987) {
+  sd_lf <- sd(gapminder$lifeExp[gapminder$year == i])
+  print(paste0(i, ": ", sd_le)
+        )
+  i <- i + 5 # increase the iterator by the interval between years
+}
+```
+
+## try a `while` loop
+
+- What is the standard deviation for life expectancy for each year between 1987 and 2002 (inclusive)?
+
+## results
+
+```{r while loop exercise}
+i <-  1987 # define the interator
+
+while (i <= 2002) {
+  sd_lf <- sd(gapminder$lifeExp[gapminder$year == i])
+  print(paste0(i, ": ", sd_le)
+        )
+  i <- i + 5 # increase the iterator by the interval between years
+}
+```
+
+## the infinite loop - a `while` loop cautionary tale
+
+- Beware! A `while` loop will continually run if the logical condition is always satisfied!
+- Give it a try: run the previous `while` loop _without increasing the iterator_
+
+```{r the infinite loop, eval = F}
+i <-  1987 # define the interator
+
+while (i <= 2002) {
+  sd_lf <- sd(gapminder$lifeExp[gapminder$year == i])
+  print(paste0(i, ": ", sd_le)
+        )
+  # oops! forgot to increase i by 5! ESC! ESC! ESC!
+}
+```
+
+# The `if/else` conditional!
+
+- `if/else` - executes a function when a condition is met
+
+## Start with `if`
+
+- Similar to `for` and `while`, initialize with `if` and then detail condition in parentheses
+
+```{r if statement}
+random_year <- sample(years, 1)
+
+random_year
+
+if (random_year > 1977) {
+  print(random_year)
+}
+```
+
+## `if` statements
+
+- We probably got different answers because of random sampling from `years`
+- We can fix that with `set.seed()`
+
+```{r if statement with set seed}
+set.seed(10)
+random_year <- sample(years, 1)
+
+if (random_year > 1977) {
+  print(random_year)
+}
+```
+
+## Adding an `else` clause
+
+- What happens if `random_year` <= 1977? NOTHING!
+- We can add an `else` statement, telling R what to do when the `if` condition isn't met
+
+```{r adding the else statement}
+set.seed(1)
+random_year <- sample(years, 1)
+random_year
+
+if (random_year > 1977) {
+  print(random_year)
+  } else {
+  print("sorry, random year is less than 1977")  
+  }
+```
+
+## putting `if` and `else` together
+
+```{r if else statement}
+random_year <- sample(years, 1)
+
+if (random_year > 1977) {
+  print(paste0(random_year, ": ", 
+               mean(gapminder$lifeExp[gapminder$year == random_year]))
+        )
+  } else { 
+    print("sorry, random year is less than 1977")
+    }
+```
+
+## Putting `for` and `if/else` together
+
+- We can add an `if`...`else` clause to a `for` loop
+
+```{r, eval = F}
+# initialize the `for` loop
+for () {
+  if () { #initialize if statement
+    # function if condition is met
+  } else {
+    # function if condition is  not met
+  }
+}
+```
+
+
+## Putting `for` and `if/else` together
+
+Which continents have a mean life expectancy greater than 70 years?
+
+```{r for loop with if else}
+threshold <- 70
+
+for (i in unique(gapminder$continent)) {
+   tmp <- mean(gapminder$lifeExp[gapminder$continent==i])
+   
+   if (tmp < threshold) {
+       print(paste("Mean Life Expectancy in", i, "is less than", threshold))
+   } else {
+       print(paste("Mean Life Expectancy in", i, "is greater than", threshold))
+   }
+}
+```
+
+## Putting `for` and `if/else` together
+
+Write a `for` loop that reports the mean population for years greater than or equal to 1987. Make sure the loop prints a message if the condition is not met!
+
+## Putting `for` and `if/else` together
+
+```{r for if else exercise}
+for (i in years) {
+  if (i >= 1987) {
+    mean_pop <- mean(gapminder$lifeExp[gapminder$year == i])
+    print(paste0(i, ": ", mean_pop))
+  } else {
+    print("Sorry, year is less than 1987")
+  }
+}
+```
+
+
+# Writing functions
+
+## Writing functions
+
+- Hadley Wickham: If you have to copy-and-paste three times, it is time to write a function
+- John Chambers: Everything that happens in R is the result of a function call -- even `[`
+
+```{r everything is a function call}
+gapminder$lifeExp[gapminder$country == "Germany"]
+`[`(gapminder$lifeExp, gapminder$country == "Germany")
+```
+
+## The anatomy of a function
+
+- Write a function should look familiar -- initialize with `function`
+- Every function has arguments
+
+```{r a function, eval = F}
+my_function <- # give the function a name
+  function(x, y) { # arguments for the function go inside the parentheses
+    # the expressions do in the braces
+  }
+```
+
+## Writing a simple function
+
+- Let's write a simple function that prints the value of a selected variable in the gapminder dataset
+
+```{r a simple function}
+get_values <-
+  function(df, variable = "continent") {
+    vals <- unique(df[[variable]])
+    print(paste0(variable, ": ", vals))
+  }
+```
+
+## Writing a more substantial function
+
+- Let's write a function that prints the mean and standard deviation for life expentancy for a given country in the `gapminder` dataset
+
+```{r writing a function}
+report_mean_sd <- 
+  function(df, variable, country) {
+    var <- df[[variable]][df$country == country]
+    m_le <- mean(var)
+    sd_le <- sd(var)
+    cat("Country:", country, 
+        "\nMean Life Expectancy:", m_le,
+        "\nSD Life Expectancy:", sd_le)
+  }
+
+report_mean_sd(gapminder, "lifeExp", "Bulgaria")
+```
+
+
+## Create your own function
+
+- Write a function that reports the mean, median, minimum, and maximum for life expectancy for a continent in `gapminder`
+- Hint: `min`, `max`
+
+## Create your own function
+
+```{r your function}
+report_stats <-
+  function(df, variable, continent) {
+    var <- df[[variable]][df$continent == continent]
+    min_le <- min(var)
+    max_le <- max(var)
+    cat("Continent:", continent,
+        "\nMinimum Life expectancy:", min_le,
+        "\nMaximum Life expectancy:", max_le)
+  }
+
+report_stats(gapminder, "lifeExp", "Asia")
+```
+
+
+## Functions and loops, together at last
+
+- Combining functions and loops saves time
+
+## A log-log model relating life expectancy to GDP
+
+```{r another function}
+viz_lm <-
+  function(df, dv, iv, year) {
+    dat <- df[df[["year"]] == year, ]
+    y <- log(dat[[dv]])
+    x <- log(dat[[iv]])
+    fit <- lm(y ~ x)
+    plot(y ~ x, main = year,
+         xlab = iv, ylab = dv)
+    lines(x, predict(fit), col = 'blue')
+  }
+```
+
+## Running the function
+
+```{r running the function}
+viz_lm(gapminder, "lifeExp", "gdpPercap", 1977)
+```
+
+
+## Loop it!
+
+```{r}
+for (i in years) {
+  viz_lm(gapminder, "lifeExp", "gdpPercap", i)
+}
+```
+
+# Reporting analysis with Rmarkdown and GitHub
+
+## Rmarkdown & GitHub
+
+- Rmarkdown creates dynamic reports in HTML, PDF, and Word
+- Combine text (using the markdown language) and R code
+- Rmarkdown runs R code, compiles, and produces a report in chosen format
+- This presentation was created using Rmarkdown!
+
+## R4 Exercise
+
+1) Open the `rmd_exercise_template.Rmd`
+2) Save as: `R4RExercise_LastnameFirstname.Rmd`.
+2) Read in the gapminder data set
+3) As you answer questions, be sure to annotate your work with as much detail as possible!

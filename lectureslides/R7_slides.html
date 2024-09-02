@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Alice Zhao" />
+  <title>Advanced R</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="R7_slides_files/reveal.js-3.3.0.1/css/reveal.css"/>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<link rel="stylesheet" href="R7_slides_files/reveal.js-3.3.0.1/css/theme/simple.css" id="theme">
+
+
+  <!-- some tweaks to reveal css -->
+  <style type="text/css">
+    .reveal h1 { font-size: 2.0em; }
+    .reveal h2 { font-size: 1.5em;  }
+    .reveal h3 { font-size: 1.25em;	}
+    .reveal h4 { font-size: 1em;	}
+
+    .reveal .slides>section,
+    .reveal .slides>section>section {
+      padding: 0px 0px;
+    }
+
+
+
+    .reveal table {
+      border-width: 1px;
+      border-spacing: 2px;
+      border-style: dotted;
+      border-color: gray;
+      border-collapse: collapse;
+      font-size: 0.7em;
+    }
+
+    .reveal table th {
+      border-width: 1px;
+      padding-left: 10px;
+      padding-right: 25px;
+      font-weight: bold;
+      border-style: dotted;
+      border-color: gray;
+    }
+
+    .reveal table td {
+      border-width: 1px;
+      padding-left: 10px;
+      padding-right: 25px;
+      border-style: dotted;
+      border-color: gray;
+    }
+
+
+  </style>
+
+    <style type="text/css">code{white-space: pre;}</style>
+
+
+<!-- Printing and PDF exports -->
+<script id="paper-css" type="application/dynamic-css">
+
+/* Default Print Stylesheet Template
+   by Rob Glazebrook of CSSnewbie.com
+   Last Updated: June 4, 2008
+
+   Feel free (nay, compelled) to edit, append, and
+   manipulate this file as you see fit. */
+
+
+@media print {
+
+	/* SECTION 1: Set default width, margin, float, and
+	   background. This prevents elements from extending
+	   beyond the edge of the printed page, and prevents
+	   unnecessary background images from printing */
+	html {
+		background: #fff;
+		width: auto;
+		height: auto;
+		overflow: visible;
+	}
+	body {
+		background: #fff;
+		font-size: 20pt;
+		width: auto;
+		height: auto;
+		border: 0;
+		margin: 0 5%;
+		padding: 0;
+		overflow: visible;
+		float: none !important;
+	}
+
+	/* SECTION 2: Remove any elements not needed in print.
+	   This would include navigation, ads, sidebars, etc. */
+	.nestedarrow,
+	.controls,
+	.fork-reveal,
+	.share-reveal,
+	.state-background,
+	.reveal .progress,
+	.reveal .backgrounds {
+		display: none !important;
+	}
+
+	/* SECTION 3: Set body font face, size, and color.
+	   Consider using a serif font for readability. */
+	body, p, td, li, div {
+		font-size: 20pt!important;
+		font-family: Georgia, "Times New Roman", Times, serif !important;
+		color: #000;
+	}
+
+	/* SECTION 4: Set heading font face, sizes, and color.
+	   Differentiate your headings from your body text.
+	   Perhaps use a large sans-serif for distinction. */
+	h1,h2,h3,h4,h5,h6 {
+		color: #000!important;
+		height: auto;
+		line-height: normal;
+		font-family: Georgia, "Times New Roman", Times, serif !important;
+		text-shadow: 0 0 0 #000 !important;
+		text-align: left;
+		letter-spacing: normal;
+	}
+	/* Need to reduce the size of the fonts for printing */
+	h1 { font-size: 28pt !important;  }
+	h2 { font-size: 24pt !important; }
+	h3 { font-size: 22pt !important; }
+	h4 { font-size: 22pt !important; font-variant: small-caps; }
+	h5 { font-size: 21pt !important; }
+	h6 { font-size: 20pt !important; font-style: italic; }
+
+	/* SECTION 5: Make hyperlinks more usable.
+	   Ensure links are underlined, and consider appending
+	   the URL to the end of the link for usability. */
+	a:link,
+	a:visited {
+		color: #000 !important;
+		font-weight: bold;
+		text-decoration: underline;
+	}
+	/*
+	.reveal a:link:after,
+	.reveal a:visited:after {
+		content: " (" attr(href) ") ";
+		color: #222 !important;
+		font-size: 90%;
+	}
+	*/
+
+
+	/* SECTION 6: more reveal.js specific additions by @skypanther */
+	ul, ol, div, p {
+		visibility: visible;
+		position: static;
+		width: auto;
+		height: auto;
+		display: block;
+		overflow: visible;
+		margin: 0;
+		text-align: left !important;
+	}
+	.reveal pre,
+	.reveal table {
+		margin-left: 0;
+		margin-right: 0;
+	}
+	.reveal pre code {
+		padding: 20px;
+		border: 1px solid #ddd;
+	}
+	.reveal blockquote {
+		margin: 20px 0;
+	}
+	.reveal .slides {
+		position: static !important;
+		width: auto !important;
+		height: auto !important;
+
+		left: 0 !important;
+		top: 0 !important;
+		margin-left: 0 !important;
+		margin-top: 0 !important;
+		padding: 0 !important;
+		zoom: 1 !important;
+
+		overflow: visible !important;
+		display: block !important;
+
+		text-align: left !important;
+		-webkit-perspective: none;
+		   -moz-perspective: none;
+		    -ms-perspective: none;
+		        perspective: none;
+
+		-webkit-perspective-origin: 50% 50%;
+		   -moz-perspective-origin: 50% 50%;
+		    -ms-perspective-origin: 50% 50%;
+		        perspective-origin: 50% 50%;
+	}
+	.reveal .slides section {
+		visibility: visible !important;
+		position: static !important;
+		width: auto !important;
+		height: auto !important;
+		display: block !important;
+		overflow: visible !important;
+
+		left: 0 !important;
+		top: 0 !important;
+		margin-left: 0 !important;
+		margin-top: 0 !important;
+		padding: 60px 20px !important;
+		z-index: auto !important;
+
+		opacity: 1 !important;
+
+		page-break-after: always !important;
+
+		-webkit-transform-style: flat !important;
+		   -moz-transform-style: flat !important;
+		    -ms-transform-style: flat !important;
+		        transform-style: flat !important;
+
+		-webkit-transform: none !important;
+		   -moz-transform: none !important;
+		    -ms-transform: none !important;
+		        transform: none !important;
+
+		-webkit-transition: none !important;
+		   -moz-transition: none !important;
+		    -ms-transition: none !important;
+		        transition: none !important;
+	}
+	.reveal .slides section.stack {
+		padding: 0 !important;
+	}
+	.reveal section:last-of-type {
+		page-break-after: avoid !important;
+	}
+	.reveal section .fragment {
+		opacity: 1 !important;
+		visibility: visible !important;
+
+		-webkit-transform: none !important;
+		   -moz-transform: none !important;
+		    -ms-transform: none !important;
+		        transform: none !important;
+	}
+	.reveal section img {
+		display: block;
+		margin: 15px 0px;
+		background: rgba(255,255,255,1);
+		border: 1px solid #666;
+		box-shadow: none;
+	}
+
+	.reveal section small {
+		font-size: 0.8em;
+	}
+
+}  
+</script>
+
+
+<script id="pdf-css" type="application/dynamic-css">
+    
+/**
+ * This stylesheet is used to print reveal.js
+ * presentations to PDF.
+ *
+ * https://github.com/hakimel/reveal.js#pdf-export
+ */
+
+* {
+	-webkit-print-color-adjust: exact;
+}
+
+body {
+	margin: 0 auto !important;
+	border: 0;
+	padding: 0;
+	float: none !important;
+	overflow: visible;
+}
+
+html {
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+}
+
+/* Remove any elements not needed in print. */
+.nestedarrow,
+.reveal .controls,
+.reveal .progress,
+.reveal .playback,
+.reveal.overview,
+.fork-reveal,
+.share-reveal,
+.state-background {
+	display: none !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	text-shadow: 0 0 0 #000 !important;
+}
+
+.reveal pre code {
+	overflow: hidden !important;
+	font-family: Courier, 'Courier New', monospace !important;
+}
+
+ul, ol, div, p {
+	visibility: visible;
+	position: static;
+	width: auto;
+	height: auto;
+	display: block;
+	overflow: visible;
+	margin: auto;
+}
+.reveal {
+	width: auto !important;
+	height: auto !important;
+	overflow: hidden !important;
+}
+.reveal .slides {
+	position: static;
+	width: 100%;
+	height: auto;
+
+	left: auto;
+	top: auto;
+	margin: 0 !important;
+	padding: 0 !important;
+
+	overflow: visible;
+	display: block;
+
+	-webkit-perspective: none;
+	   -moz-perspective: none;
+	    -ms-perspective: none;
+	        perspective: none;
+
+	-webkit-perspective-origin: 50% 50%; /* there isn't a none/auto value but 50-50 is the default */
+	   -moz-perspective-origin: 50% 50%;
+	    -ms-perspective-origin: 50% 50%;
+	        perspective-origin: 50% 50%;
+}
+
+.reveal .slides section {
+	page-break-after: always !important;
+
+	visibility: visible !important;
+	position: relative !important;
+	display: block !important;
+	position: relative !important;
+
+	margin: 0 !important;
+	padding: 0 !important;
+	box-sizing: border-box !important;
+	min-height: 1px;
+
+	opacity: 1 !important;
+
+	-webkit-transform-style: flat !important;
+	   -moz-transform-style: flat !important;
+	    -ms-transform-style: flat !important;
+	        transform-style: flat !important;
+
+	-webkit-transform: none !important;
+	   -moz-transform: none !important;
+	    -ms-transform: none !important;
+	        transform: none !important;
+}
+
+.reveal section.stack {
+	margin: 0 !important;
+	padding: 0 !important;
+	page-break-after: avoid !important;
+	height: auto !important;
+	min-height: auto !important;
+}
+
+.reveal img {
+	box-shadow: none;
+}
+
+.reveal .roll {
+	overflow: visible;
+	line-height: 1em;
+}
+
+/* Slide backgrounds are placed inside of their slide when exporting to PDF */
+.reveal section .slide-background {
+	display: block !important;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	z-index: -1;
+}
+
+/* All elements should be above the slide-background */
+.reveal section>* {
+	position: relative;
+	z-index: 1;
+}
+
+/* Display slide speaker notes when 'showNotes' is enabled */
+.reveal .speaker-notes-pdf {
+	display: block;
+	width: 100%;
+	max-height: none;
+	left: auto;
+	top: auto;
+	z-index: 100;
+}
+
+/* Display slide numbers when 'slideNumber' is enabled */
+.reveal .slide-number-pdf {
+	display: block;
+	position: absolute;
+	font-size: 14px;
+}
+
+</script>
+
+
+<script>
+var style = document.createElement( 'style' );
+style.type = 'text/css';
+var style_script_id = window.location.search.match( /print-pdf/gi ) ? 'pdf-css' : 'paper-css';
+var style_script = document.getElementById(style_script_id).text;
+style.innerHTML = style_script;
+document.getElementsByTagName('head')[0].appendChild(style);
+</script>
+
+    <script src="R7_slides_files/header-attrs-2.24/header-attrs.js"></script>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section>
+    <h1 class="title">Advanced R</h1>
+  <h1 class="subtitle">Data visualization with ggplot2</h1>
+    <h2 class="author">Alice Zhao</h2>
+    <h3 class="date">September 2024</h3>
+</section>
+
+<section>
+<section id="introduction-to-ggplot" class="title-slide slide level1">
+<h1>Introduction to ggplot</h1>
+<p>Part of the <code>tidyverse</code>, <code>ggplot2</code> is an R
+package that implements the “grammar of graphics” in R.</p>
+<p>In ggplot, graphics are built by supplying <em>data</em> and
+<em>mapping</em> of data values to aesthetics, and then adding
+<em>layers</em> that build geometric objects, scales, labels, and
+more.</p>
+</section>
+<section id="why-ggplot" class="slide level2">
+<h2>Why ggplot?</h2>
+<ul>
+<li class="fragment">Highly customizable and extensible.</li>
+<li class="fragment">Designed to work with <code>dplyr</code> and other
+<code>tidyverse</code> packages.</li>
+<li class="fragment">In use for over 10 years, meaning that help is
+widely available.</li>
+<li class="fragment">Wide variety of avilable <a
+href="http://www.ggplot2-exts.org/gallery/">extensions</a></li>
+</ul>
+</section>
+<section id="useful-resources" class="slide level2">
+<h2>Useful resources</h2>
+<ul>
+<li>The <a
+href="https://github.com/rstudio/cheatsheets/blob/master/data-visualization-2.1.pdf">ggplot
+cheatsheet</a></li>
+<li>The <a
+href="https://ggplot2.tidyverse.org/reference/index.html">ggplot
+reference guide</a></li>
+<li>The <a href="http://r4ds.had.co.nz/data-visualisation.html">Data
+Visualization chapter</a> in the “R for Data Science” book</li>
+<li>And, of course, the help files that come with the package
+itself.</li>
+</ul>
+</section>
+<section
+id="lets-make-sure-we-have-the-necessary-data-frames-for-our-examples"
+class="slide level2">
+<h2>Let’s make sure we have the necessary data frames for our
+examples</h2>
+<ol type="1">
+<li>If you still have <code>imports</code>, <code>generation</code>,
+<code>merged_energy</code>, <code>long_gen</code> and
+<code>long_merged_energy</code> in your Enrivorment, read in
+<code>gapminder</code> and recreate <code>gapminder07</code>.</li>
+<li>Alternatively, or if you are missing any of those objects from your
+workspace, run the following line of code:</li>
+</ol>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;data/day3_objects.R&quot;</span>))</span></code></pre></div>
+</section></section>
+<section>
+<section id="basics-grammar-of-graphics"
+class="title-slide slide level1">
+<h1>Basics: grammar of graphics</h1>
+
+</section>
+<section id="components-of-a-basic-plot" class="slide level2">
+<h2>Components of a basic plot</h2>
+<ul>
+<li class="fragment"><strong>data</strong>: a data frame, provided to
+the <code>ggplot()</code> function</li>
+<li class="fragment"><strong>geometric objects</strong>: the
+objects/shapes that you want to plot, indicated through one of the many
+available <code>geom</code> functions, such as <code>geom_point()</code>
+or <code>geom_hist()</code></li>
+<li class="fragment"><strong>aesthetic mapping</strong>: the mapping
+from the data to the geometric objects, provided in an
+<code>aes()</code> function nested within the chosen <code>geom</code>
+function</li>
+<li class="fragment">connected with the <code>+</code> operator</li>
+</ul>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> <span class="sc">&lt;</span>DATA FRAME<span class="sc">&gt;</span>) <span class="sc">+</span> </span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="er">&lt;</span>GEOM_FUNCTION<span class="sc">&gt;</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="sc">&lt;</span>VARIABLES<span class="sc">&gt;</span>))</span></code></pre></div>
+<aside class="notes">
+Write this on the board, without data= and mapping= specified.
+</aside>
+</section>
+<section id="example-scatterplot-from-day-1" class="slide level2">
+<h2>Example: Scatterplot from Day 1</h2>
+<p>Task:<br>Create scatterplot of <code>lifeExp</code> against
+<code>gdpPercap</code> from <code>gapminder07</code> data.</p>
+<p>Steps:</p>
+<ol type="1">
+<li class="fragment">Supply <code>gapminder07</code> data frame as input
+to <code>ggplot()</code> function</li>
+<li class="fragment">Choose a <code>geom</code>; in this case we choose
+<code>geom_point()</code> to generate points</li>
+<li class="fragment">Supply aesthetic mapping, i.e. specify
+<code>x</code> and <code>y</code> values, to
+<code>geom_point()</code>.</li>
+</ol>
+</section>
+<section id="example-scatterplot-from-day-1-1" class="slide level2">
+<h2>Example: Scatterplot from Day 1</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> gapminder07) <span class="sc">+</span> </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> gdpPercap, <span class="at">y =</span> lifeExp))</span></code></pre></div>
+<p><img src="R7_slides_files/figure-revealjs/scatterplot%201-1.png" width="768" /></p>
+</section>
+<section id="example-scatterplot-from-day-1-2" class="slide level2">
+<h2>Example: Scatterplot from Day 1</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(gapminder07) <span class="sc">+</span> </span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> gdpPercap, <span class="at">y =</span> lifeExp)) <span class="sc">+</span> </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Relationship between life expectancy and GDP per capita in 2007&quot;</span>, </span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;GDP per capita&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Life expectancy&quot;</span>)</span></code></pre></div>
+<p><img src="R7_slides_files/figure-revealjs/scatterplot%202-1.png" width="768" /></p>
+</section>
+<section id="exercise-1-scatterplot" class="slide level2">
+<h2>Exercise 1: Scatterplot</h2>
+<p>Using the <code>gapminder07</code> data, create a scatterplot of the
+natural log of <code>gdpPercap</code> as a function of the natural log
+of <code>pop</code>. Give it a title and axis labels.</p>
+<p>Remember, you will need three functions: <code>ggplot()</code>,
+<code>geom_point()</code>, and <code>labs()</code>.</p>
+<aside class="notes">
+You can create a new script file for your exercises in this session, or
+you can continue to use script files from earlier in the day. In either
+case, make sure to give the file a sensible filename and to demarcate
+sections with meaningful comments.
+</aside>
+</section>
+<section id="exercise-1-scatterplot-1" class="slide level2">
+<h2>Exercise 1: Scatterplot</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(gapminder07) <span class="sc">+</span> </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">log</span>(pop), <span class="at">y =</span> <span class="fu">log</span>(gdpPercap))) <span class="sc">+</span> </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Relationship between GDP per capita and population in 2007&quot;</span>, <span class="at">x =</span> <span class="st">&quot;Logged GDP per capita&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Logged life expectancy&quot;</span>)</span></code></pre></div>
+<p><img src="R7_slides_files/figure-revealjs/scatterplot%20exercise-1.png" width="768" /></p>
+</section></section>
+<section>
+<section id="preparing-your-data" class="title-slide slide level1">
+<h1>Preparing your data</h1>
+<ul>
+<li class="fragment">Recall the role of pipes (<code>%&gt;%</code>) in
+<code>dplyr</code>.</li>
+<li class="fragment"><code>dplyr</code> and <code>ggplot2</code> are
+designed to work well together.</li>
+<li class="fragment">You can use a series of pipes to prepare your data
+before plotting.</li>
+<li class="fragment">To see examples, let’s turn to the California
+energy data.</li>
+</ul>
+</section>
+<section id="example-energy-generated-over-time" class="slide level2">
+<h2>Example: Energy generated over time</h2>
+<p>Task:<br>Plot a <em>column chart</em> of <em>total</em> energy
+generated over time.</p>
+<p>Steps:</p>
+<ol type="1">
+<li class="fragment">Choose long-format generation data,
+i.e. <code>long_gen</code>.</li>
+<li class="fragment">Manipulate data frame to calculate total output per
+date-time.</li>
+<li class="fragment">Pipe manipulated data frame into plot.</li>
+<li class="fragment">Select <code>geom_col()</code> and map appropriate
+<code>x</code> and <code>y</code> variables.</li>
+</ol>
+</section>
+<section id="example-energy-generated-over-time-1" class="slide level2">
+<h2>Example: Energy generated over time</h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>long_gen <span class="sc">%&gt;%</span> </span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(datetime) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">output=</span><span class="fu">sum</span>(output)) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="fu">aes</span>(<span class="at">x=</span>datetime, <span class="at">y=</span>output)) <span class="sc">+</span> </span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Total energy generated, by hour&quot;</span>, <span class="at">x=</span><span class="st">&quot;Hour&quot;</span>, <span class="at">y=</span><span class="st">&quot;Output (MW)&quot;</span>)</span></code></pre></div>
+<p><img src="R7_slides_files/figure-revealjs/data%20prep%202-1.png" width="768" /></p>
+</section>
+<section id="exercise-2-hydro-power-generated-over-time"
+class="slide level2">
+<h2>Exercise 2: Hydro power generated over time</h2>
+<p>Task:<br>Plot a column chart <em>hydroelectric</em> power generated
+over time.</p>
+<p><small>Hint: There are two types of hydroelectric sources in the
+data: <code>large_hydro</code> and <code>small_hydro</code>.</small></p>
+</section>
+<section id="exercise-2-hydro-power-generated-over-time-1"
+class="slide level2">
+<h2>Exercise 2: Hydro power generated over time</h2>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>long_gen <span class="sc">%&gt;%</span> </span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(source<span class="sc">==</span><span class="st">&quot;large_hydro&quot;</span><span class="sc">|</span>source<span class="sc">==</span><span class="st">&quot;small_hydro&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(datetime) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">output=</span><span class="fu">sum</span>(output)) <span class="sc">%&gt;%</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="fu">aes</span>(<span class="at">x=</span>datetime, <span class="at">y=</span>output)) <span class="sc">+</span> </span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Total hydro power generated, by hour&quot;</span>, <span class="at">x=</span><span class="st">&quot;Hour&quot;</span>, <span class="at">y=</span><span class="st">&quot;Output (MW)&quot;</span>)</span></code></pre></div>
+<p><img src="R7_slides_files/figure-revealjs/data%20prep%20ex1-1.png" width="768" /></p>
+</section>
+<section id="exercise-2-hydro-power-generated-over-time-2"
+class="slide level2">
+<h2>Exercise 2: Hydro power generated over time</h2>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>generation <span class="sc">%&gt;%</span> </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">hydro=</span>large_hydro<span class="sc">+</span>small_hydro) <span class="sc">%&gt;%</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="fu">aes</span>(<span class="at">x=</span>datetime, <span class="at">y=</span>hydro)) <span class="sc">+</span> </span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Total hydro power generated, by hour&quot;</span>, <span class="at">x=</span><span class="st">&quot;Hour&quot;</span>, <span class="at">y=</span><span class="st">&quot;Output (MW)&quot;</span>)</span></code></pre></div>
+<p><img src="R7_slides_files/figure-revealjs/data%20prep%20ex2-1.png" width="768" /></p>
+</section></section>
+<section>
+<section id="geometric-objects" class="title-slide slide level1">
+<h1>Geometric objects</h1>
+<p>We have already seen examples of two kinds of plots:</p>
+<ul>
+<li>Scatterplots, generated with <code>geom_point()</code></li>
+<li>Column charts, generated with <code>geom_col()</code></li>
+</ul>
+<p>Let’s see a few more.</p>
+</section>
+<section id="line-plots-geom_line" class="slide level2">
+<h2>Line plots: <code>geom_line()</code></h2>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>imports <span class="sc">%&gt;%</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x=</span>datetime, <span class="at">y=</span>imports)) <span class="sc">+</span> </span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Energy imports over time&quot;</span>, <span class="at">x=</span><span class="st">&quot;Hour&quot;</span>, <span class="at">y=</span><span class="st">&quot;Amount imported (MW)&quot;</span>)</span></code></pre></div>
+<p><img src="R7_slides_files/figure-revealjs/geom_line%201-1.png" width="768" /></p>
+</section>
+<section id="interlude-changing-geom-characteristics"
+class="slide level2">
+<h2>Interlude: changing geom characteristics</h2>
+<ul>
+<li class="fragment">In the geom functions, we have only been supplying
+aesthetic mapping (in <code>aes()</code>).</li>
+<li class="fragment">Geom functions can also control characteristics of
+the geom object, <em>outside</em> the <code>aes()</code> function.</li>
+<li class="fragment">In most geoms, we can modulate <code>size=</code>
+and <code>col=</code>.</li>
+<li class="fragment">Let’s try it with the line plot we just made.</li>
+</ul>
+</section>
+<section id="interlude-changing-geom-characteristics-1"
+class="slide level2">
+<h2>Interlude: changing geom characteristics</h2>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>imports <span class="sc">%&gt;%</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x=</span>datetime, <span class="at">y=</span>imports), <span class="at">size=</span><span class="fl">1.2</span>, <span class="at">col=</span><span class="st">&quot;red&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Energy imports over time&quot;</span>, <span class="at">x=</span><span class="st">&quot;Hour&quot;</span>, <span class="at">y=</span><span class="st">&quot;Amount imported (MW)&quot;</span>)</span></code></pre></div>
+<p><img src="R7_slides_files/figure-revealjs/geom_line%202-1.png" width="768" /></p>
+</section>
+<section id="area-plots-geom_area" class="slide level2">
+<h2>Area plots: <code>geom_area()</code></h2>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>generation <span class="sc">%&gt;%</span> </span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_area</span>(<span class="fu">aes</span>(<span class="at">x=</span>datetime, <span class="at">y=</span>wind), <span class="at">fill=</span><span class="st">&quot;darkblue&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Hourly wind power generation, Sept 3-9&quot;</span>, <span class="at">x=</span><span class="st">&quot;Hour&quot;</span>, <span class="at">y=</span><span class="st">&quot;Output (MW)&quot;</span>)</span></code></pre></div>
+<p><img src="R7_slides_files/figure-revealjs/area%20plot-1.png" width="768" /></p>
+</section>
+<section id="box-plots-geom_boxplot" class="slide level2">
+<h2>Box plots: <code>geom_boxplot()</code></h2>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>long_gen <span class="sc">%&gt;%</span> </span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>source, <span class="at">y=</span>output)) <span class="sc">+</span> </span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Amount of energy generated by each source, Sept 3-9&quot;</span>, <span class="at">x=</span><span class="st">&quot;Source type&quot;</span>, <span class="at">y=</span><span class="st">&quot;Output (MW)&quot;</span>)</span></code></pre></div>
+<p><img src="R7_slides_files/figure-revealjs/box%20plot-1.png" width="768" /></p>
+</section>
+<section id="multiple-geoms-in-one-plot" class="slide level2">
+<h2>Multiple geoms in one plot</h2>
+<p>Task:<br>Plot a <em>line</em> of large hydro generation over time,
+and a <em>smoothed line</em> of the same relationship on top of it.</p>
+<p>Steps:</p>
+<ol type="1">
+<li class="fragment">Supply the <code>generation</code> data to
+<code>ggplot()</code>.</li>
+<li class="fragment">Create a line with <code>geom_line()</code> with
+appropriate <code>x</code> and <code>y</code> aesthetics. Make it
+turquoise for fun.</li>
+<li class="fragment">Create a smoothed line with
+<code>geom_smooth()</code> with the same <code>x</code> and
+<code>y</code> aesthetics.
+<ol type="1">
+<li class="fragment"><code>geom_smooth()</code> plots smoothed
+conditional means (estimated using a loess regression)</li>
+</ol></li>
+</ol>
+</section>
+<section id="multiple-geoms-in-one-plot-1" class="slide level2">
+<h2>Multiple geoms in one plot</h2>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>generation <span class="sc">%&gt;%</span> </span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x=</span>datetime, <span class="at">y=</span>large_hydro), <span class="at">col=</span><span class="st">&quot;turquoise3&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="fu">aes</span>(<span class="at">x=</span>datetime, <span class="at">y=</span>large_hydro)) <span class="sc">+</span> </span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Hydroelectric (large) generation per hour, Sept 3-9&quot;</span>, <span class="at">x=</span><span class="st">&quot;Hour&quot;</span>, <span class="at">y=</span><span class="st">&quot;Output (MW)&quot;</span>)</span></code></pre></div>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula = &#39;y ~ x&#39;</code></pre>
+<p><img src="R7_slides_files/figure-revealjs/multiple%20geoms-1.png" width="768" /></p>
+</section>
+<section id="exercise-3-total-output-per-source" class="slide level2">
+<h2>Exercise 3: Total output per source</h2>
+<p>Task:<br>Create a column chart that shows the total output per
+source.</p>
+<ul>
+<li>Change the color of the columns to <code>"darkred"</code>.</li>
+<li>Add a horizontal line indicating the mean output across all sources.
+Use the cheatsheet to identify the <code>geom</code> function that you
+need.</li>
+<li>Add a meaningful title and axis labels using
+<code>labs()</code>.</li>
+</ul>
+</section>
+<section id="exercise-3-total-output-per-source-1" class="slide level2">
+<h2>Exercise 3: Total output per source</h2>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>long_merged_energy <span class="sc">%&gt;%</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(source) <span class="sc">%&gt;%</span> </span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">output=</span><span class="fu">sum</span>(output)) <span class="sc">%&gt;%</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="fu">aes</span>(<span class="at">x=</span>source, <span class="at">y=</span>output), <span class="at">fill=</span><span class="st">&quot;darkred&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="fu">aes</span>(<span class="at">yintercept=</span><span class="fu">mean</span>(output))) <span class="sc">+</span> </span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Total output per energy source over Sept 3-9&quot;</span>, <span class="at">y=</span><span class="st">&quot;Output (MW)&quot;</span>, <span class="at">x=</span><span class="st">&quot;Source&quot;</span>)</span></code></pre></div>
+<p><img src="R7_slides_files/figure-revealjs/exercise3-1.png" width="768" /></p>
+</section></section>
+<section>
+<section id="additional-layers" class="title-slide slide level1">
+<h1>Additional layers</h1>
+
+</section>
+<section id="labels" class="slide level2">
+<h2>Labels</h2>
+<ul>
+<li class="fragment">We have already seen that the <code>labs()</code>
+layer can add titles (<code>title=</code>) and axis labels
+(<code>x=</code> and <code>y=</code>) to a plot.</li>
+<li class="fragment">It can also add subtitles (<code>subtitle=</code>)
+and captions (<code>caption=</code>).</li>
+</ul>
+</section>
+<section id="labels-1" class="slide level2">
+<h2>Labels</h2>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>imports <span class="sc">%&gt;%</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x=</span>datetime, <span class="at">y=</span>imports), <span class="at">col=</span><span class="st">&quot;red&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Energy imports over time in California&quot;</span>, <span class="at">subtitle=</span><span class="st">&quot;Hourly data from September 3-9, 2018&quot;</span>,</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">caption=</span><span class="st">&quot;Source: California Energy Commission&quot;</span>, <span class="at">x=</span><span class="st">&quot;Hour&quot;</span>, <span class="at">y=</span><span class="st">&quot;Amount imported (MW)&quot;</span>)</span></code></pre></div>
+<p><img src="R7_slides_files/figure-revealjs/labels-1.png" width="768" /></p>
+<aside class="notes">
+No exercise this time, but we will practice this later.
+</aside>
+</section>
+<section id="scales" class="slide level2">
+<h2>Scales</h2>
+<ul>
+<li class="fragment">Scales allow you to manipulate the relationship
+between data values and aesthetics beyond aesthetic mapping.
+<ul>
+<li class="fragment">AKA: scales “control the details of how data values
+are translated to visual properties” (quote from <a
+href="https://ggplot2.tidyverse.org/reference/index.html#section-aesthetics">reference
+guide</a>).</li>
+</ul></li>
+<li class="fragment">For example:
+<ul>
+<li class="fragment"><code>scale_alpha</code>: control transparency
+settings</li>
+<li class="fragment"><code>scale_color</code> and
+<code>scale_fill</code>: control color palettes and other aspects of
+data mapped to colors</li>
+<li class="fragment"><code>scale_x</code> and <code>scale_y</code>:
+control the position of axis markers</li>
+</ul></li>
+<li class="fragment">The cheatsheet is your friend!</li>
+</ul>
+</section>
+<section id="scales-1" class="slide level2">
+<h2>Scales</h2>
+<p>Task:<br>Recreate line plot of imports over time, but label x-axis
+with hours rather than dates.</p>
+<p>Steps:</p>
+<ol start="0" type="1">
+<li class="fragment">Check the cheatsheet!</li>
+<li class="fragment">Supply <code>imports</code> data to
+<code>ggplot()</code>.</li>
+<li class="fragment">Add a <code>geom_line()</code> layer and map
+appropriate <code>x</code> and <code>y</code> variables.</li>
+<li class="fragment">Add a <code>scale_x_datetime()</code> layer and use
+<code>date_labels=</code> and <code>date_breaks=</code> arguments to
+modify x-axis labels and breaks.</li>
+<li class="fragment">Add a <code>labs()</code> layer.</li>
+</ol>
+</section>
+<section id="example-imports-over-time" class="slide level2">
+<h2>Example: Imports over time</h2>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>imports <span class="sc">%&gt;%</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x=</span>datetime, <span class="at">y=</span>imports), <span class="at">col=</span><span class="st">&quot;red&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_datetime</span>(<span class="at">date_labels=</span><span class="st">&quot;%H:%M&quot;</span>, <span class="at">date_breaks=</span><span class="st">&quot;12 hours&quot;</span>) <span class="sc">+</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Energy imports over time in California&quot;</span>, <span class="at">subtitle=</span><span class="st">&quot;Hourly data from September 3-9, 2018&quot;</span>, <span class="at">x=</span><span class="st">&quot;Hour&quot;</span>, <span class="at">y=</span><span class="st">&quot;Amount imported (MW)&quot;</span>)</span></code></pre></div>
+<p><img src="R7_slides_files/figure-revealjs/scales%20dates-1.png" width="768" /></p>
+<aside class="notes">
+See lecture notes for details on what’s going on inside the scale
+function. Or read the help file. No exercise this time, but we will
+practice this later.
+</aside>
+</section>
+<section id="themes-presets" class="slide level2">
+<h2>Themes: presets</h2>
+<p>ggplot comes with several preset themes that can be added as layers,
+including:</p>
+<ul>
+<li><code>theme_grey()</code>: default</li>
+<li><code>theme_bw()</code>: strip colors, including grey gradients</li>
+<li><code>theme_dark()</code> and <code>theme_light()</code>: change the
+background of the coordinate system</li>
+<li><code>theme_minimal()</code> and <code>theme_void()</code>: see
+reference guide for details</li>
+</ul>
+</section>
+<section id="example-imports-over-time-1" class="slide level2">
+<h2>Example: Imports over time</h2>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>imports <span class="sc">%&gt;%</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x=</span>datetime, <span class="at">y=</span>imports), <span class="at">col=</span><span class="st">&quot;red&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_datetime</span>(<span class="at">date_labels=</span><span class="st">&quot;%H:%M&quot;</span>, <span class="at">date_breaks=</span><span class="st">&quot;12 hours&quot;</span>) <span class="sc">+</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Energy imports over time in California&quot;</span>, <span class="at">subtitle=</span><span class="st">&quot;Hourly data from September 3-9, 2018&quot;</span>, <span class="at">x=</span><span class="st">&quot;Hour&quot;</span>, <span class="at">y=</span><span class="st">&quot;Amount imported (MW)&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div>
+<p><img src="R7_slides_files/figure-revealjs/theme%20preset-1.png" width="768" /></p>
+</section>
+<section id="themes-manual" class="slide level2">
+<h2>Themes: manual</h2>
+<p>The <code>theme()</code> layer lets you modulate many components of
+the theme, including:</p>
+<ul>
+<li class="fragment">Angle, position, and other characteristics of axis
+labels (e.g. <code>axis.labels.x =</code>).</li>
+<li class="fragment">Angle, position, and other characteristics of
+legends (e.g. <code>legend.position =</code>).</li>
+<li class="fragment">Characteristics of the background of the plot
+(e.g. <code>plot.background =</code>).</li>
+<li class="fragment">For a full list of the components that can be
+modified, see the help file for <code>ggplot2::theme()</code>.</li>
+</ul>
+</section>
+<section id="example-imports-over-time-2" class="slide level2">
+<h2>Example: Imports over time</h2>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>imports <span class="sc">%&gt;%</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x=</span>datetime, <span class="at">y=</span>imports), <span class="at">col=</span><span class="st">&quot;red&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_datetime</span>(<span class="at">date_labels=</span><span class="st">&quot;%H:%M&quot;</span>, <span class="at">date_breaks=</span><span class="st">&quot;12 hours&quot;</span>) <span class="sc">+</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Energy imports over time in California&quot;</span>, <span class="at">subtitle=</span><span class="st">&quot;Hourly data from September 3-9, 2018&quot;</span>, <span class="at">x=</span><span class="st">&quot;Hour&quot;</span>, <span class="at">y=</span><span class="st">&quot;Amount imported (MW)&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x=</span><span class="fu">element_text</span>(<span class="at">angle=</span><span class="dv">45</span>, <span class="at">hjust=</span><span class="dv">1</span>, <span class="at">size=</span><span class="dv">12</span>))</span></code></pre></div>
+<p><img src="R7_slides_files/figure-revealjs/theme%20manual-1.png" width="768" /></p>
+</section>
+<section id="coordinate-system-adjustment" class="slide level2">
+<h2>Coordinate system adjustment</h2>
+<ul>
+<li class="fragment"><code>coord_flip()</code> is the default Cartesian
+coordinate system used; by explicitly calling this function, you can
+change the limits of the <code>x</code> and <code>y</code> axes from
+their defaults</li>
+<li class="fragment"><code>coord_fixed()</code> sets a fixed aspect
+ratio between the <code>x</code> and <code>y</code> axes</li>
+<li class="fragment"><code>coord_transform()</code> lets you transform
+the Cartesian coordinates using functions like <code>sqrt</code> or
+<code>log</code></li>
+<li class="fragment"><code>coord_polar()</code> changes the coordinate
+system to polar coordinates rather than a Cartesian system</li>
+</ul>
+</section>
+<section id="example-coord_flip" class="slide level2">
+<h2>Example: coord_flip()</h2>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>long_gen <span class="sc">%&gt;%</span> </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date=</span>lubridate<span class="sc">::</span><span class="fu">date</span>(datetime)) <span class="sc">%&gt;%</span> </span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(date) <span class="sc">%&gt;%</span> <span class="fu">summarise</span>(<span class="at">output=</span><span class="fu">sum</span>(output)) <span class="sc">%&gt;%</span> </span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_col</span>(<span class="fu">aes</span>(<span class="at">x=</span>date, <span class="at">y=</span>output)) <span class="sc">+</span> </span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Total energy generated, by day&quot;</span>, <span class="at">x=</span><span class="st">&quot;Day&quot;</span>, <span class="at">y=</span><span class="st">&quot;Output (MW)&quot;</span>)</span></code></pre></div>
+<p><img src="R7_slides_files/figure-revealjs/coord_flip%20pre-1.png" width="768" /></p>
+</section>
+<section id="example-coord_flip-1" class="slide level2">
+<h2>Example: coord_flip()</h2>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>long_gen <span class="sc">%&gt;%</span> </span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date=</span>lubridate<span class="sc">::</span><span class="fu">date</span>(datetime)) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(date) <span class="sc">%&gt;%</span> <span class="fu">summarise</span>(<span class="at">output=</span><span class="fu">sum</span>(output)) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_col</span>(<span class="fu">aes</span>(<span class="at">x=</span>date, <span class="at">y=</span>output)) <span class="sc">+</span> </span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Total energy generated, by day&quot;</span>, <span class="at">x=</span><span class="st">&quot;Day&quot;</span>, <span class="at">y=</span><span class="st">&quot;Output (MW)&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>()</span></code></pre></div>
+<p><img src="R7_slides_files/figure-revealjs/coord_flip%20post-1.png" width="768" /></p>
+</section>
+<section id="stats" class="slide level2">
+<h2>Stats</h2>
+<ul>
+<li class="fragment">There are several <code>stat</code> functions in
+ggplot that enable you to conduct statistical transformations of your
+data prior to plotting.</li>
+<li class="fragment"><code>stat</code> and <code>geom</code> layers can
+be used interchangeably, as each <code>stat</code> layer has a
+<code>geom</code> argument and vice versa.</li>
+<li class="fragment">You may want to use stat layers or arguments to
+override default settings, or to use transformed versions of a variable
+in your plot.</li>
+<li class="fragment">For more, see <a
+href="http://r4ds.had.co.nz/data-visualisation.html#statistical-transformations">Chapter
+3.7 of the R for data science online textbook</a>.</li>
+</ul>
+</section></section>
+<section>
+<section id="visualizing-grouped-data" class="title-slide slide level1">
+<h1>Visualizing grouped data</h1>
+<ul>
+<li class="fragment">We often want to visualize multiple variables, or a
+variable that can be divided into groups, in one graphic.</li>
+<li class="fragment">There are two broad principles for visualizing
+grouped variables in R:
+<ul>
+<li class="fragment">Identify a grouping variable in a
+<code>geom()</code> using the <code>group =</code> argument, and
+demarcate the distinct objects created per group in some way.</li>
+<li class="fragment">Use facets to generate geometric objects in
+separate coordinate systems for each group.</li>
+</ul></li>
+</ul>
+</section>
+<section id="colors-and-fill" class="slide level2">
+<h2>Colors and fill</h2>
+<p>Task:<br>Create a line plot of energy output over time, with separate
+lines for each source.</p>
+<p>Steps:</p>
+<ol type="1">
+<li class="fragment">Supply the data frame
+<code>long_merged_energy</code> to <code>ggplot()</code>.</li>
+<li class="fragment">Add a <code>geom_line()</code> layer and specify
+<code>x=datetime</code> and <code>y=output</code>.</li>
+<li class="fragment">Also specify that <code>group=source</code> and
+<code>col=source</code>.</li>
+<li class="fragment">Add a <code>labs()</code> layer.</li>
+</ol>
+</section>
+<section id="colors-and-fill-1" class="slide level2">
+<h2>Colors and fill</h2>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>long_merged_energy <span class="sc">%&gt;%</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x=</span>datetime, <span class="at">y=</span>output, <span class="at">group=</span>source, <span class="at">col=</span>source)) <span class="sc">+</span> </span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Output by energy source over time&quot;</span>, <span class="at">subtitle=</span><span class="st">&quot;Hourly data from September 3-9, 2018&quot;</span>, <span class="at">x=</span><span class="st">&quot;Hour&quot;</span>, <span class="at">y=</span><span class="st">&quot;Output (MW)&quot;</span>)</span></code></pre></div>
+<p><img src="R7_slides_files/figure-revealjs/aes%20colors%201-1.png" width="768" /></p>
+</section>
+<section id="exercise-4-colors-and-fill" class="slide level2">
+<h2>Exercise 4: Colors and fill</h2>
+<p>Task:<br>Create a line plot that compares generation of wind, solar,
+and geothermal energy over time.</p>
+<p><small>Bonus: Set the line size to 1.5.</small></p>
+</section>
+<section id="exercise-4-colors-and-fill-1" class="slide level2">
+<h2>Exercise 4: Colors and fill</h2>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>long_merged_energy <span class="sc">%&gt;%</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(source<span class="sc">==</span><span class="st">&quot;wind&quot;</span><span class="sc">|</span>source<span class="sc">==</span><span class="st">&quot;solar&quot;</span><span class="sc">|</span>source<span class="sc">==</span><span class="st">&quot;geothermal&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x=</span>datetime, <span class="at">y=</span>output, <span class="at">group=</span>source, <span class="at">col=</span>source), <span class="at">size=</span><span class="fl">1.5</span>) <span class="sc">+</span> </span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Wind vs. Solar vs. Geothermal generation&quot;</span>, <span class="at">subtitle=</span><span class="st">&quot;Hourly data from September 3-9, 2018&quot;</span>, <span class="at">x=</span><span class="st">&quot;Hour&quot;</span>, <span class="at">y=</span><span class="st">&quot;Output (MW)&quot;</span>)</span></code></pre></div>
+<p><img src="R7_slides_files/figure-revealjs/aes%20colors%20ex-1.png" width="768" /></p>
+</section>
+<section id="customizing-with-scale_color-layers" class="slide level2">
+<h2>Customizing with scale_color layers</h2>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>long_merged_energy <span class="sc">%&gt;%</span> <span class="fu">filter</span>(source<span class="sc">==</span><span class="st">&quot;wind&quot;</span><span class="sc">|</span>source<span class="sc">==</span><span class="st">&quot;solar&quot;</span><span class="sc">|</span>source<span class="sc">==</span><span class="st">&quot;geothermal&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x=</span>datetime, <span class="at">y=</span>output, <span class="at">group=</span>source, <span class="at">col=</span>source), <span class="at">size=</span><span class="fl">1.5</span>) <span class="sc">+</span> </span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_brewer</span>(<span class="at">palette=</span><span class="st">&quot;Accent&quot;</span>, <span class="at">name=</span><span class="st">&quot;Energy source&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Wind vs. Solar vs. Geothermal generation&quot;</span>, <span class="at">subtitle=</span><span class="st">&quot;Hourly data from September 3-9, 2018&quot;</span>, <span class="at">x=</span><span class="st">&quot;Hour&quot;</span>, <span class="at">y=</span><span class="st">&quot;Output (MW)&quot;</span>)</span></code></pre></div>
+<p><img src="R7_slides_files/figure-revealjs/aes%20colors%202-1.png" width="768" /></p>
+</section>
+<section id="colors-and-fill-2" class="slide level2">
+<h2>Colors and fill</h2>
+<ul>
+<li><code>col=</code> is used to color objects like lines and
+points</li>
+<li><code>fill=</code> is used to color objects like columns and
+histograms
+<ul>
+<li><code>col=</code> will create colored outlines for such objects</li>
+</ul></li>
+<li>After some trial and error, this will become intuitive</li>
+</ul>
+</section>
+<section id="position-adjustment" class="slide level2">
+<h2>Position adjustment</h2>
+<ul>
+<li class="fragment">Once we introduce a grouping variable to a
+<code>geom</code> function, we generate multiple geometric objects on
+the same plot.</li>
+<li class="fragment">Colors and fill help us distinguish each object
+from other objects.</li>
+<li class="fragment">Another way to distinguish objects, often used
+together with color/fill, is <em>position adjustment</em>.</li>
+</ul>
+</section>
+<section id="example-energy-use-by-day" class="slide level2">
+<h2>Example: Energy use by day</h2>
+<p>Task:<br>Create a column chart of energy use by day, grouped by
+source.</p>
+<p>Steps:</p>
+<ol type="1">
+<li class="fragment">Modify <code>long_merged_energy</code> to summarize
+output by date and source.
+<ol type="1">
+<li class="fragment">Use <code>mutate()</code> to create a
+<code>date</code> variable from <code>datetime</code>.</li>
+<li class="fragment">Use <code>group_by()</code> and
+<code>summarize()</code> to calculate total output per date per
+source.</li>
+</ol></li>
+<li class="fragment">Supply modified data frame to
+<code>ggplot()</code></li>
+<li class="fragment">Add a <code>geom_col()</code> layer, supply
+<code>x</code> and <code>y</code> aesthetics.</li>
+<li class="fragment">Specify <code>group=source</code> and
+<code>fill=source</code>.</li>
+<li class="fragment">Add a <code>labs()</code> layer.</li>
+</ol>
+</section>
+<section id="example-energy-use-by-day-1" class="slide level2">
+<h2>Example: Energy use by day</h2>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>long_merged_energy <span class="sc">%&gt;%</span> </span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date=</span>lubridate<span class="sc">::</span><span class="fu">date</span>(datetime)) <span class="sc">%&gt;%</span> </span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(date, source) <span class="sc">%&gt;%</span> </span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">output=</span><span class="fu">sum</span>(output)) <span class="sc">%&gt;%</span> </span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="fu">aes</span>(<span class="at">x=</span>date, <span class="at">y=</span>output, <span class="at">group=</span>source, <span class="at">fill=</span>source)) <span class="sc">+</span> </span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Energy use by day&quot;</span>, <span class="at">x=</span><span class="st">&quot;Day&quot;</span>, <span class="at">y=</span><span class="st">&quot;Output (MW)&quot;</span>)</span></code></pre></div>
+<pre><code>## `summarise()` has grouped output by &#39;date&#39;. You can override using the
+## `.groups` argument.</code></pre>
+<p><img src="R7_slides_files/figure-revealjs/col%20stack-1.png" width="768" /></p>
+</section>
+<section id="example-energy-use-by-day-2" class="slide level2">
+<h2>Example: Energy use by day</h2>
+<ul>
+<li class="fragment">This column chart is useful if our main goal is to
+examine total output over time across sources.</li>
+<li class="fragment">But what if our main goal is to compare trends
+across sources?
+<ul>
+<li class="fragment">We can use <code>position="dodge"</code> in
+<code>geom_col()</code> ‘unstack’ the columns for each source.</li>
+</ul></li>
+<li class="fragment">What if our goal is to compare what portion of
+output per day each source comprises?
+<ul>
+<li class="fragment">We can use <code>position="fill"</code> to
+normalize height of stacked columns.</li>
+</ul></li>
+</ul>
+</section>
+<section id="example-energy-use-by-day-pos-dodge" class="slide level2">
+<h2>Example: Energy use by day (pos dodge)</h2>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>long_merged_energy <span class="sc">%&gt;%</span> </span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date=</span>lubridate<span class="sc">::</span><span class="fu">date</span>(datetime)) <span class="sc">%&gt;%</span> </span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(date, source) <span class="sc">%&gt;%</span> </span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">output=</span><span class="fu">sum</span>(output)) <span class="sc">%&gt;%</span> </span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="fu">aes</span>(<span class="at">x=</span>date, <span class="at">y=</span>output, <span class="at">group=</span>source, <span class="at">fill=</span>source), <span class="at">position=</span><span class="st">&quot;dodge&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Energy use by day&quot;</span>, <span class="at">x=</span><span class="st">&quot;Day&quot;</span>, <span class="at">y=</span><span class="st">&quot;Output (MW)&quot;</span>)</span></code></pre></div>
+<pre><code>## `summarise()` has grouped output by &#39;date&#39;. You can override using the
+## `.groups` argument.</code></pre>
+<p><img src="R7_slides_files/figure-revealjs/col%20dodge-1.png" width="768" /></p>
+</section>
+<section id="example-energy-use-by-day-pos-fill" class="slide level2">
+<h2>Example: Energy use by day (pos fill)</h2>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>long_merged_energy <span class="sc">%&gt;%</span> </span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date=</span>lubridate<span class="sc">::</span><span class="fu">date</span>(datetime)) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(date, source) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">output=</span><span class="fu">sum</span>(output)) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="fu">aes</span>(<span class="at">x=</span>date, <span class="at">y=</span>output, <span class="at">group=</span>source, <span class="at">fill=</span>source), <span class="at">position=</span><span class="st">&quot;fill&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Energy use by day&quot;</span>, <span class="at">x=</span><span class="st">&quot;Day&quot;</span>, <span class="at">y=</span><span class="st">&quot;Output (MW)&quot;</span>)</span></code></pre></div>
+<pre><code>## `summarise()` has grouped output by &#39;date&#39;. You can override using the
+## `.groups` argument.</code></pre>
+<p><img src="R7_slides_files/figure-revealjs/col%20fill-1.png" width="768" /></p>
+</section>
+<section id="shapes-and-linetypes" class="slide level2">
+<h2>Shapes and linetypes</h2>
+<ul>
+<li class="fragment">Colors/fill and position adjustment are the most
+common and intuitive way to distinguish geometric objects from each
+other.</li>
+<li class="fragment">Shapes and linetypes are two other ways.</li>
+<li class="fragment">The idea here is to modify what the object actually
+looks like.</li>
+</ul>
+</section>
+<section id="example-energy-source-group-by-day" class="slide level2">
+<h2>Example: Energy source group, by day</h2>
+<p>Task:<br>Create a line graph of the output by day, with a different
+line for each regrouped group (renewable, hydro, etc.)</p>
+<p>Steps:</p>
+<ol type="1">
+<li class="fragment">Prepare data frame that summarizes output by date
+and “group” from <code>regroup</code>.</li>
+<li class="fragment">Supply modified data frame to
+<code>ggplot()</code>.</li>
+<li class="fragment">Two choices!
+<ol type="1">
+<li class="fragment">Add <code>geom_line()</code> and
+<code>geom_point()</code> with <code>shape=group</code>.</li>
+<li class="fragment">Add <code>geom_line()</code> with
+<code>linetype=group</code>.</li>
+</ol></li>
+</ol>
+</section>
+<section id="example-energy-source-group-by-day-1" class="slide level2">
+<h2>Example: Energy source group by day</h2>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Prepare data</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>long_merged_energy_regroup <span class="ot">&lt;-</span> long_merged_energy <span class="sc">%&gt;%</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">type =</span> source) <span class="sc">%&gt;%</span> </span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">merge</span>(regroup, <span class="at">by =</span> <span class="st">&quot;type&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date=</span>lubridate<span class="sc">::</span><span class="fu">date</span>(datetime)) <span class="sc">%&gt;%</span> </span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(date, group) <span class="sc">%&gt;%</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">output=</span><span class="fu">sum</span>(output))</span></code></pre></div>
+<pre><code>## `summarise()` has grouped output by &#39;date&#39;. You can override using the
+## `.groups` argument.</code></pre>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Take a look at our prepared data</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(long_merged_energy_regroup)</span></code></pre></div>
+<pre><code>## # A tibble: 6 × 3
+## # Groups:   date [1]
+##   date       group      output
+##   &lt;date&gt;     &lt;chr&gt;       &lt;dbl&gt;
+## 1 2019-09-03 hydro      93919.
+## 2 2019-09-03 imports   169826.
+## 3 2019-09-03 nuclear    53926.
+## 4 2019-09-03 other          0 
+## 5 2019-09-03 renewable 183304.
+## 6 2019-09-03 thermal   313436.</code></pre>
+</section>
+<section id="example-energy-source-group-by-day-2" class="slide level2">
+<h2>Example: Energy source group, by day</h2>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>long_merged_energy_regroup <span class="sc">%&gt;%</span> </span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x=</span>date, <span class="at">y=</span>output, <span class="at">group=</span>group, <span class="at">col=</span>group), <span class="at">size=</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x=</span>date, <span class="at">y=</span>output, <span class="at">group=</span>group, <span class="at">shape=</span>group)) <span class="sc">+</span> </span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Output by source group over time&quot;</span>, <span class="at">subtitle=</span><span class="st">&quot;Data collected during September 3-9, 2018&quot;</span>, <span class="at">x=</span><span class="st">&quot;Date&quot;</span>, <span class="at">y=</span><span class="st">&quot;Output (MW)&quot;</span>)</span></code></pre></div>
+<p><img src="R7_slides_files/figure-revealjs/aes%20shapes-1.png" width="768" /></p>
+</section>
+<section id="example-energy-source-group-by-day-3" class="slide level2">
+<h2>Example: Energy source group, by day</h2>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>long_merged_energy_regroup <span class="sc">%&gt;%</span> </span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x=</span>date, <span class="at">y=</span>output, <span class="at">group=</span>group, <span class="at">linetype=</span>group), <span class="at">size=</span><span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Output by source group over time&quot;</span>, <span class="at">subtitle=</span><span class="st">&quot;Data collected during September 3-9, 2018&quot;</span>, <span class="at">x=</span><span class="st">&quot;Date&quot;</span>, <span class="at">y=</span><span class="st">&quot;Output (MW)&quot;</span>)</span></code></pre></div>
+<p><img src="R7_slides_files/figure-revealjs/aes%20linetypes-1.png" width="768" /></p>
+</section>
+<section id="sizes-and-alpha" class="slide level2">
+<h2>Sizes and alpha</h2>
+<ul>
+<li class="fragment"><code>size=</code> and <code>alpha=</code> inside
+<code>aes()</code> modulate the size and transparency of geom objects
+based on some data value.</li>
+<li class="fragment">They are particularly useful when you want to
+distinguish objects based on some <em>continuous</em> variable.</li>
+<li class="fragment">Let’s return to the Gapminder data for an
+example.</li>
+</ul>
+</section>
+<section id="example-life-expectancy-over-gdp" class="slide level2">
+<h2>Example: Life expectancy over GDP</h2>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>gapminder07 <span class="sc">%&gt;%</span> </span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x=</span><span class="fu">log</span>(gdpPercap), <span class="at">y=</span>lifeExp, <span class="at">size=</span>pop, <span class="at">col=</span>continent)) <span class="sc">+</span> </span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_size_continuous</span>(<span class="at">name=</span><span class="st">&quot;Population&quot;</span>) <span class="sc">+</span> <span class="fu">scale_color_discrete</span>(<span class="at">name=</span><span class="st">&quot;Continent&quot;</span>) <span class="sc">+</span></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Life expectancy as a function of GDP per capita in 2007&quot;</span>, <span class="at">x=</span><span class="st">&quot;Logged GDP per capita&quot;</span>, <span class="at">y=</span><span class="st">&quot;Life expectancy&quot;</span>)</span></code></pre></div>
+<p><img src="R7_slides_files/figure-revealjs/aes%20size-1.png" width="768" /></p>
+</section>
+<section id="exercise-5-average-hourly-output-by-source"
+class="slide level2">
+<h2>Exercise 5: Average hourly output by source</h2>
+<p>Task:<br>Visualize the average output for each hour of the day,
+grouped by source.</p>
+<p><small>You need to identify the output per source per hour
+(e.g. 01:00, 02:00, etc) averaged over all days.</small></p>
+<ul>
+<li>You will need to prepare your data using both <code>dplyr</code> and
+<code>lubridate</code> functions.</li>
+<li>You can choose which <code>geom</code>(s) to use, and how to
+demarcate groups.</li>
+<li>Bonus: use a scale layer to set a color palette (try
+<code>"Set3"</code>) and change the legend name.</li>
+<li>Remember to add <code>labs()</code>!</li>
+</ul>
+</section>
+<section id="exercise-5-average-hourly-output-by-source-1"
+class="slide level2">
+<h2>Exercise 5: Average hourly output by source</h2>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>ex5 <span class="ot">&lt;-</span> long_merged_energy <span class="sc">%&gt;%</span> </span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">hour=</span>lubridate<span class="sc">::</span><span class="fu">hour</span>(datetime)) <span class="sc">%&gt;%</span> </span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(hour, source) <span class="sc">%&gt;%</span> </span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">output=</span><span class="fu">mean</span>(output)) <span class="sc">%&gt;%</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_area</span>(<span class="fu">aes</span>(<span class="at">x=</span>hour, <span class="at">y=</span>output, <span class="at">fill=</span><span class="fu">factor</span>(source))) <span class="sc">+</span> </span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette=</span><span class="st">&quot;Set3&quot;</span>, <span class="at">name=</span><span class="st">&quot;Source&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Average hourly output by source&quot;</span>, </span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle=</span><span class="st">&quot;Data collected during September 3-9&quot;</span>,</span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">x=</span><span class="st">&quot;Hour of the day&quot;</span>, <span class="at">y=</span><span class="st">&quot;Output (MW)&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div>
+<pre><code>## `summarise()` has grouped output by &#39;hour&#39;. You can override using the
+## `.groups` argument.</code></pre>
+</section>
+<section id="exercise-5-average-hourly-output-by-source-2"
+class="slide level2">
+<h2>Exercise 5: Average hourly output by source</h2>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>ex5</span></code></pre></div>
+<p><img src="R7_slides_files/figure-revealjs/exercise5%20plot-1.png" width="768" /></p>
+</section>
+<section id="facets" class="slide level2">
+<h2>Facets</h2>
+<ul>
+<li class="fragment">So far we have been visualizing grouped data by
+changing the appearance or position of the objects.</li>
+<li class="fragment">A different approach is to use facets, which
+creates separate coordinate systems for each geometric object.</li>
+</ul>
+</section>
+<section id="example-comparing-generation-patterns"
+class="slide level2">
+<h2>Example: Comparing generation patterns</h2>
+<p>Task:<br>Compare energy generation over time, across sources.</p>
+<p>How do we do this? Using what we’ve learned so far:</p>
+<ol type="1">
+<li class="fragment">Supply <code>long_gen</code> to
+<code>ggplot()</code>.</li>
+<li class="fragment">Add a <code>geom_line()</code> layer, setting
+<code>x=datetime</code> and <code>y=output</code> in
+<code>aes()</code>.</li>
+<li class="fragment">Let’s set <code>group=source</code> and
+<code>col=source</code> in <code>aes()</code>.</li>
+</ol>
+</section>
+<section id="example-comparing-generation-patterns-1"
+class="slide level2">
+<h2>Example: Comparing generation patterns</h2>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>long_gen <span class="sc">%&gt;%</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x=</span>datetime, <span class="at">y=</span>output, <span class="at">group=</span>source, <span class="at">col=</span>source), <span class="at">size=</span><span class="dv">1</span>) <span class="sc">+</span> </span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Generation over time, by energy source&quot;</span>, <span class="at">subtitle=</span><span class="st">&quot;Hourly data from September 3-9, 2018&quot;</span>, <span class="at">x=</span><span class="st">&quot;Hour&quot;</span>, <span class="at">y=</span><span class="st">&quot;Output (MW)&quot;</span>)</span></code></pre></div>
+<p><img src="R7_slides_files/figure-revealjs/why%20facet-1.png" width="768" /></p>
+</section>
+<section id="example-comparing-generation-patterns-2"
+class="slide level2">
+<h2>Example: Comparing generation patterns</h2>
+<p>Is this a helpful plot?</p>
+<ul>
+<li class="fragment">Not if our goal is to compare the patterns of each
+source.</li>
+<li class="fragment">It’s too noisy!</li>
+<li class="fragment">Instead of setting <code>col=</code> in
+<code>aes()</code>, let’s add a <code>facet_wrap()</code> layer.</li>
+<li class="fragment">Specifically, <code>facet_wrap(~source)</code>,
+i.e. tell ggplot to “facet by source”.</li>
+</ul>
+</section>
+<section id="example-comparing-generation-patterns-3"
+class="slide level2">
+<h2>Example: Comparing generation patterns</h2>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>long_gen <span class="sc">%&gt;%</span> </span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> datetime, <span class="at">y =</span> output)) <span class="sc">+</span> </span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>source) <span class="sc">+</span> </span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Generation over time, by energy source&quot;</span>, <span class="at">subtitle=</span><span class="st">&quot;Hourly data from September 3-9, 2018&quot;</span>, <span class="at">x=</span><span class="st">&quot;Hour&quot;</span>, <span class="at">y=</span><span class="st">&quot;Output (MW)&quot;</span>)</span></code></pre></div>
+<p><img src="R7_slides_files/figure-revealjs/facet%201-1.png" width="768" /></p>
+</section>
+<section id="example-comparing-generation-patterns-4"
+class="slide level2">
+<h2>Example: Comparing generation patterns</h2>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>long_gen <span class="sc">%&gt;%</span> </span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> datetime, <span class="at">y =</span> output)) <span class="sc">+</span> </span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>source, <span class="at">scales=</span><span class="st">&quot;free&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Generation over time, by energy source&quot;</span>, <span class="at">subtitle=</span><span class="st">&quot;Hourly data from September 3-9, 2018&quot;</span>, <span class="at">x=</span><span class="st">&quot;Hour&quot;</span>, <span class="at">y=</span><span class="st">&quot;Output (MW)&quot;</span>)</span></code></pre></div>
+<p><img src="R7_slides_files/figure-revealjs/facet%202-1.png" width="768" /></p>
+</section>
+<section id="exercise-6-facets" class="slide level2">
+<h2>Exercise 6: Facets</h2>
+<p>Task:<br>Alter the facet plot by:</p>
+<ul>
+<li class="fragment">Making the line in each plot a different color</li>
+<li class="fragment">Making the lines thicker</li>
+<li class="fragment">Moving the legend to the bottom</li>
+</ul>
+</section>
+<section id="exercise-6-facets-1" class="slide level2">
+<h2>Exercise 6: Facets</h2>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>long_gen <span class="sc">%&gt;%</span> </span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> datetime, <span class="at">y =</span> output, <span class="at">col=</span>source), <span class="at">size=</span><span class="dv">1</span>) <span class="sc">+</span> </span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>source, <span class="at">scales=</span><span class="st">&quot;free&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">&quot;Generation over time, by energy source&quot;</span>, <span class="at">subtitle=</span><span class="st">&quot;Hourly data from September 3-9, 2018&quot;</span>, <span class="at">x=</span><span class="st">&quot;Hour&quot;</span>, <span class="at">y=</span><span class="st">&quot;Output (MW)&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>)</span></code></pre></div>
+<p><img src="R7_slides_files/figure-revealjs/facet%20ex-1.png" width="768" /></p>
+</section></section>
+<section>
+<section id="final-notes" class="title-slide slide level1">
+<h1>Final notes</h1>
+
+</section>
+<section id="comment-your-code" class="slide level2">
+<h2>Comment your code</h2>
+<p>Always remember to comment your code!</p>
+<p>When writing particularly complex code in <code>dplyr</code> or
+<code>ggplot2</code>, this includes commenting <em>within</em> a flow of
+<code>%&gt;%</code> or <code>+</code> operators. See the lecture notes
+for some examples of this.</p>
+</section>
+<section id="saving-images" class="slide level2">
+<h2>Saving images</h2>
+<p>Three ways to save images created by ggplot:</p>
+<ul>
+<li>Assign the result of your ggplot code to a named object, which can
+be saved like other objects in your R workspace</li>
+<li>Use the “save” icon in the Plots tab of RStudio</li>
+<li>Add the function <code>ggsave()</code> as a layer to your plotting
+code</li>
+</ul>
+</section></section>
+<section id="break" class="title-slide slide level1">
+<h1>Break!</h1>
+<p>This is the end of the R lecture sessions.</p>
+<p>After a short break, we will return for a cumulative exercise that
+combines the skills you have learned since Monday.</p>
+</section>
+
+<section>
+<section id="final-exercise" class="title-slide slide level1">
+<h1>Final Exercise</h1>
+<p>The instructions are in a markdown file in the <code>exercises</code>
+folder. Create a new RMarkdown file (save it using this naming
+convention: <code>FinalRExercise_LastnameFirstname.Rmd</code>), in which
+you will complete the exercise.</p>
+<p>You can work in small groups, but write up your code separately.</p>
+<p>Raise your hand if you need help!</p>
+</section>
+<section id="optional-submissions" class="slide level2">
+<h2>Optional Submissions</h2>
+<p>You’ve created several RMarkdown files over the past three days.
+Since you stored these in a forked repo, it is possible to create a pull
+request and ‘submit’ these changes to the base repo. This is
+<em>optional</em>, but gives you a chance to explore Github
+functionality and share your work with your classmates.</p>
+<p>Before you submit your completed exercises, <em>move every new file
+in your repo to the</em> <code>submissions</code> <em>folder</em>. This
+ensures that we won’t inadvertently make changes to the session
+materials. Then, create a new pull request, asking to merge changes from
+your fork to the base repository.</p>
+</section></section>
+    </div>
+  </div>
+
+  <script src="R7_slides_files/reveal.js-3.3.0.1/lib/js/head.min.js"></script>
+  <script src="R7_slides_files/reveal.js-3.3.0.1/js/reveal.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        // Display controls in the bottom right corner
+        controls: true,
+        // Display a presentation progress bar
+        progress: true,
+        // Push each slide change to the browser history
+        history: true,
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+        // Enable the slide overview mode
+        overview: true,
+        // Vertical centering of slides
+        center: false,
+        // Enables touch navigation on devices with touch input
+        touch: true,
+        // Turns fragments on and off globally
+        fragments: true,
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+        // Transition style
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        // Transition speed
+        transitionSpeed: 'default', // default/fast/slow
+        // Transition style for full page slide backgrounds
+        backgroundTransition: 'default', // none/fade/slide/convex/concave/zoom
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'R7_slides_files/reveal.js-3.3.0.1/plugin/notes/notes.js', async: true },
+        ]
+      });
+    </script>
+  <!-- dynamically load mathjax for compatibility with self-contained -->
+  <script>
+    (function () {
+      var script = document.createElement("script");
+      script.type = "text/javascript";
+      script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+      document.getElementsByTagName("head")[0].appendChild(script);
+    })();
+  </script>
+
+<script>
+  (function() {
+    if (window.jQuery) {
+      Reveal.addEventListener( 'slidechanged', function(event) {  
+        window.jQuery(event.previousSlide).trigger('hidden');
+        window.jQuery(event.currentSlide).trigger('shown');
+      });
+    }
+  })();
+</script>
+
+
+  </body>
+</html>

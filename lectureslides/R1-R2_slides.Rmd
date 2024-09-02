@@ -1,0 +1,756 @@
+---
+title: 'Intro to R: Day 1'
+author: "Alice Zhao"
+date: "`r format(Sys.Date(), '%B %Y')`"
+output: 
+  revealjs::revealjs_presentation:
+    fig_height: 4
+    self_contained: false
+    reveal_plugins: ["notes"]
+params:
+  notes: no
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = normalizePath("../"))
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE}
+notes<-params$notes
+```
+
+# Introduction
+
+## Why R?
+
+> -   R is flexible
+> -   R is customizable
+> -   R is open source
+> -   R has a large community of users
+
+## What is RStudio?
+
+> -   RStudio refers to both the company and the software
+> -   RStudio is an integrated development environment (IDE) for R
+> -   RStudio Desktop is the most commonly used version of the software
+> -   You will also have access to RStudio Workbench through the MLDS program
+
+## Exploring the IDE
+
+![](figures/rstudio_screenshot.PNG)
+
+<aside class="notes">
+
+RStudio helps you organize your workflow and keep track of your work. The top-left pane is where you open, work on, and save script files. The bottom-left pane includes the console, which is where your code actually "runs". The right-hand side panes include tools for manging your environment, workspace, and packages; for plotting and graphics; for accessing help files; and more.
+
+</aside>
+
+## Some key concepts
+
+You will hear these terms often this week:
+
+> -   Objects
+> -   Packages
+> -   Functions
+> -   Help files
+> -   Comments (anything following `#` in a code file)
+
+## Starting with the basics
+
+> -   Arithmetic with R
+> -   Objects and variable assignment
+> -   Data types, incl.: character, numeric, logical, factors
+> -   Data structures, incl.: vectors, matricies, data frames, lists
+
+<aside class="notes">
+
+The above topics are the basics you need to learn before we start working with "real" data.
+
+</aside>
+
+## Our materials
+
+All of our materials are available at [github.com/msia/bootcamp-2024](https://www.github.com/msia/bootcamp-2024). Today, you will only need to work with two files, which are in the ZIP file linked at the top of the Github page.
+
+Starting with the R3 session tomorrow, you will be working with a much wider set of files. Tomorrow, you will learn how to make a copy of the whole bootcamp-2024 repository using Git.
+
+# Basics and data types
+
+## Arithmetic and objects
+
+At its most basic level, you can use R as a calculator. The basic operators are all what you would expect for addition (`+`), subtraction (`-`), multiplication (`*`), division (`/`), and exponentiation (`^`). You can use parentheses to indicate which operation should take place first.
+
+You can save numbers or the results of operations as *objects* (whose names must start with a character) using the assignment operator `<-` or a single equal sign `=`. We sometimes call these objects *variables*. Look in the **Environment** to see what objects currently exist.
+
+```{r}
+x <- 11*5
+x
+```
+
+## Arithmetic: exercise
+
+Open up the file `R1-R2_exercises.R` in RStudio. <br> Do the following tasks:
+
+-   Pick a number; save it as `x`
+-   Multiply x by 3
+-   Take the log of the above
+-   Subtract 4 from the above
+-   Square the above
+
+## Arithmetic: exercise
+
+```{r arithmetic}
+x <- 5
+x*3
+log(x*3)
+(log(x*3))-4
+((log(x*3))-4)^2
+```
+
+## Functions
+
+Functions are called with `functionName(parameters)`. Multiple paramters are *comma-separated*. Paramters can be named. For unnamed parameters, the order matters. R functions don't change the objects passed to them (more on this later).
+
+Let's take a look at a simple function, `log()`, which takes the log of a number. You can access its help file by entering `?log` in the console. Do so now. What does the function do? What are the arguments?
+
+## Functions
+
+```{r}
+# Take the natural log of 10
+log(10)
+
+# Take the log of 10 with base-2
+log(10, base=2)
+
+# Store the result of log(10) as a variable
+y <- log(10)
+```
+
+## Data types
+
+> -   **numeric**: real or decimal
+>
+>     -   **integer**: a specific type; most numbers are numeric instead
+>
+>     -   **complex**: ex: `2+5i`
+>
+> -   **character**: `"text data"`, denoted with quotes <br><small>(`'single quotes'` and `"double quotes"` both work)</small>
+>
+> -   **logical**: `TRUE` or `FALSE` <br><small>(When coerced into numeric type, `TRUE`=`1` and `FALSE`=`0`)</small>
+>
+> -   Use `class()` on an object to check its type
+
+## Data types
+
+```{r}
+x <- "some text"
+x
+class(x)
+
+x <- 5
+x
+class(x)
+```
+
+## Comparisons and Logical Operators
+
+The basic logical operators in R are:
+
+-   `==` for "is equal"; `!` for "is not"
+
+-   `&` for "and"; `|` for "or"
+
+-   `<` for "lesser than"; `>` for "more than"
+
+A statement with logical operators will return a logical object `TRUE` or `FALSE`.
+
+## Comparisons and Logical Operators
+
+```{r}
+5 > 4
+
+(5 > 4) & (4 < 5)
+
+(5 > 4) | (4 < 5)
+
+!(4 > 5)
+```
+
+## Comparisons and Logical Operators: exercise
+
+-   Check if 1 is bigger than 2
+-   Check if 1 + 1 is equal to 2
+-   Check if it is true that the strings "eat" and "drink" are not equal to each other
+-   Check if it is true that 1 is equal to 1 *AND* 1 is equal to 2 <br><small>(Hint: remember what the operators `&` and `|` do)</small>
+-   Check if it is true that 1 is equal to 1 *OR* 1 is equal to 2
+
+## Comparisons and Logical Operators: exercise
+
+```{r comparisons}
+1 > 2
+(1 + 1) == 2
+"eat" != 'drink'
+(1==1) & (1==2)
+(1==1) | (1==2)
+```
+
+## Packages
+
+-   Install the package `tidyverse`<br><small>(You only need to do this the first time)</small>
+-   Load the package `tidyverse`
+-   Open the help file for the function `recode` <br><small>(Hint: remember what `?` does)</small>
+
+## Packages
+
+```{r packages, eval=F}
+install.packages("tidyverse")
+library(tidyverse)
+
+?recode
+```
+
+# Data structures
+
+## Vectors
+
+> -   Vectors store multiple values of a **single** data type (i.e. vectors are *homogeneous*)
+>
+> -   Create a vector using the `c()` function
+>
+> -   Arithmetic operators and many functions can apply to vectors (i.e. some functions are *vectorized*)
+>
+> -   Vectors can be *indexed* by:
+>
+>     -   element position (`vec[1]`)
+>     -   'slice' position (`vec[1:3]`)
+>     -   condition (`vec[vec>2]`).
+
+## Vectors
+
+```{r}
+vec <- c("yes", "no", "maybe")
+vec <- c(1, 2, 3)
+
+vec[1]
+vec[vec<3]
+
+vec*2
+log(vec)
+```
+
+## Vectors: exercise
+
+Return to the exercise file and complete the following tasks:
+
+-   Run the code to generate variables `x1` and `x2`
+-   Select the 3rd element in `x1`
+-   Select the elements of x1 that are less than 0
+-   Select the elements of x2 that are greater than 1
+-   Create x3 containing the first five elements of x2
+-   Select all but the third element of x1
+
+## Vectors: exercise
+
+```{r vectors}
+set.seed(1234) 
+x1 <- rnorm(5)
+x2 <- rnorm(20, mean=0.5)
+x1[3]
+x1[x1 < 0]
+x2[x2 > 1]
+x3 <- x2[1:5]
+x1[-3]
+```
+
+## Interlude: Missing Values
+
+Real-world data often include missing values. In R, missing values are stored as `NA`. Vectors containing any data type can contain missing values. Functions deal with missing values differently, and sometimes require arguments to specify how to deal with missing values.
+
+```{r missing values}
+vec <- c(1, 8, NA, 7, 3)
+mean(vec)
+mean(vec, na.rm=TRUE)
+```
+
+<aside class="notes">
+
+Ask students to calculate the mean in their exercises script.
+
+</aside>
+
+## Interlude: Missing Values
+
+You can check if a vector contains missing values by the function `is.na()`. Since this returns a logical vector, you can use `sum()` or `mean()` on the result to count the number or proportion of `TRUE` values.
+
+```{r missing values 2}
+is.na(vec)
+sum(is.na(vec))
+mean(is.na(vec))
+```
+
+<aside class="notes">
+
+Ask students to calculate the number of mean values in their exercises script.
+
+</aside>
+
+## Factors
+
+> -   Factors are a special type of vector that are useful for categorical variables
+> -   Factors have a limited number of *levels* that the variable can take, set by the user
+> -   For categorical variables with natural ordering between categories, we often want to use *ordered factors*
+> -   Create factors with `factor()`, which includes an argument for `levels =`
+
+<aside class="notes">
+
+We won't spend any more time reviewing factors today. If you need a refresher, check the lecture notes.
+
+</aside>
+
+## Lists
+
+> -   Lists are like vectors, but more complex.
+> -   Lists are *heterogenous*: they can store single elements, vectors, or even lists.
+> -   You can keep multi-dimensional and ragged data in R using lists.
+> -   You can index an element in a list using double brackets: `[[1]]`. Single brackets will return the element as a list.
+
+<aside class="notes">
+
+For more on lists, see the lecture notes or data camp.
+
+</aside>
+
+## Matrices
+
+> -   Matrices in R are two-dimensional arrays.
+> -   Matrices are *homogeneous*: all values of a matrix must be of the same data type.
+> -   You can initialize a matrix using the `matrix()` function.
+> -   Matrices are used sparingly in R, primarily for numerical calculations or explicit matrix manipulation.
+> -   Matrices are indexed as follows: `mat[row no, col no]`.
+
+<aside class="notes">
+
+There is an example matrix for you to practice with in the exercises file, but we won't do it together.
+
+</aside>
+
+## Data frames
+
+> -   Data frames are the core data structure in R. A data frame is a list of named vectors with the same length.
+> -   Data frames are *heterogeneous*: the vectors in a data frames can each be of a different data type.
+> -   Columns are typically variables and rows are observations.
+> -   You can make make data frames with `data.frame()`, or by combining vectors with `cbind()` or `rbind()`.
+> -   Data frames can be indexed in the same way as matrices: `df[row no, col no]`.
+> -   Data frames can also be indexed by using variable/column names: `df$var` or `df[["var"]]`.
+
+## Data frames: exercise
+
+-   Load the example data frame using the code provided
+-   Identify the number of observations (rows), number of variables (columns), and names of variables using `str()`
+-   Select the variable `mpg`
+-   Select the 4th row
+-   Square the value of the `cyl` variable and store this as a new variable `cylsq`
+
+## Data frames: exercise
+
+```{r data frames setup, include = F}
+data(mtcars)
+```
+
+```{r data frames 1}
+str(mtcars)
+```
+
+```{r data frames 2, eval=F}
+mtcars$mpg
+```
+
+```{r data frames 3}
+mtcars[4,]
+mtcars$cylsq <- (mtcars$cyl)^2
+```
+
+# Reading files
+
+## Working directories
+
+The working directory is the folder where R scripts and projects look for files by default.
+
+You can go to the Files tab in the bottom right window in RStudio and find the directory you want. Then you can set it as a working directory with an option in the "More" menu. Or you can use the `setwd()` as follows:
+
+```{r, eval=FALSE}
+setwd("/nfs/home/krn5889/R sessions")
+```
+
+In the exercises script file, set your working directory now.
+
+## Reading files: read.csv()
+
+```{r read.csv intro, eval=F}
+gapminder <- read.csv("data/gapminder5.csv", stringsAsFactors=FALSE)
+```
+
+```{r read.csv breakdown, eval=F}
+gapminder <- read.csv(file = "data/gapminder5.csv",
+                       sep = ",",
+                       stringsAsFactors = FALSE)
+```
+
+<aside class="notes">
+
+The above code is what you will usually see and use. The below code breaks down what is going on inside.
+
+</aside>
+
+## Reading files: exercise
+
+-   Check your working directory with `getwd()`.
+-   Run the `read.csv()` code provided and see what happens in the Environment tab.
+-   Load the `readr` package. <br><small>(It as has already been installed as part of `tidyverse`)</small>
+-   Use `read_csv()` to load the gapminder data. Read the message generated in the console.
+
+## Reading files: exercise
+
+```{r read_csv, message=TRUE}
+getwd()
+library(readr)
+gapminder <- read_csv("data/gapminder5.csv")
+```
+
+## Reading files
+
+> -   You can also read files from the full local path or from URLs
+> -   You can read files using RStudio's interface through the "Files" tab
+> -   For other file types, use the packages `haven` (Stata, SAS, SPSS) or `readxl` (Excel)
+
+# Roadmap
+
+## Roadmap for the rest of the R sessions
+
+-   Today we will learn how to do basic **data manipulation** and **data visualization** in base R
+
+-   Most commonly, you will do these tasks using specialized packages such as `tidyverse` or `data.table`
+
+-   So why teach these skills in base R?
+
+    -   This helps you understand how R works
+    -   Many packages rely on how these tasks work in base R
+    -   Useful for simple tasks in workflows that otherwise don't involve much manipulation or visualization
+
+# Data manipulation
+
+## Exploring data frames
+
+> -   You can view data frames in RStudio with `View()` and examine other characteristics with `str()`, `dim()`, `names()`, `nrow()`, and more.
+>
+> -   When run on a data frame, `summary()` returns summary statistics for all variables.
+>
+> -   `mean()`, `median()`, `var()`, `sd()`, and `quantile()` are useful functions for variables.
+>
+> -   Frequency tables are a simple and useful way to explore discrete/categorical variables in data frames
+>
+>     -   `table()` creates a frequency table of one or more variables
+>     -   `prop.table()` can turn a frequency table into a proportion table
+
+<aside class="notes">
+
+Notice that any data frames which have been read in or created, like all other objects, can be seen in the environment
+
+</aside>
+
+## Exploring data frames: exercise
+
+-   Run `summary()` on the gapminder data
+-   Find the mean of the variable `pop`
+-   Create a frequency table of the variable `year` using `table()`
+-   Create a proportion table of the variable `continent` using `prop.table()` <br><small>(Hint: check the help file for `prop.table()` to see what the input should be)</small>
+
+## Exploring data frames: exercise
+
+```{r exploring data frames pt1}
+summary(gapminder)
+```
+
+## Exploring data frames: exercise
+
+```{r exploring data frames pt2}
+mean(gapminder$pop)
+table(gapminder$year)
+prop.table(table(gapminder$continent))
+```
+
+## Subsetting
+
+> -   One of the benefits of R is that we can work with multiple data frames at the same time
+>
+> -   We will often want to *subset* a data frame, i.e. work with a portion of the data frame
+>
+> -   There are two common ways to subset a data frame in base R
+>
+>     -   Index the data frame: `gapminder[gapminder$continent=="Asia",]` (note the use of a logical statement and the comma)
+>     -   Use the `subset()` function: `subset(gapminder, subset=continent=="Asia")`
+
+## Sorting
+
+> -   The `sort()` function reorders elements, in ascending order by default.
+>
+>     -   You can flip the order by using the `decreasing = TRUE` argument.
+>
+> -   The `order()` function gives you the index positions in sorted order.
+>
+> -   `sort()` is useful for quickly viewing vectors; `order()` is useful for arranging data frames.
+
+## Subsetting and Sorting: exercise
+
+-   Create a new data frame called `gapminder07` containing only those rows in the gapminder data where `year` is 2007
+-   Created a sorted frequency table of the variable `continent` in `gapminder07` <br><small>(Hint: use `table()` and `sort()`)</small>
+-   Print out the population of Mexico in 2007
+-   Try the bonus question if you have time
+
+## Subsetting and Sorting: exercise
+
+```{r subsetting and sorting}
+gapminder07 <- subset(gapminder, subset = year==2007)
+sort(table(gapminder07$continent))
+gapminder07$pop[gapminder07$country=="Mexico"]
+head(gapminder07[order(gapminder07$pop, decreasing=TRUE),])
+```
+
+<aside class="notes">
+
+Don't worry too much about the bonus question if you find it confusing. The package `dplyr`, which we will cover on Thursday, will offer other ways to do this kind of task which some of you may find more intuitive.
+
+</aside>
+
+## Adding and removing columns
+
+When cleaning or wrangling datasets in RStudio, we will often want to create new variables.
+
+Two ways to add a vector as a new variable in R:
+
+```{r adding columns, eval=F}
+gapminder$newvar <- newvar
+
+gapminder <- cbind(gapminder, newvar)
+```
+
+Removing columns is easy too:
+
+```{r removing columns, eval=F}
+gapminder$newvar <- NULL
+
+gapminder <- gapminder[-"newvar"]
+```
+
+## Recoding variables
+
+> -   A common task when cleaning/wrangling data is recoding variables.
+>
+> -   Think about what the recoded variable should look like & then decide on an approach.
+>
+>     -   Sometimes, a single function can accomplish the recoding task needed. The new vector can then be assigned to a new column in the data frame.
+>     -   If no single function comes to mind, we can initialize a new variable in the data frame, and assign values using indexes and conditional statements.
+>     -   More complex recoding tasks can be accomplished with other packages like `dplyr`, which you can preview in the lecture notes.
+
+## Recoding variables: exercise
+
+Use the data frame `gapminder07` throughout this exercise.
+
+-   Round the values of the variable `lifeExp` using `round()`, and store this as a new variable `lifeExp_round`
+-   Print out the new variable to see what it looks like
+-   Read through the code that creates the new variable `lifeExp_over70` and try to understand what it does.
+-   Try to create a new variable `lifeExp_highlow` that has the value "High" when life expectancy is over the mean and the value "Low" when it is below the mean.
+
+## Recoding variables: exercise
+
+```{r recoding variables}
+gapminder07$lifeExp_round <- round(gapminder07$lifeExp)
+head(gapminder07$lifeExp_round)
+```
+
+## Recoding variables: exercise
+
+```{r}
+gapminder07$lifeExp_over70 <- NA  # Initialize a variable containing all "NA" values
+gapminder07$lifeExp_over70[gapminder07$lifeExp>70] <- "Yes"
+gapminder07$lifeExp_over70[gapminder07$lifeExp<70] <- "No"
+table(gapminder07$lifeExp_over70)
+```
+
+## Recoding variables: exercise
+
+```{r}
+gapminder07$lifeExp_highlow <- NA
+gapminder07$lifeExp_highlow[gapminder07$lifeExp>mean(gapminder07$lifeExp)] <- "High"
+gapminder07$lifeExp_highlow[gapminder07$lifeExp<mean(gapminder07$lifeExp)] <- "Low"
+table(gapminder07$lifeExp_highlow)
+```
+
+## Aggregating
+
+> -   Notice that the observations (i.e. rows) in our data frame are grouped; specifically, each country is grouped into a continent.
+>
+> -   We are often interested in summary statistics by groups.
+>
+> -   The `aggregate()` function accomplishes this: `aggregate(y ~ x, FUN = mean)` gives the mean of vector `y` for each unique group in `x`.
+>
+>     -   `mean` can be replaced by other functions here, such as `median`.
+>
+> -   **Try it**! In the exercise file, find the mean of life expectancy in 2007 for each continent.
+
+## Aggregating: exercise
+
+```{r aggregating pt 1}
+aggregate(gapminder07$lifeExp ~ gapminder07$continent, FUN = mean)
+```
+
+```{r aggregating pt 2}
+aggregate(lifeExp ~ continent, data = gapminder07, FUN = mean)
+```
+
+## Statistics
+
+> -   Here are some easy statistical analyses to conduct in R
+>
+>     -   Correlations: `cor()`; Covariance: `cov()`
+>     -   T-tests: `t.test(var1 ~ var2)`, where `var2` is the grouping variable
+>     -   Linear regression: `lm(y ~ x1 + x2, data = df)`
+>
+> -   You can store the results of these functions in objects, which is especially useful for statistical models with many components.
+
+## Statistics: exercise
+
+Use `gapminder07` for all the below exercises.
+
+<small>You're using some new functions, so refer to help files whenever you get stuck.</small>
+
+-   Calculate the correlation between `lifeExp` and `gdpPercap`.
+-   Use a t-test to evaluate the difference in `gdpPercap` between "high" and "low" life expectancy countries. Store the results as `t1`, and then print out `t1`.
+
+## Statistics: exercise
+
+```{r statistics pt 1}
+cor(gapminder07$lifeExp, gapminder07$gdpPercap)
+t1 <- t.test(gapminder07$gdpPercap~gapminder07$lifeExp_highlow)
+t1 <- t.test(gdpPercap~lifeExp_highlow, data=gapminder07)
+t1
+```
+
+<small>Note that `t1` is stored as a list. You can now call up the components of the t-test when you need them.</small>
+
+## Statistics: exercise
+
+-   Conduct a linear regression using `lm()` which predicts `lifeExp` as a function of `gdpPercap` and `pop`. Store the results as `reg1`.
+
+    -   You can define all the variables using the `df$var` syntax, or you can just use variable names and identify the data frame in the `data =` argument.
+    -   Examples are shown at the bottom of the help file for `lm()`
+
+-   Print out `reg1`.
+
+-   Run `summary()` on `reg1`.
+
+## Statistics: exercise
+
+```{r statistics pt 2}
+reg1 <- lm(lifeExp ~ gdpPercap + pop, data = gapminder07)
+reg1
+summary(reg1)
+```
+
+# Writing files
+
+## Writing a data file
+
+> -   We will often want to save the data frames as data files after cleaning/wrangling/etc.
+>
+> -   You can use `write.csv()` from base R or `write_csv()` from `readr` to do this.
+>
+> -   **Try it!** Save the data frame `gapminder07` in the same directory that `gapminder5.csv` is located.
+>
+>     -   If you use `write.csv()` , set the argument `row.names = FALSE`
+>
+>     -   If you use `write_csv()`, it does not include row names/numbers by default
+
+## Writing a data file: exercise
+
+```{r writing files, eval=F}
+write.csv(gapminder07, file="data/gapminder07.csv", row.names=FALSE)
+write_csv(gapminder07, file="data/gapminder07.csv")
+```
+
+## Save R objects
+
+> -   You can save all objects in your workspace using `save.image()` or by clicking the "Save" icon in the Environment tab.
+>
+>     -   You can load all objects back in using `load.image()` or opening the `.RData` file that is created.
+>     -   You can save specific objects in an `.RData` file with the `save()` function.
+>
+> -   If your script file is well-written, you should be able to retrieve all your objects just by running your code again.
+>
+> -   If you have a project with code that takes a long time to run, I would recommend using project files.
+
+# Data visualization
+
+## Base R vs. ggplot2
+
+> -   We will only cover visualization briefly today, using some functions included in base R. Data scientists generally use other packages for data visualization, especially `ggplot2`, which we will cover next Monday.
+>
+> -   So why learn data visualization in base R?
+>
+>     -   Some of the simple functions are useful ways to explore data while doing analysis.
+>     -   The syntax of visualization in base R is often adopted by other packages.
+
+## Histograms
+
+> -   Histograms are a useful way to examine the distribution of a single variable. The base R function for histograms is simple: `hist()`.
+>
+> -   **Try it!** Create a histogram of the variable `lifeExp` in `gapminder07`.
+>
+>     -   When you're done, look at the help file and try to re-create the histogram, this time with a title and axis labels.
+>     -   Bonus: Change the `breaks =` argument from its default setting and see what happens.
+
+## Histograms: exercise
+
+```{r histograms}
+hist(gapminder07$lifeExp, 
+     main="Distribution of life expectancy across countries in 2007", 
+     xlab="Life expectancy", ylab="Frequency")
+```
+
+## Scatterplots
+
+> -   You can create a scatterplot by providing a formula containing two variables (i.e. `y ~ x`) to the `plot()` function in R.
+> -   Titles and axis labels can be added in `plot()` similarly to `hist()`.
+> -   The function `abline()` can "layer" straight lines on top of a `plot()` output.
+
+## Scatterplots: exercise
+
+-   Create a scatterplot with `lifeExp` on the y-axis and `gdpPercap` on the x-axis.
+-   Add a title and axis labels.
+-   Bonus: Add a horizontal line indicating the mean of `lifeExp` onto the plot using `abline()`.
+
+## Scatterplots: exercise
+
+```{r scatterplot 1}
+plot(gapminder07$lifeExp ~ gapminder07$gdpPercap)
+```
+
+## Scatterplots: exercise
+
+```{r scatterplot 2}
+plot(gapminder07$lifeExp ~ gapminder07$gdpPercap,
+     main="Relationship between life expectancy and GDP per capita in 2007", 
+     ylab="Life expectancy", xlab="GDP per capita")
+```
+
+## Scatterplots: exercise
+
+```{r scatterplot 3}
+plot(gapminder07$lifeExp ~ gapminder07$gdpPercap,
+     main="Relationship between life expectancy and GDP per capita in 2007", 
+     ylab="Life expectancy", xlab="GDP per capita")
+abline(h = mean(gapminder07$lifeExp))
+```
+
+# The End!

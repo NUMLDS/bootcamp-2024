@@ -1,0 +1,13 @@
+type,group
+solar,renewable
+wind,renewable
+geothermal,renewable
+biomass,renewable
+biogas,renewable
+small_hydro,hydro
+imports,imports
+nuclear,nuclear
+coal,thermal
+other,other
+natural_gas,thermal
+large_hydro,hydro
