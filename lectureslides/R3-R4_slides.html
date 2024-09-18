@@ -1858,9 +1858,9 @@ document.addEventListener('DOMContentLoaded', function(e) {
 and appends any strings enclosed in the function.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages(&quot;here&quot;)</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>here<span class="sc">::</span><span class="fu">here</span>()</span></code></pre></div>
-<pre><code>## [1] &quot;/Users/alice/Documents/Northwestern/R Bootcamp/2024/github&quot;</code></pre>
+<pre><code>## [1] &quot;/Users/tuckerlewis/Documents/Bootcamp/bootcamp-2024&quot;</code></pre>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;gapminder.csv&quot;</span>)</span></code></pre></div>
-<pre><code>## [1] &quot;/Users/alice/Documents/Northwestern/R Bootcamp/2024/github/data/gapminder.csv&quot;</code></pre>
+<pre><code>## [1] &quot;/Users/tuckerlewis/Documents/Bootcamp/bootcamp-2024/data/gapminder.csv&quot;</code></pre>
 </section>
 <section id="remember-our-data-this-morning" class="slide level2">
 <h2>Remember our data this morning…</h2>
@@ -2191,7 +2191,7 @@ for each continent for each year?</li>
 <span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 <pre><code>## [1] &quot;Continent: Asia&quot;
 ## [1] &quot;1952: 9.29175069597824&quot;
-## [1] &quot;1957: 9.63542861940215&quot;
+## [1] &quot;1957: 9.63542861940214&quot;
 ## [1] &quot;1962: 9.82063194066467&quot;
 ## [1] &quot;1967: 9.65096458232544&quot;
 ## [1] &quot;1972: 9.72270004073083&quot;
@@ -2219,7 +2219,7 @@ for each continent for each year?</li>
 ## [1] &quot;1952: 5.1515814343277&quot;
 ## [1] &quot;1957: 5.62012285430095&quot;
 ## [1] &quot;1962: 5.87536393337021&quot;
-## [1] &quot;1967: 6.08267262744012&quot;
+## [1] &quot;1967: 6.08267262744013&quot;
 ## [1] &quot;1972: 6.41625832389558&quot;
 ## [1] &quot;1977: 6.80819741006083&quot;
 ## [1] &quot;1982: 7.37594008904693&quot;
@@ -2235,7 +2235,7 @@ for each continent for each year?</li>
 ## [1] &quot;1967: 7.90917103705144&quot;
 ## [1] &quot;1972: 7.32301680161029&quot;
 ## [1] &quot;1977: 7.06949561543585&quot;
-## [1] &quot;1982: 6.72083381905351&quot;
+## [1] &quot;1982: 6.7208338190535&quot;
 ## [1] &quot;1987: 5.80192884249138&quot;
 ## [1] &quot;1992: 5.16710380580843&quot;
 ## [1] &quot;1997: 4.88758389629614&quot;
@@ -2473,7 +2473,7 @@ met</li>
 <div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>random_year <span class="ot">&lt;-</span> <span class="fu">sample</span>(years, <span class="dv">1</span>)</span>
 <span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>random_year</span></code></pre></div>
-<pre><code>## [1] 1957</code></pre>
+<pre><code>## [1] 1967</code></pre>
 <div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (random_year <span class="sc">&gt;</span> <span class="dv">1977</span>) {</span>
 <span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(random_year)</span>
 <span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
@@ -2726,11 +2726,12 @@ format</li>
 <li>This presentation was created using Rmarkdown!</li>
 </ul>
 </section>
-<section id="day-3-part-2-exercise" class="slide level2">
-<h2>Day 3, Part 2 Exercise</h2>
+<section id="r3-r4-exercises" class="slide level2">
+<h2>R3, R4 Exercises</h2>
 <ol type="1">
-<li>Open the <code>rmd_exercise_template.Rmd</code></li>
-<li>Save as: <code>Day1Part2RExercise_LastnameFirstname.Rmd</code>.</li>
+<li>Open the <code>rmd_exercise_template.Rmd</code> or
+<code>R3-R4_exercises_no_answers.Rmd</code></li>
+<li>Save as: <code>R3R4Exercise_LastnameFirstname.Rmd</code>.</li>
 <li>Read in the gapminder data set</li>
 <li>As you answer questions, be sure to annotate your work with as much
 detail as possible!</li>
