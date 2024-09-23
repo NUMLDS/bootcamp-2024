@@ -1,0 +1,74 @@
+
+
+```{r load-data}
+rm(list=ls())
+
+library(here)
+library(readr)
+schools <- read.csv(here::here("data/nys_schools.csv"))
+acs <- read.csv(here::here("data/nys_acs.csv"))
+```
+
+```{r examine-99}
+
+filtered_schools <- subset(schools, total_enroll != -99 & per_free_lunch != -99 & per_reduced_lunch != -99 & per_lep != -99 & mean_ela_score != -99 & mean_math_score != -99 )
+
+```
+
+```{r poverty-level}
+
+
+
+for (year in c(2009:2016)){
+  low_thresh <- quantile(acs$county_per_poverty[acs$year == year], 0.33)
+  high_thresh <- quantile(acs$county_per_poverty[acs$year == year], 0.66)
+  
+  acs <- acs %>%
+    filter(year==year) %>%
+    mutate(poverty_level=case_when(
+      county_per_poverty <= low_thresh[["33%"]] ~ "low",
+      county_per_poverty >= high_thresh[["66%"]] ~ "high",
+      TRUE ~ "medium"
+    ))
+}
+
+```
+
+
+```{r data-viz}
+library(scales)
+
+merged <- merge(filtered_schools, acs, by=c("county_name", "year"))
+
+merged %>% 
+  group_by(county_name) %>%
+  summarise(avg_poverty=mean(county_per_poverty),
+            avg_math=mean(mean_math_score)) %>%
+  ggplot() +
+  geom_point(aes(x=avg_poverty, y=avg_math)) +
+  geom_smooth(aes(x=avg_poverty, y=avg_math), method="lm")+ 
+  scale_x_continuous(labels=percent) +
+  labs(title="Average Percentage of Poverty by Average Math Score for Each County",
+       y="Average Math Score",
+       x="% of Impoverished Citizens") + 
+  theme_minimal()
+
+
+```
+
+
+```{r data-viz-2}
+merged %>% 
+  group_by(county_name, year) %>%
+  summarise(avg_poverty=mean(county_per_poverty),
+            avg_math=mean(mean_math_score)) %>%
+  ggplot() +
+  geom_point(aes(x=avg_poverty, y=avg_math)) +
+  geom_smooth(aes(x=avg_poverty, y=avg_math), method="lm")+ 
+  scale_x_continuous(labels=percent) +
+  facet_wrap(~year, scales = "free") +
+  labs(title="Average Percentage of Poverty by Average Math Score for Each County",
+       y="Average Math Score",
+       x="% of Impoverished Citizens") + 
+  theme_minimal()
+```
