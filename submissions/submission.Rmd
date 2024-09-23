@@ -1,0 +1,246 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+
+
+
+# MLDS Boot Camp - Final R exercise
+
+You've learned quite a lot about R in a short time. Congratulations! This exercise is designed to give you some additional practice on the material we have discussed this week while the lectures are still fresh in your mind, and to integrate different tools and skills that you have learned.
+
+## Background
+
+You are a data analyst for the New York City Department of Education. You've been tasked with answering the question:
+  
+  > What can data tell us about the relationship between poverty and test performance in New York public schools?
+  Some other questions that your department has:
+  > * What's the difference in test performance between low, medium and high poverty areas?
+  > * Has this relationship changed over time?
+  > * Is this relationship at all moderated by access to free / reduced price lunch?
+
+## Brainstorming
+
+Before even looking at the data:
+
+* Empathize: Why is the stakeholder asking these questions?
+  - want to improve the education in general
+  - want to improve performance in bad area/...
+  - do region with high poverty do good or bad in test score
+  - do poverty has impact on test score
+  
+* Brainstorm: What data and/or visualizations could help answer these questions?
+  - hist gram poverty are vs test score
+  
+* Insights: What conclusions and/or recommendations do you expect to come from your analysis?
+  - how to impove area with low test score
+
+## Your Task
+
+Using the skills you've learned in the past week, tackle the question(s) above. You can use summary tables, statistical models, and/or data visualization in pursuing an answer.
+Given the short time period, any answer will of course prove incomplete. The goal of this task is to give you some room to play around with the skills you've just learned. Don't hesitate to try something even if you don't feel comfortable with it yet. Do as much as you can in the time allotted.
+
+### Step 1: Clean the Data
+
+This is where the majority of your time will be spent.
+
+#### Task 0: Open RStudio
+
+Create a new .R or .Rmd file to document your work.
+
+- Remember to **load necessary packages**.
+- Remember to **comment extensively** in your code. If you're working in an RMarkdown file, you can describe your workflow in the text section. But you should also comment within all of your code chunks.
+
+#### Task 1: Import your data
+
+Read the data files `nys_schools.csv` and `nys_acs.csv` into R. These data come from two different sources: one is data on *schools* in New York state from the [New York State Department of Education](http://data.nysed.gov/downloads.php), 
+and the other is data on *counties* from the American Communities Survey from the US Census Bureau. 
+Review the codebook file so that you know what each variable name means in each dataset.
+
+```{r}
+nys_schools = read_csv("nys_schools.csv")
+head(nys_schools)
+```
+
+```{r}
+nys_acs = read_csv("nys_acs.csv")
+head(nys_acs)
+# poverty by county, income, education level 
+```
+
+
+#### Task 2: Explore your data
+
+Getting to know your data is a critical part of data analysis. 
+Take the time to explore the structure of the two dataframes you have imported. 
+What types of variables are there? Is there any missing data? How can you tell? 
+What else do you notice about the data?
+
+  
+```{r}
+str(nys_schools)
+summary(nys_schools)
+# school with score# school with score# school with score in different county 
+# county -> many districts
+```
+
+  
+```{r}
+str(nys_acs)
+summary(nys_acs)
+```
+
+    
+#### Task 3: Recoding and variable manipulation
+  
+1. Deal with missing values, which are currently coded as `-99`.
+```{r}
+char_col = names(nys_schools)[sapply(nys_schools,is.character)]
+print(char_col)
+num_col = names(nys_schools)[sapply(nys_schools,is.numeric)]
+print(num_col)
+```
+```{r}
+for (col in char_col) {
+  nys_schools[[col]][nys_schools[[col]] == -99] <- ""
+  }
+```
+
+```{r}
+for (col in num_col) {
+  nys_schools[[col]][nys_schools[[col]] == -99] <- NA
+  }
+```
+
+
+2. Create a categorical variable that groups counties into "high", "medium", and "low" poverty groups. Decide how you want to split up the groups and briefly explain your decision.
+
+```{r}
+quantiles <- quantile(nys_acs$county_per_poverty, probs = c(0.33, 0.66))
+quantiles[1]
+nys_acs$group[nys_acs$county_per_poverty < quantiles[1]] = "low"
+nys_acs$group[(nys_acs$county_per_poverty >= quantiles[1])&(nys_acs$county_per_poverty <= quantiles[2])] = "medium"
+nys_acs$group[nys_acs$county_per_poverty > quantiles[2]] = "high"
+
+head(nys_acs[, c("county_name", "county_per_poverty", "group")])
+
+```
+```{r}
+hist(nys_acs$county_per_poverty)
+```
+
+3. The tests that the NYS Department of Education administers changes from time to time, so scale scores are not directly comparable year-to-year. Create a new variable that is the standardized z-score for math and English Language Arts (ELA) for each year (hint: group by year and use the `scale()` function)
+```{r}
+# Check mean and standard deviation of z-scores for each year
+nys_schools %>%
+  group_by(year) %>%
+  summarize(
+    math_mean = mean(mean_math_score, na.rm = TRUE),
+    math_sd = sd(mean_math_score, na.rm = TRUE),
+    ela_mean = mean(mean_ela_score, na.rm = TRUE),
+    ela_sd = sd(mean_ela_score, na.rm = TRUE)
+  )
+
+```
+
+#### Task 4: Merge datasets
+
+Create a dataset that merges variables from the schools dataset and the ACS dataset. Remember that you have learned multiple approaches on how to do this, and that you will have to decide how to combine the two data sets.
+
+---
+```{r}
+merge_nys = merge(nys_schools, nys_acs, by = c("county_name","year"))
+merge_nys
+```
+
+
+### Step 2: Analyze the Data
+  
+  Think back to the original question(s). The best way to answer them and present them to a non-technical audience is using summary tables or visualizations.
+
+#### Task 5: Create summary tables
+
+Generate a few summary tables to help answer the questions you were originally asked.
+
+For example:
+  
+  1. For each county: total enrollment, percent of students qualifying for free or reduced price lunch, and percent of population in poverty.
+2. For the counties with the top 5 and bottom 5 poverty rate: percent of population in poverty, percent of students qualifying for free or reduced price lunch, mean reading score, and mean math score.
+
+
+```{r}
+library(dplyr)
+
+county_summary <- merge_nys %>%
+  group_by(county_name) %>%
+  summarise(
+    total_enrollment = sum(total_enroll, na.rm = TRUE),
+    percent_free_lunch = mean(per_free_lunch, na.rm = TRUE),
+    
+    percent_population_poverty = mean(county_per_poverty, na.rm = TRUE)
+  )
+head(county_summary)
+
+```
+
+
+#### Task 6: Data visualization
+
+Using `plot` or `ggplot2`, create a few visualizations that you could share with your department.
+
+For example:
+  
+1. The relationship between access to free/reduced price lunch and test performance, at the *school* level.
+2. Average test performance across *counties* with high, low, and medium poverty.
+
+```{r}
+# Calculate average test scores across poverty groups
+average_scores_by_poverty <- merge_nys %>%
+  group_by(group) %>%
+  summarise(
+    avg_math_score = mean(mean_math_score, na.rm = TRUE),
+    avg_ela_score = mean(mean_ela_score, na.rm = TRUE)
+  )
+
+# Bar plot showing average scores by poverty group
+ggplot(average_scores_by_poverty, aes(x = group)) +
+  geom_bar(aes(y = avg_math_score), stat = "identity", fill = "skyblue", alpha = 0.7) +
+  labs(title = "Average Test Performance by Poverty Group",
+       x = "Poverty Group",
+       y = "Average Score") +
+  theme_minimal() 
+
+
+```
+
+---
+  
+### Step 3: Github Submission
+  
+#### 1. Save your exercise within your forked repo
+  
+  When you have completed the exercise, save your Markdown file in the `submissions` folder of your forked repo using this naming convention: `FinalRExercise_LastnameFirstname.Rmd`.
+
+#### 2. Create a pull request
+
+Create a pull request to submit the file to the base repo that lives in the MSiA organization. Make sure that the new file you created is in the `submissions` folder, and then create a pull request that asks to merge changes from your forked repo to the base repo.
+
+#### Reminders
+
+- Attempt to knit your Markdown file into HTML format before committing it to Github. Troubleshoot any errors with the knit process by checking the lines referred to in the error messages.
+- When working with git, don't forget to commit changes periodically, and push commits when you are done.
