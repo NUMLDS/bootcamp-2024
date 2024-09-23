@@ -1,0 +1,59 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+# import Libraries
+```{r}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+schools = read.csv("nys_schools.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE)
+county = read.csv("nys_acs.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE)
+```
+
+# Explore Data
+```{r}
+summary(schools) # We see that certain columns have -99 values which may be considered as null values
+schools[schools==-99] = NA # Replacing all -99 with NA values
+summary(county)
+```
+# Exploring Data and creating categories
+```{r}
+# We are considering 
+quantile(county$county_per_poverty, probs = c(0, 0.33, 0.66, 1))
+# Low Poverty - 0 to 0.12
+# Medium Poverty - 0.12 to 0.15
+#High Poverty - 0.15 to 0.3
+```
+```{r}
+# Creating the categorical variable
+county = county %>%
+  mutate(poverty_cat = NA, poverty_cat = if_else(county_per_poverty<=0.12, 'Low', poverty_cat),
+         poverty_cat = if_else(county_per_poverty>0.12 & county_per_poverty<=0.15, 'Medium', poverty_cat),
+         poverty_cat = if_else(county_per_poverty>0.15 & county_per_poverty<=0.3, 'High', poverty_cat)
+  )
+```
+# Z-score of Math and ELA scores
+```{r}
+schools = schools %>%
+  group_by(year) %>%
+  mutate(scaled_ela_score = scale(mean_ela_score),scaled_math_score = scale(mean_math_score))
+```
+#Merging two dataframes schools and County
+```{r}
+merged_data = left_join(county, schools, by=c("county_name", "year"))
+```
+#Data Visualization
+```{r}
+summary(merged_data)
+merged_data %>%
+  group_by(year, poverty_cat) %>%
+  summarise(total_score = (mean_ela_score+mean_math_score)/2) #%>%
+  ggplot()+
+  geom_area(aes(x=year, y=total_score, fill=factor(poverty_cat)))
+```
+
+
+
+
+
