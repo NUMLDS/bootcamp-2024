@@ -1,0 +1,76 @@
+---
+title: "final exercise"
+output: html_document
+date: "2024-09-23"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Step 1: clean the data
+
+Task 1: import dataset
+```{r}
+nys_schools <- read_csv("nys_schools.csv")
+nys_acs <- read_csv("nys_acs.csv")
+```
+
+Task 2: explore data
+```{r}
+# Explore structure
+str(nys_schools)
+str(nys_acs)
+
+summary(nys_schools)
+summary(nys_acs)
+
+```
+
+Task 3: check for missing data
+```{r}
+#change missing value name
+nys_schools[nys_schools == -99] = NA
+nys_acs[nys_acs == -99] = NA
+
+#create categorical data to decide poverty level
+nys_acs$poverty_category = cut(nys_acs$county_per_poverty, 
+                                breaks = quantile(nys_acs$county_per_poverty, probs = c(0, 0.33, 0.66, 1)), #the decision is based on percentile 
+                                labels = c("low", "medium", "high"),
+                                include.lowest = TRUE)
+
+#create variable to standardize score
+nys_schools = nys_schools %>%
+  group_by(year) %>%
+  mutate(englist_z = scale(mean_ela_score),
+         math_z = scale(mean_math_score))
+
+#merge two datasets by county and year
+merged_data <- merge(nys_schools, nys_acs, by = c("county_name", "year"))
+
+
+```
+
+```{r}
+# Task 6.1
+result <- merged_data %>%
+  group_by(poverty_category) %>%
+  summarise(
+    MeanELAScore = mean(mean_ela_score, na.rm = TRUE),  # Calculate mean, removing NA values
+    MeanMathScore = mean(mean_math_score, na.rm = TRUE)  # Same for math scores
+  )
+
+result
+
+ggplot(result, aes(x = poverty_category)) +
+  geom_col(aes(y = MeanMathScore), position = position_dodge(width = 0.4)) +
+  labs(title = "Mean ELA and Math Scores by Poverty Category",
+       x = "Poverty Category",
+       y = "Mean Score") +
+  scale_fill_manual(values = c("Mean ELA Score" = "steelblue", "Mean Math Score" = "salmon")) +
+  theme_minimal()
+```
+
+
