@@ -1,0 +1,266 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+library(dplyr)
+library(tidyverse)
+
+acs_df <- nys_acs
+schools_df <- nys_schools
+
+
+# Drop rows with -99 values in acs_df
+acs_df <- acs_df %>%
+  filter_all(all_vars(. != -99))
+
+# Drop rows with -99 values in schools_df
+schools_df <- schools_df %>%
+  filter_all(all_vars(. != -99))
+
+merged_df <- acs_df %>%
+  mutate(poverty_category = case_when(
+    county_per_poverty < 0.10 ~ "low",
+    county_per_poverty >= 0.10 & county_per_poverty < 0.20 ~ "medium",
+    county_per_poverty >= 0.20 ~ "high"
+  ))
+
+schools_df <- schools_df %>%
+  group_by(year) %>%
+  mutate(
+    math_zscore = scale(mean_math_score),
+    ela_zscore = scale(mean_ela_score)
+  ) %>%
+  ungroup()
+
+head(acs_df)
+head(schools_df)
+
+
+```
+```{r}
+
+# Step 1: Create a summary table for each county
+# Total enrollment, percent of students qualifying for free/reduced lunch, and percent of population in poverty
+county_summary <- schools_df %>%
+  group_by(county_name) %>%
+  summarise(
+    total_enroll = sum(total_enroll, na.rm = TRUE),
+    avg_per_free_lunch = mean(per_free_lunch, na.rm = TRUE),
+    avg_per_reduced_lunch = mean(per_reduced_lunch, na.rm = TRUE)
+  ) %>%
+  left_join(acs_df, by = c("county_name" = "county_name")) %>%
+  select(county_name, total_enroll, avg_per_free_lunch, avg_per_reduced_lunch, county_per_poverty)
+
+# Display the county summary
+print(county_summary)
+```
+
+
+
+```{r}
+
+# Step 2: Identify top 5 and bottom 5 counties by poverty rate
+
+# Get the top 5 and bottom 5 counties based on poverty rate
+top_bottom_poverty <- acs_df %>%
+  group_by(county_name) %>%
+  summarise(county_per_poverty = mean(county_per_poverty, na.rm = TRUE)) %>%
+  arrange(desc(county_per_poverty)) %>%
+  slice(c(1:5, (n() - 4):n()))  # Top 5 and bottom 5
+
+# Merge with school data to get relevant information
+top_bottom_poverty_schools <- top_bottom_poverty %>%
+  left_join(schools_df, by = "county_name") %>%
+  group_by(county_name) %>%
+  summarise(
+    county_per_poverty = first(county_per_poverty),
+    avg_per_free_lunch = mean(per_free_lunch, na.rm = TRUE),
+    avg_per_reduced_lunch = mean(per_reduced_lunch, na.rm = TRUE),
+    mean_reading_score = mean(mean_ela_score, na.rm = TRUE),
+    mean_math_score = mean(mean_math_score, na.rm = TRUE)
+  )
+
+# Display the top and bottom poverty counties summary
+print(top_bottom_poverty_schools)
+
+```
+
+```{r}
+
+# Step 2: Identify top 5 and bottom 5 counties by poverty rate
+
+# Summarize poverty rates for each county
+county_poverty_summary <- acs_df %>%
+  group_by(county_name) %>%
+  summarise(county_per_poverty = mean(county_per_poverty, na.rm = TRUE)) %>%
+  arrange(desc(county_per_poverty))
+
+# Top 5 counties based on poverty rate
+top_5_poverty <- county_poverty_summary %>%
+  slice(1:5)
+
+# Bottom 5 counties based on poverty rate
+bottom_5_poverty <- county_poverty_summary %>%
+  slice((n() - 4):n())
+
+# Merge with school data to get relevant information for Top 5 counties
+top_5_poverty_schools <- top_5_poverty %>%
+  left_join(schools_df, by = "county_name") %>%
+  group_by(county_name) %>%
+  summarise(
+    county_per_poverty = first(county_per_poverty),
+    avg_per_free_lunch = mean(per_free_lunch, na.rm = TRUE),
+    avg_per_reduced_lunch = mean(per_reduced_lunch, na.rm = TRUE),
+    mean_reading_score = mean(mean_ela_score, na.rm = TRUE),
+    mean_math_score = mean(mean_math_score, na.rm = TRUE)
+  )
+
+# Merge with school data to get relevant information for Bottom 5 counties
+bottom_5_poverty_schools <- bottom_5_poverty %>%
+  left_join(schools_df, by = "county_name") %>%
+  group_by(county_name) %>%
+  summarise(
+    county_per_poverty = first(county_per_poverty),
+    avg_per_free_lunch = mean(per_free_lunch, na.rm = TRUE),
+    avg_per_reduced_lunch = mean(per_reduced_lunch, na.rm = TRUE),
+    mean_reading_score = mean(mean_ela_score, na.rm = TRUE),
+    mean_math_score = mean(mean_math_score, na.rm = TRUE)
+  )
+
+# Display the top 5 and bottom 5 tables
+print("Top 5 counties based on poverty rate:")
+print(top_5_poverty_schools)
+
+print("Bottom 5 counties based on poverty rate:")
+print(bottom_5_poverty_schools)
+
+
+```
+```{r}
+library(ggplot2)
+
+# Filter out rows with missing or non-finite values in the relevant columns
+filtered_schools_df <- schools_df %>%
+  filter(!is.na(per_free_lunch), !is.na(mean_math_score), !is.na(mean_ela_score))
+
+# Plot 1: Relationship between Free Lunch and Math Performance
+ggplot(filtered_schools_df, aes(x = per_free_lunch, y = mean_math_score)) +
+  geom_point(alpha = 0.5, color = "blue") +
+  geom_smooth(method = "lm", formula = y ~ x, color = "red") +
+  labs(title = "Relationship Between Free Lunch Percentage and Math Performance",
+       x = "Percent of Students Qualifying for Free Lunch",
+       y = "Mean Math Score") +
+  theme_minimal()
+
+# Plot 2: Relationship between Free Lunch and ELA Performance
+ggplot(filtered_schools_df, aes(x = per_free_lunch, y = mean_ela_score)) +
+  geom_point(alpha = 0.5, color = "green") +
+  geom_smooth(method = "lm", formula = y ~ x, color = "red") +
+  labs(title = "Relationship Between Free Lunch Percentage and ELA Performance",
+       x = "Percent of Students Qualifying for Free Lunch",
+       y = "Mean ELA Score") +
+  theme_minimal()
+
+```
+
+
+```{r}
+# Ensure that the poverty_category column is created
+acs_df <- acs_df %>%
+  mutate(poverty_category = case_when(
+    county_per_poverty < 0.10 ~ "low",
+    county_per_poverty >= 0.10 & county_per_poverty < 0.20 ~ "medium",
+    county_per_poverty >= 0.20 ~ "high"
+  ))
+
+# Merge the poverty category into the school data
+schools_with_poverty <- schools_df %>%
+  left_join(acs_df, by = c("county_name", "year")) %>%
+  group_by(poverty_category) %>%
+  summarise(
+    avg_math_score = mean(mean_math_score, na.rm = TRUE),
+    avg_ela_score = mean(mean_ela_score, na.rm = TRUE)
+  )
+
+# Plot 2: Average Math Score by Poverty Level
+ggplot(schools_with_poverty, aes(x = poverty_category, y = avg_math_score, fill = poverty_category)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Average Math Score by Poverty Category",
+       x = "Poverty Category",
+       y = "Average Math Score") +
+  theme_minimal()
+
+# Plot 3: Average ELA Score by Poverty Level
+ggplot(schools_with_poverty, aes(x = poverty_category, y = avg_ela_score, fill = poverty_category)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Average ELA Score by Poverty Category",
+       x = "Poverty Category",
+       y = "Average ELA Score") +
+  theme_minimal()
+
+```
+
+```{r}
+
+# Merge poverty data from acs_df into schools_df for analysis
+schools_with_poverty <- schools_df %>%
+  left_join(acs_df, by = c("county_name", "year"))
+
+# Filter out rows with missing or non-finite values in relevant columns
+filtered_data <- schools_with_poverty %>%
+  filter(!is.na(county_per_poverty), !is.na(mean_math_score), !is.na(mean_ela_score))
+
+# Linear regression model for Math performance
+math_model <- lm(mean_math_score ~ county_per_poverty, data = filtered_data)
+
+# Linear regression model for ELA performance
+ela_model <- lm(mean_ela_score ~ county_per_poverty, data = filtered_data)
+
+# Summary of the models
+summary(math_model)
+summary(ela_model)
+
+# Plot 1: Math Score vs. Poverty with Regression Line
+ggplot(filtered_data, aes(x = county_per_poverty, y = mean_math_score)) +
+  geom_point(alpha = 0.5, color = "blue") +
+  geom_smooth(method = "lm", formula = y ~ x, color = "red") +
+  labs(title = "Poverty vs. Math Performance",
+       x = "County Poverty Rate",
+       y = "Mean Math Score") +
+  theme_minimal()
+
+# Plot 2: ELA Score vs. Poverty with Regression Line
+ggplot(filtered_data, aes(x = county_per_poverty, y = mean_ela_score)) +
+  geom_point(alpha = 0.5, color = "green") +
+  geom_smooth(method = "lm", formula = y ~ x, color = "red") +
+  labs(title = "Poverty vs. ELA Performance",
+       x = "County Poverty Rate",
+       y = "Mean ELA Score") +
+  theme_minimal()
+
+
+
+# Linear regression model for total performance
+total_model <- lm(mean_math_score + mean_ela_score ~ county_per_poverty, data = filtered_data)
+
+
+# Summary of the models
+summary(total_model)
+
+
+# Plot 1: Math Score vs. Poverty with Regression Line
+ggplot(filtered_data, aes(x = county_per_poverty, y = mean_math_score+mean_ela_score)) +
+  geom_point(alpha = 0.5, color = "blue") +
+  geom_smooth(method = "lm", formula = y ~ x, color = "red") +
+  labs(title = "Poverty vs. Math Performance",
+       x = "County Poverty Rate",
+       y = "Mean total Score") +
+  theme_minimal()
+
+```
