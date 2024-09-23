@@ -1,0 +1,83 @@
+
+### Setup and Inputs
+
+```{r setup}
+
+rm(list = ls()) # Remove all leftover objects from previous work
+gc(verbose = FALSE)
+
+library("dplyr")
+library("data.table")
+library("ggplot2")
+library("wesanderson")
+
+options(scipen = 999)
+
+```
+
+
+```{r inputs}
+
+# Read in data
+nyc_school <- fread("C:\\Users\\yeeju\\Desktop\\Northwestern University\\R Exercise\\nys_schools.csv")
+nyc_asc <- fread("C:\\Users\\yeeju\\Desktop\\Northwestern University\\R Exercise\\nys_acs.csv")
+
+```
+
+
+### Step 1: Clean the Data
+
+```{r data_cleaning}
+
+# Remove -99 county_name
+df_clean1 <- nyc_school %>% 
+  filter(county_name != "-99") %>% 
+  mutate(
+    filter_out = case_when(
+      total_enroll == -99 | per_free_lunch == -99 | per_reduced_lunch == -99 | per_lep == -99 | mean_ela_score == -99 | mean_math_score == -99 ~ 1,
+      TRUE ~ 0
+    )
+  ) %>% 
+  filter(filter_out == 0) %>% 
+  select(-filter_out) %>% 
+  group_by(year) %>% 
+  mutate(
+    "scaled_ela" = scale(mean_ela_score), "scaled_math" = scale(mean_math_score)
+  )
+
+# Define poverty group
+df_clean2 <- nyc_asc %>% 
+  group_by(year) %>% 
+  mutate(
+    "income_group" = case_when(
+      county_per_poverty < quantile(county_per_poverty, 0.5) ~ "low",
+      county_per_poverty < quantile(county_per_poverty, 0.75) ~ "medium",
+      TRUE ~ "high"
+    )
+  )
+
+# Join the two datasets
+nyc <- df_clean1 %>% 
+  left_join(df_clean2, by = c("county_name", "year"))
+
+```
+
+
+### Visualization
+
+```{r data_visualization}
+
+viz1 <- nyc %>% 
+  filter(!is.na(income_group)) %>% 
+  group_by(income_group) %>% 
+  summarize("mean_ela" = mean(mean_ela_score), "mean_math" = mean(mean_math_score))
+
+ggplot(viz1, aes(x = income_group, y = mean_math)) +
+  geom_bar(stat = "identity", fill = "steel blue", color = "steel blue") +
+  xlab("Income Groups") +
+  ylab("Mean Math Score") +
+  ggtitle("Mean Math Score by Income Groups") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
