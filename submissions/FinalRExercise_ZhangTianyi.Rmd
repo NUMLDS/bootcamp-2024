@@ -1,0 +1,92 @@
+---
+title: "MLDS Boot Camp - Final R exercise"
+output: html_notebook
+---
+
+
+```{r}
+# import data
+nys_acs <- read.csv("~/Desktop/data/nys_acs.csv")
+nys_schools <- read.csv("~/Desktop/data/nys_schools.csv")
+nys_acs
+nys_schools
+```
+step 1: clean data
+```{r}
+# check if there's missing value
+colSums(is.na(nys_acs))
+colSums(is.na(nys_schools))
+
+# delete rows with missing value (-99)
+nys_schools[nys_schools == '-99'] <- NA
+
+# breakdown into 3 categories
+nys_acs <- nys_acs %>%
+  mutate(category = cut(county_per_poverty, breaks = c(0, 0.1, 0.2, Inf), 
+                        labels = c("Low", "Medium", "High")))
+print(nys_acs)
+
+# standardize ela score
+nys_schools$mean_ela_standardized <- scale(nys_schools$mean_ela_score)
+nys_schools$mean_math_standardized <- scale(nys_schools$mean_math_score)
+
+```
+
+```{r}
+# merge data
+merged <- merge(nys_acs, nys_schools)
+merged
+```
+step 2: analyze data
+
+5. analayze data
+```{r}
+summary_table <- merged %>%
+  group_by(county_name) %>%
+  
+  summarize(
+    total_enrollment = sum(total_enroll, na.rm = TRUE),
+    percent_reduced_lunch = mean(per_reduced_lunch, na.rm = TRUE),
+    percent_free_lunch = mean(per_free_lunch, na.rm = TRUE),
+    percent_poverty = mean(county_per_poverty, na.rm = TRUE),
+    mean_ela = mean(mean_ela_standardized, na.rm = TRUE),
+    mean_math = mean(mean_math_standardized, na.rm = TRUE)
+  )
+
+print(summary_table)
+```
+top 5 poverty
+```{r}
+summary_table_top5 <- summary_table %>%
+  arrange(desc(percent_poverty)) %>%
+  slice(1:5)
+print(summary_table_top5)
+```
+bottom 5 poverty
+```{r}
+summary_table_bottom5 <- summary_table %>%
+  arrange(percent_poverty) %>%
+  slice(1:5)
+print(summary_table_bottom5)
+```
+
+task 6:visualization
+
+```{r}
+ggplot(summary_table, aes(x = percent_free_lunch + percent_reduced_lunch, y = mean_math)) +
+  geom_point(alpha = 0.5) +  # Scatter points
+  geom_smooth(method = "lm", color = "blue", se = FALSE) +  # Linear trend line
+  labs(title = "Relationship Between Free/Ruduced Lunch Eligibility and Math Score",
+       x = "Percent of Students Eligible for Free/Reduced Lunch",
+       y = "Math Score") +
+  theme_minimal()
+
+ggplot(summary_table, aes(x = percent_free_lunch + percent_reduced_lunch, y = mean_ela)) +
+  geom_point(alpha = 0.5) +  # Scatter points
+  geom_smooth(method = "lm", color = "blue", se = FALSE) + 
+  labs(title = "Relationship Between Free/Ruduced Lunch Eligibility and Ela Score",
+       x = "Percent of Students Eligible for Free/Reduced Lunch",
+       y = "Ela Score") +
+  theme_minimal()
+```
+
