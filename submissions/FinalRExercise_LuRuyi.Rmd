@@ -1,0 +1,171 @@
+---
+title: "Bootcamp Final Exercise"
+author: "Ruyi Lu"
+date: "2024-09-23"
+output: html_document
+---
+
+### Questions to look at
+#### What's the difference in test performance between low, medium and high poverty areas? Has this relationship changed over time? Is this relationship at all moderated by access to free / reduced price lunch?
+
+```{r setup, include=FALSE}
+library(tidyverse)
+```
+
+### load data
+```{r}
+acs = read_csv('data/nys_acs.csv')
+school = read_csv('data/nys_schools.csv')
+#acs: 496*5
+#school: 35663*12
+```
+
+### data cleaning
+```{r}
+sum(is.na(acs))
+# no missing values in acs
+
+sum(is.na(school))
+# 1706 missing values in school
+# but NA labeled as -99, convert -99 to na first
+
+str(school)
+# colnames(school)
+
+# divide school by variable type, numeric and character
+# drop `district_name`
+num = c("year","total_enroll","per_free_lunch","per_reduced_lunch","per_lep","mean_ela_score","mean_math_score")
+chr = c("school_cd","school_name","county_name", "region","year")
+school_num = school[,num]
+school_chr = school[,chr]
+
+# convert -99 in numerical variables to NA
+school_num=replace(school_num, school_num==-99, NA)
+colSums(is.na(school_chr))
+colSums(is.na(school_num))
+
+#replace na with mean
+school_num$total_enroll=ifelse(is.na(school_num$total_enroll), mean(school_num$total_enroll, na.rm = TRUE), school_num$total_enroll)
+school_num$per_free_lunch=ifelse(is.na(school_num$per_free_lunch), mean(school_num$per_free_lunch, na.rm = TRUE), school_num$per_free_lunch)
+school_num$per_reduced_lunch=ifelse(is.na(school_num$per_reduced_lunch), mean(school_num$per_reduced_lunch, na.rm = TRUE), school_num$per_reduced_lunch)
+school_num$per_lep=ifelse(is.na(school_num$per_lep), mean(school_num$per_lep, na.rm = TRUE), school_num$per_lep)
+
+colSums(is.na(school_num))
+
+# scale math and ela score
+school_num$mean_ela_score=scale(school_num$mean_ela_score)
+school_num$mean_math_score=scale(school_num$mean_math_score)
+
+# combined school dataset together
+# drop repetitive column `year.1`
+temp = cbind(school_chr, school_num)
+str(temp)
+temp[,6] = NULL
+
+# dont wanna use rf or mice to replace NA so will just drop them here
+school_cleaned = na.omit(temp)
+
+colSums(is.na(school_cleaned))
+```
+
+### poverty level seperation
+```{r}
+# categorical variable grouping counties into "high", "medium", and "low" poverty groups
+# split based on 33% and 67% percentile
+str(acs)
+fivenum(acs$median_household_income)
+quantile(acs$median_household_income, c(.01, .33, .67, .99)) 
+acs$poverty_level<-NA
+acs$poverty_level <- ifelse(acs$median_household_income < 47627.80, 'high',
+                            ifelse(acs$median_household_income <= 53488.60, 'medium', 'low'))
+```
+
+### merge data
+```{r}
+temp <- school_cleaned %>% left_join(acs, by=c("county_name","year"))
+data = na.omit(temp)
+colSums(is.na(data))
+```
+
+### analysis
+### summary table for each county: total enrollment, percent of students qualifying for free or reduced price lunch, and percent of population in poverty.
+```{r}
+# total enrollment by county
+data %>%
+  group_by(county_name) %>%
+  summarize(total_enrollment = sum(total_enroll))
+
+# average per_free_lunch by county
+data %>%
+  group_by(county_name) %>%
+  summarize(avg_per_free_lunch = mean(per_free_lunch))
+
+# average per_reduced_lunch by county
+data %>%
+  group_by(county_name) %>%
+  summarize(avg_per_reduced_lunch = mean(per_reduced_lunch))
+
+# general poverty level
+table(data$poverty_level)
+
+# poverty level of each county
+data %>%
+  group_by(county_name, poverty_level) %>%
+  summarize(count = n(), .groups = 'drop') %>% head()
+
+# general poverty level over year
+data %>%
+  group_by(year, poverty_level) %>%
+  summarize(count = n(), .groups = 'drop') %>% head()
+
+```
+
+### my own analysis
+```{r}
+data %>% group_by(county_name) %>% arrange(county_per_poverty) %>% head(10)
+
+# average math score by poverty level for each county?
+data %>% group_by(county_name, poverty_level) %>%
+  summarise(avg_math_score = mean(mean_math_score)) %>% head(10)
+
+# higher poverty rate counties/regions -> lower score performance?
+# low-income neighborhoods < high-income neighborhoods in terms of score and percentage of bach?
+# relationship btw poverty and test performance over years?
+
+# which is better measure of household income, math score or ela score?
+ela = lm(median_household_income~mean_ela_score, data)
+math = lm(median_household_income~mean_math_score, data)
+summary(ela)
+summary(math)
+# neither seems like a good measurement intuitively
+# will use math score anyway
+
+```
+
+### viz
+```{r}
+# over the past few years, the difference in percentage of bach?
+data %>% 
+  group_by(year, poverty_level) %>%  # Include year in grouping
+  summarise(avg_county_bach_perc = mean(county_per_bach)) %>% 
+  ggplot(aes(x = year, y = avg_county_bach_perc, group = poverty_level, color = poverty_level)) + 
+  geom_smooth() + 
+  labs(title = "Percenatge of Bachelor of Different Poverty Level over Year",
+       x = "Year", y = "Percentage of Bachelor") + 
+  theme(legend.position = "bottom")
+
+
+# over the past few years, the difference in percentage of bach between low, medium and high poverty areas?
+data %>% 
+  group_by(year, poverty_level) %>%
+  summarise(avg_county_bach_perc = mean(county_per_bach)) %>%
+  ggplot(aes(x=poverty_level, y=avg_county_bach_perc, fill = poverty_level)) +
+  geom_bar(stat = 'identity') + 
+  facet_wrap(~year) + 
+  labs(title="Percenatge of Bachelor of Different Poverty Level over Year",
+       x="Poverty Level", y="Percenatge of Bachelor") + 
+  theme(legend.position = "bottom")
+
+
+```
+
