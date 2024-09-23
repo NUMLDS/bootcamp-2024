@@ -1,0 +1,96 @@
+---
+title: "final exercise"
+author: "Bo Zhao"
+date: '2024-09-23'
+output: html_document
+---
+step 1:
+```{r}
+library(ggplot2)
+library(tidyverse)
+
+schools = read_csv("r_bootcamp_day1/bootcamp-2024/data/nys_schools.csv")
+acs = read_csv("r_bootcamp_day1/bootcamp-2024/data/nys_acs.csv")
+```
+
+```{r}
+str(acs)
+summary(acs)
+```
+
+```{r}
+str(schools)
+summary(schools)
+```
+
+
+```{r}
+
+schools[schools == -99] = NA
+
+schools_missing_permutated = schools %>% 
+  mutate(mean_ela_score = ifelse(is.na(mean_ela_score), mean(mean_ela_score, na.rm = TRUE), mean_ela_score))%>%
+  mutate(mean_math_score = ifelse(is.na(mean_math_score), mean(mean_math_score, na.rm = TRUE), mean_math_score))
+
+schools_missing_permutated = schools_missing_permutated %>% na.omit()
+
+acs =
+  acs %>%
+    mutate(poverty_group = case_when(
+      county_per_poverty <= quantile(county_per_poverty, 1/3, na.rm = TRUE) ~ "low",
+      county_per_poverty <= quantile(county_per_poverty, 2/3, na.rm = TRUE) ~ "medium",
+      .default = "high"))
+
+schools =
+  schools %>%
+  group_by(year) %>%
+  mutate(mean_ela_score = scale(mean_ela_score),
+        mean_math_score = scale(mean_math_score)) %>%
+  ungroup()
+
+data = left_join(schools, acs, by = c("county_name", "year"))
+data
+```
+
+
+step 2:
+```{r}
+library(dplyr)
+county_summary <- data %>%
+  group_by(county_name) %>%
+  summarise(
+    total_enrollment = sum(total_enroll, na.rm = TRUE),
+    percent_free_lunch = mean(per_free_lunch, na.rm = TRUE),
+    percent_reduced_lunch = mean(per_reduced_lunch, na.rm = TRUE),
+    percent_poverty = mean(county_per_poverty, na.rm = TRUE)
+  )
+
+print(county_summary)
+
+
+```
+
+```{r}
+ggplot(data, aes(x = county_per_poverty, y = mean_math_score)) +
+  geom_point(alpha = 0.5, color = "blue") +    # Scatter plot with semi-transparent points
+  geom_smooth(method = "lm", se = TRUE, color = "red") +  # Add linear regression line
+  labs(
+    title = "Relationship between Poverty Rate and Math Test Performance",
+    x = "Poverty Rate (%)",
+    y = "Standardized Math Z-Score"
+  ) +
+  theme_minimal()
+
+# Step 2: Create a scatter plot of poverty rate vs. ELA z-score
+ggplot(data, aes(x = county_per_poverty, y = mean_ela_score)) +
+  geom_point(alpha = 0.5, color = "green") +    # Scatter plot with semi-transparent points
+  geom_smooth(method = "lm", se = TRUE, color = "red") +  # Add linear regression line
+  labs(
+    title = "Relationship between Poverty Rate and ELA Test Performance",
+    x = "Poverty Rate (%)",
+    y = "Standardized ELA Z-Score"
+  ) +
+  theme_minimal()
+
+```
+
