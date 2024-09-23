@@ -1,0 +1,143 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+#### Import Libraries
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+#### Task 1: Import your data
+
+
+```{r}
+library(readr)
+nys_acs <- read.csv("bootcamp-2024/data/nys_acs.csv",na = -99)
+nys_schools <- read.csv("bootcamp-2024/data/nys_schools.csv", na = -99)
+View(nys_acs)
+View(nys_schools)
+```
+
+Read the data files `nys_schools.csv` and `nys_acs.csv` into R. These data come from two different sources: one is data on *schools* in New York state from the [New York State Department of Education](http://data.nysed.gov/downloads.php), and the other is data on *counties* from the American Communities Survey from the US Census Bureau. Review the codebook file so that you know what each variable name means in each dataset.
+
+#### Task 2: Explore your data
+
+Getting to know your data is a critical part of data analysis. Take the time to explore the structure of the two dataframes you have imported. What types of variables are there? Is there any missing data? How can you tell? What else do you notice about the data?
+
+```{r} 
+nys_schools %>%  # Exploring data types and missing values
+    count(school_cd)
+
+summary(nys_schools)
+summary(nys_acs)
+head(nys_schools)
+head(nys_acs)
+
+nys_acs %>%
+    count(county_name)
+```
+
+```{r}
+
+# Look at relationship between potiental poverty category variables
+plot(nys_acs$median_household_income, nys_acs$county_per_poverty)
+plot(nys_acs$county_per_bach, nys_acs$county_per_poverty)
+```
+
+#### Task 3: Recoding and variable manipulation
+
+1. Deal with missing values, which are currently coded as `-99`.
+2. Create a categorical variable that groups counties into "high", "medium", and "low" poverty groups. Decide how you want to split up the groups and briefly explain your decision.
+
+```{r}
+quantile(nys_acs$county_per_poverty, probs = c(0,0.33, 0.66,1)) #Get 33% cut offs for high medium and low
+
+nys_acs <- nys_acs %>%
+    mutate(poverty_cat = NA, 
+           poverty_cat = if_else(county_per_poverty < 0.116, 'low',poverty_cat), 
+           poverty_cat = if_else(county_per_poverty >= 0.116 & county_per_poverty < 0.143, 'med',poverty_cat), 
+           poverty_cat = if_else(county_per_poverty >= 0.143 & county_per_poverty <= 0.299, 'high',poverty_cat)
+           ) # Create new variable poverty category
+```
+3. The tests that the NYS Department of Education administers changes from time to time, so scale scores are not directly comparable year-to-year. Create a new variable that is the standardized z-score for math and English Language Arts (ELA) for each year (hint: group by year and use the `scale()` function)
+
+```{r}
+nys_schools <- nys_schools %>%
+    group_by(year) %>%
+    mutate(adj_math_score = scale(mean_math_score),
+           adj_ela_score = scale(mean_ela_score)) #Scale scores by year
+             
+```
+
+#### Task 4: Merge datasets
+
+Create a dataset that merges variables from the schools dataset and the ACS dataset. Remember that you have learned multiple approaches on how to do this, and that you will have to decide how to combine the two data sets.
+
+```{r}
+# Merge Data
+merged_data = inner_join(nys_schools, nys_acs, by = c('year','county_name'))
+```
+
+---
+
+### Step 2: Analyze the Data
+
+Think back to the original question(s). The best way to answer them and present them to a non-technical audience is using summary tables or visualizations.
+
+
+#### Task 5: Create summary tables
+
+Generate a few summary tables to help answer the questions you were originally asked.
+
+For example:
+
+1. For each county: total enrollment, percent of students qualifying for free or reduced price lunch, and percent of population in poverty.
+2. For the counties with the top 5 and bottom 5 poverty rate: percent of population in poverty, percent of students qualifying for free or reduced price lunch, mean reading score, and mean math score.
+
+```{r}
+merged_data %>%
+    group_by(poverty_cat) %>%
+   summarise(mean(adj_ela_score,na.rm = TRUE))
+```
+
+#### Task 6: Data visualization
+
+Using `plot` or `ggplot2`, create a few visualizations that you could share with your department.
+
+For example:
+
+1. The relationship between access to free/reduced price lunch and test performance, at the *school* level.
+2. Average test performance across *counties* with high, low, and medium poverty.
+
+---
+
+### Step 3: Github Submission
+
+#### 1. Save your exercise within your forked repo
+
+When you have completed the exercise, save your Markdown file in the `submissions` folder of your forked repo using this naming convention: `FinalRExercise_LastnameFirstname.Rmd`.
+
+#### 2. Create a pull request
+
+Create a pull request to submit the file to the base repo that lives in the MSiA organization. Make sure that the new file you created is in the `submissions` folder, and then create a pull request that asks to merge changes from your forked repo to the base repo.
+
+#### Reminders
+
+- Attempt to knit your Markdown file into HTML format before committing it to Github. Troubleshoot any errors with the knit process by checking the lines referred to in the error messages.
+- When working with git, don't forget to commit changes periodically, and push commits when you are done.
+
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
