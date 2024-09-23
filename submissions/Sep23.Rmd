@@ -1,0 +1,59 @@
+---
+title: "Activity"
+date: "2024-09-23"
+---
+
+```{r setup, include=False}
+# import data
+nys_schools <- read.csv("~/Desktop/bootcamp-2024/data/nys_schools.csv")
+nys_acs <- read.csv("~/Desktop/bootcamp-2024/data/nys_acs.csv")
+```
+
+```{r setup, include=False}
+# check rows
+nrow(nys_schools)
+nrow(nys_acs)
+```
+
+```{r setup, include=False}
+# check column, and column names
+ncol(nys_schools)
+colnames(nys_schools)
+
+ncol(nys_acs)
+colnames(nys_acs)
+```
+
+```{r setup, include=False}
+# check column, and column names
+summary(nys_schools)
+summary(nys_acs)
+```
+
+```{r setup, include=False}
+# check column, and column names
+library(dplyr)
+distinct_nys_schools<- distinct(nys_schools)
+distinct_nys_acs<- distinct(nys_acs)
+```
+
+```{r setup, include=False}
+nys_acs <- nys_acs %>%
+  mutate(poverty_group = ntile(county_per_poverty, 3)) %>%
+  mutate(poverty_group = case_when(
+    poverty_group == 1 ~ "Low",
+    poverty_group == 2 ~ "Medium",
+    poverty_group == 3 ~ "High"
+  ))
+
+```
+
+
+```{r setup, include=False}
+merged_data <- merge(nys_schools, nys_acs, by = c("year", "county_name"))
+
+ggplot(data = merged_data) + 
+  geom_boxplot(mapping = aes(x = poverty_group, y = mean_math_score))
+
+```
+
