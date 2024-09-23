@@ -1,0 +1,144 @@
+---
+title: "Bootcamp Final Exercise"
+output: html_notebook
+---
+
+
+```{r}
+library(tidyverse)
+library(here)
+library(reshape2)
+
+nys_school <- read.csv("data/nys_schools.csv")
+nys_acs <- read.csv("data/nys_acs.csv")
+```
+
+```{r}
+head(nys_school)
+```
+
+```{r}
+head(nys_acs)
+```
+
+```{r}
+str(nys_school)
+```
+
+```{r}
+str(nys_acs)
+```
+
+
+```{r}
+summary(nys_school)
+```
+total_enroll, mean_ela_score, mean_math_score -> positive value, but the minimum value -> -99 (Missing value)
+per_free_lunch, per_reduced_lunch, per_lep -> should be ratio, but the minimum value -> -99 (Missing values)
+
+```{r}
+summary(nys_acs)
+```
+county_per_poverty, country_per_batch -> ratio
+median_household_income -> integer
+
+```{r}
+colSums(is.na(nys_school))
+```
+
+```{r}
+colSums(is.na(nys_acs))
+```
+
+No NA values, just -99 as the missing values
+
+Variables with missing values -> total_enroll, mean_ela_score, mean_math_score, per_free_lunch, per_reduced_lunch, per_lep
+
+Dealing with missing values -> set it to NA for the -99
+```{r}
+nys_school[nys_school == -99] <- NA
+summary(nys_school)
+```
+
+```{r}
+head(nys_acs)
+```
+```{r}
+boxplot(county_per_poverty ~ year, data = nys_acs,
+        main = "Income Distribution by year",
+        xlab = "Year",
+        ylab = "Income",
+        las = 2)  # Adjust label size if there are many counties
+```
+Based on the distribution -> it looks like within a year, most of the distribution lie on a simillar value. Set Low -> Less than 0.07, Medium [0.07, 0.17], High (>0,17)
+
+```{r}
+nys_acs_with_county_level <- nys_acs %>%
+  mutate(county_level = case_when(
+      county_per_poverty < 0.07 ~ "Low",
+      county_per_poverty >= 0.07 & county_per_poverty <= 0.17 ~ "Medium",
+      county_per_poverty > 0.17 ~ "High"
+    )
+  )
+```
+
+Task 3.3
+```{r}
+scores_std <- nys_school %>%
+  select(year, contains("score")) %>%
+  group_by(year) %>%
+  summarize(all_mean_ela = mean(mean_ela_score, na.rm=TRUE),
+            all_mean_math = mean(mean_math_score, na.rm=TRUE),
+            all_sd_ela = sd(mean_ela_score, na.rm=TRUE),
+            all_sd_math = sd(mean_math_score, na.rm=TRUE))
+```
+
+```{r}
+with_all_value <- inner_join(nys_school, scores_std, by = 'year')
+std_school <- mutate(with_all_value,
+                     z_score_ela = (mean_ela_score-all_mean_ela)/all_sd_ela,
+                     z_score_math = (mean_math_score-all_mean_math)/all_sd_math)
+```
+
+```{r}
+head(nys_acs_with_county_level)
+```
+
+```{r}
+join_data <- inner_join(std_school, nys_acs_with_county_level, by = c('county_name', 'year'))
+head(join_data)
+```
+
+```{r}
+summary_data <- join_data %>%
+  group_by(year, county_level) %>%
+  summarize(mean_ela = mean(z_score_ela, na.rm = TRUE),
+            mean_math = mean(z_score_math, na.rm = TRUE))
+
+ggplot(summary_data, aes(x = year, y = mean_ela, color = county_level, group = county_level)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Trend of Average ELA Scores by County Poverty Level",
+    x = "Year",
+    y = "Average ELA Score",
+    color = "County Poverty Level"
+  ) +
+  scale_color_brewer(palette = "Dark2") +
+  theme_minimal()
+```
+
+```{r}
+ggplot(summary_data, aes(x = year, y = mean_math, color = county_level, group = county_level)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Trend of Average Math Scores by County Poverty Level",
+    x = "Year",
+    y = "Average Math Score",
+    color = "County Poverty Level"
+  ) +
+  scale_color_brewer(palette = "Dark2") +
+  theme_minimal()
+```
+
