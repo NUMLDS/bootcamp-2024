@@ -1,0 +1,156 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+#Task2: Explore your data
+#check missing values
+schools<-nys_schools
+acs<-nys_acs
+is.na(schools)
+is.na(acs)
+sum(is.na(schools))
+sum(is.na(acs))
+#check duplicates
+duplicated(schools)
+duplicated(acs)
+sum(duplicated(schools))
+sum(duplicated(acs))
+
+summary(schools)
+summary(acs)
+#Task3:
+#1.Deal with missing values, which are currently coded as -99.
+#2.Create a categorical variable that groups counties into "high", "medium", and "low" poverty groups. Decide how you want to split up the groups and briefly explain your decision.
+
+
+#Low poverty: Counties with poverty rates in the bottom 33% of the data.
+#Medium poverty: Counties with poverty rates in the middle 33%.
+#High poverty: Counties with poverty rates in the top 33%.
+
+# Step 1: Calculate the average poverty rate for each county
+county_poverty <- nys_acs %>%
+  group_by(county_name) %>%
+  summarise(avg_poverty_rate = mean(county_per_poverty, na.rm = TRUE))
+# Step 2: Create a new categorical variable based on quantiles (bottom 33%, middle 33%, top 33%)
+county_poverty <- county_poverty %>%
+  mutate(poverty_group = cut(
+    avg_poverty_rate,
+    breaks = quantile(avg_poverty_rate, probs = c(0, 0.33, 0.66, 1), na.rm = TRUE),
+    labels = c("Low", "Medium", "High"),
+    include.lowest = TRUE
+  ))
+
+# View the result
+print(county_poverty)
+
+  
+#3.The tests that the NYS Department of Education administers changes from time to time, so scale scores are not directly comparable year-to-year. Create a new variable that is the standardized z-score for math and English Language Arts (ELA) for each year (hint: group by year and use the scale() function)
+  schools %>%
+  group_by(year) %>%
+  summarise(
+    math_z_score = mean(mean_math_score),  # Create standardized z-scores for math
+    ela_z_score = mean(mean_ela_score)     # Create standardized z-scores for ELA
+  ) 
+  
+view(schools)
+
+#Task 4: Merge datasets
+#Create a dataset that merges variables from the schools dataset and the ACS dataset. Remember that you have learned multiple approaches on how to do this, and that you will have to decide how to combine the two data sets.
+
+merged_data <- schools %>%
+  left_join(acs, by = "county_name")  # Replace "county_name" with the correct column name if different
+head(merged_data)
+
+```
+
+
+```{r}
+#Analyze the data
+#Task 5: Create summary tables
+#Generate a few summary tables to help answer the questions you were originally asked.
+#For example:
+#For each county: total enrollment, percent of students qualifying for free or reduced price lunch, and percent of population in poverty.
+#For the counties with the top 5 and bottom 5 poverty rate: percent of population in poverty, percent of students qualifying for free or reduced price lunch, mean reading score, and mean math score.
+#We will generate a table that shows:
+#Total enrollment for each county.
+#Percent of students qualifying for free or reduced price lunch.
+#Percent of population in poverty.
+
+# Summary for each county
+county_summary <- merged_data %>%
+  group_by(county_name) %>%
+  summarise(
+    total_enrollment = sum(total_enroll, na.rm = TRUE),  # Total enrollment
+    percent_free_reduced_lunch = (mean(per_free_lunch, na.rm = TRUE) + mean(per_reduced_lunch, na.rm = TRUE)) * 100,  # Combined percent of students on free/reduced lunch
+    percent_poverty = mean(poverty_rate, na.rm = TRUE) * 100  # Percent of population in poverty
+  )
+
+# View the summary table
+view(county_summary)
+
+#Task 6: Data visualization
+#Using plot or ggplot2, create a few visualizations that you could share with your department.
+#For example:
+#The relationship between access to free/reduced price lunch and test performance, at the school level.
+#Average test performance across counties with high, low, and medium poverty.
+merged_data <- merged_data %>%
+  mutate(
+    poverty_group = cut(
+      county_per_poverty,
+      breaks = quantile(poverty_rate, probs = c(0, 0.33, 0.66, 1), na.rm = TRUE),
+      labels = c("Low", "Medium", "High"),
+      include.lowest = TRUE
+    )
+  )
+ 
+school_summary <- merged_data %>%
+  group_by(school_name, county_per_poverty) %>%
+  summarise(
+    avg_math_score = mean(mean_math_score, na.rm = TRUE),  # Average math score
+    avg_ela_score = mean(mean_ela_score, na.rm = TRUE)     # Average ELA score
+  )
+
+# View the summary
+print(school_summary)
+
+library(ggplot2)
+
+ggplot(school_summary, aes(x = county_per_poverty, y = avg_math_score, fill = school_name)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(~ school_name, scales = "free_y") +  # Facet by school
+  labs(
+    title = "Average Math Test Performance by School and Poverty Group",
+    x = "Poverty Group",
+    y = "Average Math Score"
+  ) +
+  theme_minimal()
+
+
+#Average test performance across counties with high, low, and medium poverty.
+
+ggplot(merged_data, aes(x = county_name, y = mean_math_score)) +
+  stat_summary(fun = "mean", geom = "bar", fill = "skyblue", color = "black", width = 0.6) +
+  labs(
+    title = "Average Math Test Performance by Poverty Group",
+    x = "County",
+    y = "Average Math Score"
+  ) +
+  theme_minimal()
+
+```
+
+
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
