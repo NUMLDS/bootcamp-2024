@@ -1,0 +1,50 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+1. Read in data
+```{r}
+acs <- read_csv("data/nys_acs.csv")
+schools <- read_csv("data/nys_schools.csv")
+```
+
+2. Clean data 
+```{r}
+schools_clean <- schools[!apply(schools == -99, 1, any), ]
+schools_clean <- drop_na(schools_clean)
+```
+
+3. Create categorical varibles 
+```{r}
+acs$poverty_level <- NA
+
+for (i in 1:nrow(acs)) {
+  if (acs$county_per_poverty[i] < 0.10903) {
+    acs$poverty_level[i] <- 'low'
+  } else if (acs$county_per_poverty[i] > 0.10903 && acs$county_per_poverty[i] < 0.14929) {
+    acs$poverty_level[i] <- 'medium'
+  } else {
+    acs$poverty_level[i] <- 'high'
+  }
+}
+```
+
+4. Merge datesets 
+```{r}
+merged_df <- left_join(schools_clean, acs, by = c("county_name", "year"))
+merged_df <- drop_na(merged_df)
+```
+
+5. Data visualization 
+```{r}
+merged_df %>% 
+  group_by(poverty_level, school_name) %>% 
+  summarise(output=sum(mean_math_score)) %>% 
+  ggplot() + 
+  geom_col(aes(x=poverty_level, y=output)) 
+  labs(x="poverty_level", y="mean_math_score")
+```
+
+
+
