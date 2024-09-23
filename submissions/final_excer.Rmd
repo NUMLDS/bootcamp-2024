@@ -1,0 +1,132 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r package}
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+```
+
+#### Task 1: Import your data
+
+Read the data files `nys_schools.csv` and `nys_acs.csv` into R. These data come from two different sources: one is data on *schools* in New York state from the [New York State Department of Education](http://data.nysed.gov/downloads.php), and the other is data on *counties* from the American Communities Survey from the US Census Bureau. Review the codebook file so that you know what each variable name means in each dataset.
+
+```{r load_data}
+school_data <- read_csv("data/nys_schools.csv")
+nyc_data <- read_csv("data/nys_acs.csv")
+```
+
+#### Task 2: Explore your data
+
+Getting to know your data is a critical part of data analysis. Take the time to explore the structure of the two dataframes you have imported. What types of variables are there? Is there any missing data? How can you tell? What else do you notice about the data?
+```{r data}
+summary(school_data)
+```
+
+```{r load_data}
+nyc_data %>% filter(if_any(everything(), is.na))
+school_data %>% filter(if_any(everything(), is.na))
+```
+
+
+#### Task 3: Recoding and variable manipulation
+
+1. Deal with missing values, which are currently coded as `-99`.
+2. Create a categorical variable that groups counties into "high", "medium", and "low" poverty groups. Decide how you want to split up the groups and briefly explain your decision.
+3. The tests that the NYS Department of Education administers changes from time to time, so scale scores are not directly comparable year-to-year. Create a new variable that is the standardized z-score for math and English Language Arts (ELA) for each year (hint: group by year and use the `scale()` function)
+
+```{r task 3}
+nyc_data<- nyc_data %>% drop_na()
+school_data<- school_data %>% drop_na()
+```
+
+```{r task 3_2}
+summary(nyc_data)
+```
+```{r task3_split}
+nyc_data <- nyc_data %>%
+  mutate(poverty_level = case_when(
+    county_per_poverty < 0.10903 ~ "Low",
+    county_per_poverty >=0.10903 & county_per_poverty < 0.14929 ~ "Medium",
+    county_per_poverty >= 0.14929 ~ "High"
+  ))
+```
+
+```{r task3_count}
+nyc_data %>%
+  group_by(poverty_level) %>%
+  summarise(count = n())
+```
+
+```{r task3_count}
+school_data %>%
+  group_by(year)
+```
+
+```{r task3_zscore}
+#z_scores <- (data-mean(data))/sd(data)
+school_data %>%
+  group_by(year) %>%
+  mutate(
+    zscore_math = (mean_math_score - mean(mean_math_score) / sd(mean_math_score)),
+    zscore_ela = (mean_ela_score - mean(mean_ela_score) / sd(mean_ela_score))
+  )
+  
+```
+
+
+
+#### Task 4: Merge datasets
+
+Create a dataset that merges variables from the schools dataset and the ACS dataset. Remember that you have learned multiple approaches on how to do this, and that you will have to decide how to combine the two data sets.
+
+---
+
+### Step 2: Analyze the Data
+
+Think back to the original question(s). The best way to answer them and present them to a non-technical audience is using summary tables or visualizations.
+
+#### Task 5: Create summary tables
+
+Generate a few summary tables to help answer the questions you were originally asked.
+
+For example:
+
+1. For each county: total enrollment, percent of students qualifying for free or reduced price lunch, and percent of population in poverty.
+2. For the counties with the top 5 and bottom 5 poverty rate: percent of population in poverty, percent of students qualifying for free or reduced price lunch, mean reading score, and mean math score.
+
+#### Task 6: Data visualization
+
+Using `plot` or `ggplot2`, create a few visualizations that you could share with your department.
+
+For example:
+
+1. The relationship between access to free/reduced price lunch and test performance, at the *school* level.
+```{r relationship}
+ggplot(data = school_data) +
+  geom_point(mapping = aes(x=per_free_lunch,y=mean_ela_score)) +
+  labs(title = 'The relationship between free lunch and ela score ', x = 'per_free_lunch', y='mean_ela_score')
+```
+
+2. Average test performance across *counties* with high, low, and medium poverty.
+
+
+
+---
+
+### Step 3: Github Submission
+
+#### 1. Save your exercise within your forked repo
+
+When you have completed the exercise, save your Markdown file in the `submissions` folder of your forked repo using this naming convention: `FinalRExercise_LastnameFirstname.Rmd`.
+
+#### 2. Create a pull request
+
+Create a pull request to submit the file to the base repo that lives in the MSiA organization. Make sure that the new file you created is in the `submissions` folder, and then create a pull request that asks to merge changes from your forked repo to the base repo.
+
+#### Reminders
+
+- Attempt to knit your Markdown file into HTML format before committing it to Github. Troubleshoot any errors with the knit process by checking the lines referred to in the error messages.
+- When working with git, don't forget to commit changes periodically, and push commits when you are done.
