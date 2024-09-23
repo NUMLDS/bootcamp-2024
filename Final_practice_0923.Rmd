@@ -1,0 +1,185 @@
+---
+title: "final_exercise"
+author: "Mason Ma"
+date: "2024-09-23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+schools_data <- read.csv("/Users/mason/Desktop/Mason-Ma-R/bootcamp-2024/data/nys_schools.csv")
+acs_data <- read.csv("/Users/mason/Desktop/Mason-Ma-R/bootcamp-2024/data/nys_acs.csv")
+```
+
+```{r}
+# The structure of the data overall
+glimpse(schools_data)
+glimpse(acs_data)
+
+# Check for missing values
+summary(schools_data)
+summary(acs_data)
+
+```
+
+We saw that some of the missing values are filled with value 99 and we should replace those values with 'NA'.
+
+```{r}
+# Replace -99 with NA
+schools_data[schools_data == -99] <- NA
+acs_data[acs_data == -99] <- NA
+```
+
+```{r}
+##Now we create a categorical variable that groups counties into "high", "medium", and "low" poverty groups by quantiles. First we need to check the distribution of the variable "Poverty rate".
+
+ggplot(acs_data, aes(x = county_per_poverty)) +
+  geom_histogram() +
+  labs(title = "Distribution of County Poverty Rates", x = "County Poverty Rate (%)", y = "Count")
+
+summary(acs_data$county_per_poverty)
+```
+
+```{r}
+# Now we can use Quantiles to define poverty categories into "low", "medium", and "high."
+# Calculate the 1/3 and 2/3 percentiles
+quantiles <- quantile(acs_data$county_per_poverty, probs = c(0.33, 0.67), na.rm = TRUE)
+
+# check the quantiles and the values correspondingly
+quantiles
+```
+
+```{r}
+# Then we can create a new categorical variable for poverty category using the values above
+acs_data <- acs_data %>%
+  mutate(poverty_category = case_when(
+    county_per_poverty <= 0.1163753 ~ "low",
+    county_per_poverty > 0.1163753 & county_per_poverty <= 0.1441282  ~ "medium",
+    county_per_poverty > 0.1441282  ~ "high"
+  ))
+
+# Check the results
+table(acs_data$poverty_category)
+```
+
+```{r}
+# Then we can visualize the new poverty categories
+ggplot(acs_data, aes(x = poverty_category, y = county_per_poverty)) +
+  geom_boxplot() +
+  labs(title = "Poverty Rate by Poverty Category", x = "Poverty Category", y = "Poverty Rate (%)")
+
+```
+
+```{r}
+# Since the scale scores are not directly comparable year-to-year, we need to create a new variable that is the standardized z-score for math and English Language Arts (ELA) for each year.
+
+schools_data <- schools_data %>%
+  group_by(year) %>%
+  mutate(z_score_ela = scale(mean_ela_score),
+         z_score_math = scale(mean_math_score))
+
+summary(schools_data$z_score_ela)
+summary(schools_data$z_score_math)
+
+# we can see the scores has been scaled as standardized z-score.
+```
+```{r}
+# Based on the observations above, I choose to merge these two datasets by their county_name and year.
+merged_data <- merge(schools_data, acs_data, by = c("county_name", "year"))
+
+summary(merged_data)
+head(merged_data)
+```
+
+```{r}
+# Now for each county, the summary table will include its total enrollment, percent of students qualifying for free or reduced price lunch, and percent of population in poverty.
+
+county_summary <- merged_data %>%
+  group_by(county_name) %>%
+  summarise(
+    total_enrollment = sum(total_enroll, na.rm = TRUE),
+# The weights are the number of students enrolled in each school. A school with a larger enrollment should have more influence on the overall average than a smaller school.    
+    avg_free_reduced_lunch = weighted.mean(per_free_lunch + per_reduced_lunch, total_enroll, na.rm = TRUE),
+    county_poverty_rate = mean(county_per_poverty, na.rm = TRUE)
+  ) %>%
+  arrange(desc(county_poverty_rate))
+
+print(county_summary)
+```
+```{r}
+# Get top 5 and bottom 5 counties by poverty rate
+top_5_poverty <- county_summary %>% top_n(5, county_poverty_rate)
+bottom_5_poverty <- county_summary %>% top_n(-5, county_poverty_rate)
+```
+
+
+```{r}
+# Create summary table for top and bottom counties
+top_summary <- merged_data %>%
+  filter(county_name %in% c(top_5_poverty$county_name)) %>%
+  group_by(county_name) %>%
+  summarise(
+    county_poverty_rate = mean(county_per_poverty, na.rm = TRUE),
+    avg_free_reduced_lunch = weighted.mean(per_free_lunch + per_reduced_lunch, total_enroll, na.rm = TRUE),
+    avg_ela_score = mean(mean_ela_score, na.rm = TRUE),
+    avg_math_score = mean(mean_math_score, na.rm = TRUE)
+  ) %>%
+  arrange(desc(county_poverty_rate))
+```
+
+```{r}
+bottom_summary <- merged_data %>%
+  filter(county_name %in% c(bottom_5_poverty$county_name)) %>%
+  group_by(county_name) %>%
+  summarise(
+    county_poverty_rate = mean(county_per_poverty, na.rm = TRUE),
+    avg_free_reduced_lunch = weighted.mean(per_free_lunch + per_reduced_lunch, total_enroll, na.rm = TRUE),
+    avg_ela_score = mean(mean_ela_score, na.rm = TRUE),
+    avg_math_score = mean(mean_math_score, na.rm = TRUE)
+  ) %>%
+  arrange(desc(county_poverty_rate))
+```
+
+```{r}
+print(top_summary)
+print(bottom_summary)
+```
+
+```{r}
+sum(merged_data$per_reduced_lunch,na.rm=TRUE)
+sum(merged_data$per_free_lunch,na.rm=TRUE)
+```
+
+```{r}
+# The plot below shows the relationship between access to free/reduced price lunch and test performance at the school level.
+ggplot(merged_data, aes(x = per_free_lunch + per_reduced_lunch, y = z_score_ela)) +
+  geom_point(alpha = 0.2, color = "red") +  # Scatter plot with transparency
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +  # Linear regression line
+  labs(
+    title = "Relationship Between Free/Reduced Lunch and ELA Test Scores",
+    x = "Percent of Students Qualifying for Free or Reduced Lunch",
+    y = "Mean ELA Test Score"
+  ) +
+  xlim(0,1.5)
+  theme_minimal()
+
+```
+```{r}
+ggplot(merged_data, aes(x = per_free_lunch + per_reduced_lunch, y = z_score_math)) +
+  geom_point(alpha = 0.2, color = "red") +  # Scatter plot with transparency
+  geom_smooth(method = "lm", color = "blue") +  # Linear regression line
+  labs(
+    title = "Relationship Between Free/Reduced Lunch and ELA Test Scores",
+    x = "Percent of Students Qualifying for Free or Reduced Lunch",
+    y = "Mean ELA Test Score"
+  ) +
+  xlim(0,1.5)
+  theme_minimal()
+```
+
