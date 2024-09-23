@@ -1,0 +1,137 @@
+---
+title: "MLDS Boot Camp - Final R exercise"
+output: html_notebook
+author: Runxuan Li, Bo Zhao, Yunze Wei, Mingsha Mo
+---
+
+# Step 1: Clean the Data
+
+#### Task 0: Open RStudio
+```{r}
+library(tidyverse)
+library(here)
+library(reshape2)
+library(dplyr)
+```
+
+
+#### Task 1: Import your data
+```{r}
+schools <- read_csv(here("data/nys_schools.csv"))
+
+acs <- read_csv(here("data/nys_acs.csv"))
+```
+
+#### Task 2: Explore your data
+```{r}
+summary(schools)
+```
+
+```{r}
+summary(acs)
+```
+
+
+#### Task 3: Recoding and variable manipulation
+
+1. Deal with missing values, which are currently coded as -99.
+
+```{r}
+# Number of missing values in the original tables.
+
+colSums(schools == -99)
+colSums(acs == -99)
+colSums(is.na(acs))
+colSums(is.na(schools))
+```
+
+```{r}
+# Remove missing district_name values, then replace other missing values with column means.
+
+# schools_missing_permutated <- schools[!is.na(schools$district_name) & schools$district_name!="-99",]
+# 
+# schools_missing_permutated <- lapply(schools_missing_permutated, function(x) {
+#   col_mean <- mean(x[(x != -99)], na.rm = TRUE)
+#   x[x == -99] <- col_mean
+#   x[is.na(x)] <- col_mean
+#   return(x)
+# }) %>% as.data.frame()
+# 
+# schools <- schools_missing_permutated
+
+schools[schools == -99] = NA
+
+schools_missing_permutated = schools %>% 
+  mutate(mean_ela_score = ifelse(is.na(mean_ela_score), mean(mean_ela_score, na.rm = TRUE), mean_ela_score))%>%
+  mutate(mean_math_score = ifelse(is.na(mean_math_score), mean(mean_math_score, na.rm = TRUE), mean_math_score))
+
+schools_missing_permutated = schools_missing_permutated %>% na.omit()
+
+schools <- schools_missing_permutated
+
+colSums(is.na(acs))
+colSums(is.na(schools))
+```
+
+2. Create a categorical variable that groups counties into "high", "medium", and "low" poverty groups. Decide how you want to split up the groups and briefly explain your decision.
+
+```{r}
+low_threshold <- quantile(acs$median_household_income, 0.33)
+high_threshold <- quantile(acs$median_household_income, 0.66)
+
+acs$poverty_level <- cut(acs$median_household_income,
+                                 breaks = c(-Inf, low_threshold, high_threshold, Inf),
+                                 labels = c("low", "medium", "high"))
+```
+
+3. The tests that the NYS Department of Education administers changes from time to time, so scale scores are not directly comparable year-to-year. Create a new variable that is the standardized z-score for math and English Language Arts (ELA) for each year (hint: group by year and use the `scale()` function)
+
+```{r}
+schools <- schools %>%
+  group_by(year) %>%
+  mutate(
+    math_zscore = scale(mean_math_score),
+    ela_zscore = scale(mean_ela_score)
+  ) %>%
+  ungroup()
+```
+
+#### Task 4: Merge datasets
+
+Create a dataset that merges variables from the schools dataset and the ACS dataset. Remember that you have learned multiple approaches on how to do this, and that you will have to decide how to combine the two data sets.
+
+```{r}
+data <- left_join(schools, acs, by = c("county_name","year"))
+```
+
+### Step 2: Analyze the Data
+
+#### Task 5: Create summary tables
+
+Generate a few summary tables to help answer the questions you were originally asked.
+
+
+```{r}
+summary(data)
+```
+
+
+#### Task 6: Data visualization
+
+Using `plot` or `ggplot2`, create a few visualizations that you could share with your department.
+
+For example:
+
+1. The relationship between access to free/reduced price lunch and test performance, at the *school* level.
+2. Average test performance across *counties* with high, low, and medium poverty.
+
+```{r}
+data %>% group_by(c(county_name)) %>% mutate(total_enroll_count = sum(total_enroll),
+                                                avg_county_per_proverty = mean(county_per_poverty, na.rm = TRUE),
+                                                avg_ela_score = mean(mean_ela_score, na.rm =TRUE)) %>% 
+  ggplot() + geom_point(aes(x = avg_county_per_proverty, y = avg_ela_score)) + 
+  labs(title = "average county proverty rate VS. average ela score",
+       x = "average county proverty rate",
+       y = "average ela score")
+```
+
