@@ -1,0 +1,79 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+## Step1: Read in our Data
+
+```{r}
+nyc_acs <- read.csv("data/nys_acs.csv", stringsAsFactors=FALSE)
+nyc_schools <- read.csv("data/nys_schools.csv", stringsAsFactors = FALSE)
+
+summary(nyc_acs)
+```
+
+```{r}
+summary(nyc_schools)
+```
+
+```{r}
+nyc_schools <- nyc_schools[which(nyc_schools$mean_ela_score != -99 & nyc_schools$mean_math_score != -99),]
+summary(nyc_schools)
+```
+
+## Define poverty level. It would be great to visualize first and then find natural breaks
+
+```{r}
+nyc_acs$poverty_level <- NA
+nyc_acs$poverty_level[nyc_acs$county_per_poverty>quantile(nyc_acs$county_per_poverty,0.75) ] <- "high"
+nyc_acs$poverty_level[nyc_acs$county_per_poverty<=quantile(nyc_acs$county_per_poverty,0.75)  & nyc_acs$county_per_poverty>quantile(nyc_acs$county_per_poverty,0.25) ] <- "medium"
+nyc_acs$poverty_level[nyc_acs$county_per_poverty<=quantile(nyc_acs$county_per_poverty,0.25)] <- "low"
+
+table(nyc_acs$poverty_level)
+
+```
+
+```{r}
+scores_std <-nyc_schools %>%
+  select(year, contains("score")) %>%
+  group_by(year) %>%
+  summarise(
+    ela_mean = mean(mean_ela_score, na.rm = TRUE),
+    math_mean = mean(mean_math_score, na.rm = TRUE),
+    ela_sd = sd(mean_ela_score, na.rm = TRUE),
+    math_sd = sd(mean_math_score, na.rm = TRUE)
+  )
+
+school_scale <- inner_join(nyc_schools, scores_std, by="year") %>%
+  mutate(
+    ela_z_score = (mean_ela_score - ela_mean)/ela_sd,
+    math_z_score = (mean_math_score - math_mean)/math_sd
+  )%>%
+  select(-c(ela_mean, ela_sd, math_mean, math_sd))
+
+school_scale
+```
+
+```{r}
+data <- left_join(nyc_acs, school_scale, by = c("county_name", "year"))
+data
+```
+
+```{r}
+data %>%
+  group_by(year, poverty_level) %>%
+  summarize(output = median(ela_z_score)) %>%
+  ggplot() +
+  geom_col(aes(x=year, y=output, group=poverty_level, fill = poverty_level),position="dodge") +
+  labs(title="ELA Performance by Poverty Level and Year", x="Year", y="ela z-score")
+```
+
+```{r}
+data %>%
+  group_by(year, poverty_level) %>%
+  summarize(output = median(math_z_score)) %>%
+  ggplot() +
+  geom_col(aes(x=year, y=output, group=poverty_level, fill = poverty_level),position="dodge") +
+  labs(title="Math Performance by Poverty Level and Year", x="Year", y="math z-score")
+
+```
