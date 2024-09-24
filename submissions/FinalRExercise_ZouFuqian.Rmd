@@ -1,0 +1,104 @@
+---
+title: "MLDS Bootcamp Final Exercise"
+output: html_notebook
+author: Fuqian Zou
+---
+
+
+# Step 1: Clean the Data
+
+```{r}
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+```
+
+#### Task 1: Import data
+```{r}
+acs <- read.csv("/Users/fuqianzou/Desktop/bootcamp-2024/data/nys_acs.csv")
+schools <- read.csv("/Users/fuqianzou/Desktop/bootcamp-2024/data/nys_schools.csv")
+```
+
+#### Task 2: Explore data
+```{r}
+acs
+```
+
+
+```{r}
+summary(acs)
+```
+```{r}
+schools
+```
+
+```{r}
+summary(schools)
+```
+
+```{r}
+colSums(is.na(acs))
+```
+
+```{r}
+colSums(is.na(schools))
+```
+
+#### Task 3: Recoding and variable manipulation
+```{r}
+schools[schools == -99] <- NA
+summary(schools)
+```
+
+
+```{r}
+acs$poverty_level <- cut(acs$county_per_poverty,
+                         breaks = c(-Inf, 0.1, 0.15, Inf),
+                         labels = c("low", "medium", "high"))
+
+table(acs$poverty_level)
+```
+
+#### Task 4: Merge datasets
+
+```{r}
+merge_schools_acs <- merge(schools, acs, by = c("year", "county_name"), all = T)
+```
+
+
+# Step 2: Analyze the Data
+
+#### Task 5: Create summary tables
+
+```{r}
+schools %>% 
+    mutate(free_lunch_num = total_enroll * per_free_lunch) %>%
+    mutate(reduced_price_num = total_enroll * per_reduced_lunch) %>%
+    group_by(county_name) %>%
+    summarize(enrollment = sum(total_enroll, na.rm = T), per_free_lunch_county = sum(free_lunch_num, na.rm = T)/sum(total_enroll, na.rm = T), per_reduced_lunch_county = sum(reduced_price_num, na.rm = T)/sum(total_enroll, na.rm = T))
+```
+
+#### Task 6: Data visualization
+```{r}
+schools %>%
+    filter(per_free_lunch<1) %>%
+    ggplot() +
+    geom_point(aes(x=per_free_lunch, y=per_lep)) +
+    geom_smooth(aes(x=per_free_lunch, y=per_lep)) +
+    facet_wrap(~region)
+```
+```{r}
+schools %>%
+    filter(per_free_lunch<1) %>%
+    ggplot() +
+    geom_point(aes(x=per_free_lunch, y=mean_ela_score)) +
+    facet_wrap(~region)
+```
+```{r}
+schools %>%
+    filter(per_free_lunch<1) %>%
+    ggplot() +
+    geom_point(aes(x=per_free_lunch, y=mean_math_score)) +
+    facet_wrap(~region)
+```
+
