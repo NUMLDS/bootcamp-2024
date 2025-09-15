@@ -1,0 +1,129 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+```{r}
+
+```
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+```{r}
+ggplot(gapminder07)+
+    geom_point(aes(x= log(pop), y= log(gdpPercap)))+
+    labs(title = "Relationship between gdp and population")
+```
+```{r}
+long_gen %>%
+    group_by(datetime) %>%
+    summarise(output = sum(output)) %>%
+    ggplot ()+
+    geom_col(aes(x = datetime, y = output))+
+    labs(title = "total energy over time")
+```
+```{r}
+long_gen %>%
+    filter(long_gen$source == ("large_hydro") | long_gen$source ==("small_hydro")) %>%
+    group_by(datetime) %>%
+    ggplot ()+
+    geom_col(aes(x = datetime, y = output))+
+    labs(title = "hydro energy over time")
+```
+```{r}
+imports %>%
+    ggplot()+
+    geom_line(x = )
+```
+```{r}
+long_gen %>%
+    filter(long_gen$source == ("large_hydro") ) %>%
+    group_by(datetime) %>%
+    ggplot ()+
+    geom_line(aes(x = datetime, y = output), col ="blue4")+
+    geom_smooth(aes(x = datetime, y = output))+
+    labs(title = "hydro energy over time")
+```
+```{r}
+long_gen %>%
+    group_by(source) %>%
+    summarise(output = sum(output)) %>%
+    ggplot ()+
+    geom_col(aes(x = source, y = output), col ="yellow", fill = "darkred") +
+    geom_hline(aes(yintercept = mean(output)))+
+    labs(title = "source-wise energy ")
+```
+
+```{r}
+imports %>%
+  ggplot() + 
+  geom_line(aes(x=datetime, y=imports), col="red",) +
+  scale_x_datetime(date_labels = "%H:%M", date_breaks = "12 hours")+  
+  labs(title="Energy imports over time in California", subtitle="Hourly data from September 3-9, 2018",
+       caption="Source: California Energy Commission", x="Hour", y="Amount imported (MW)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size =10))
+```
+
+```{r}
+long_merged_energy %>%
+    ggplot()+
+    geom_line(aes(x = datetime, y= output, col = source, group =source))+
+    labs(title = "Create a line plot of energy output over time, with separate lines for each source.")
+    
+```
+```{r}
+long_merged_energy %>%
+    filter(long_merged_energy$source == ("wind") | long_merged_energy$source == ("geothermal") | long_merged_energy$source == ("solar")) %>%
+    ggplot ()+
+    geom_line(aes(x = datetime, y = output, col =source, group=source, size = 0))+
+    labs(title = "Create a line plot that compares generation of wind, solar, and geothermal energy over time.")
+```
+```{r}
+long_merged_energy %>% 
+  mutate(date=lubridate::date(datetime)) %>% 
+  group_by(date, source) %>% 
+  summarize(output=sum(output)) %>% 
+  ggplot() + 
+  geom_col(aes(x=date, y=output, group=source, fill=source)) + 
+  labs(title="Energy use by day", x="Day", y="Output (MW)")
+```
+```{r}
+long_merged_energy_regroup <- long_merged_energy %>%
+  rename(type = source) %>% 
+  merge(regroup, by = "type") %>% 
+  mutate(date=lubridate::date(datetime)) %>% 
+  group_by(date, group) %>%
+  summarise(output=sum(output))
+View(long_merged_energy_regroup)
+
+long_merged_energy_regroup %>%
+    ggplot()+
+    geom_line(aes(x=date, y=output, group = group, col=group), size =0.7)+
+    geom_point(aes(x=date, y=output, group=group, shape=group)) + 
+    labs(title="Output by source group over time", subtitle="Data collected during September 3-9, 2018", x="Date", y="Output (MW)")
+```
+```{r}
+ex5 <- long_merged_energy %>% 
+  mutate(hour=lubridate::hour(datetime))%>%
+  group_by(hour, source) %>%
+  summarize(output=mean(output)) %>%
+  ggplot() +
+  geom_area(aes(x=hour, y=output, fill=factor(source))) +
+  scale_fill_brewer(palette="Set3", name="Source") +
+  labs(title="Average hourly output by source",
+       subtitle="Data collected during September 3-9",
+       x="Hour of the day", y="Output (MW)") +
+  theme_bw()
+view(ex5)
+```
+
