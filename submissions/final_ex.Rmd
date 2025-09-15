@@ -1,0 +1,67 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+schools <- read_csv(here("~/Desktop/NU/bootcamp-2024/data/nys_schools.csv"))
+acs <- read_csv(here("~/Desktop/NU/bootcamp-2024/data/nys_acs.csv"))
+```
+
+```{r}
+filtered_schools <- subset(schools, total_enroll != -99 & per_free_lunch != -99 & mean_ela_score != -99 & mean_math_score != -99)
+summary(filtered_schools)
+```
+
+```{r}
+# year = c(2009:2016)
+# for (i in year) {
+#   one_third = quantile(acs$county_per_poverty[acs$year==i], probs = 0.33)
+#   two_third = quantile(acs$county_per_poverty[acs$year==i], probs = 0.66)
+#   if (acs$county_per_poverty[acs$year==i] < one_third) {
+#   acs$poverty = "low"
+#   } 
+#   else if (acs$county_per_poverty[acs$year==i] >= one_third & acs$county_per_poverty[acs$year==i] <= two_third) {
+#   acs$poverty = "median"
+#   }
+#   else {
+#     acs$poverty = "high"
+#   }
+# }
+for (year in c(2009:2016)){
+  low_thresh <- quantile(acs$county_per_poverty[acs$year == year], 0.33)
+  high_thresh <- quantile(acs$county_per_poverty[acs$year == year], 0.66)
+  
+  acs <- acs %>%
+    filter(year==year) %>%
+    mutate(poverty_level=case_when(
+      county_per_poverty <= low_thresh[["33%"]] ~ "low",
+      county_per_poverty >= high_thresh[["66%"]] ~ "high",
+      TRUE ~ "medium"
+    ))
+}
+```
+
+
+```{r}
+merged = merge(acs, filtered_schools, by = c("county_name", "year"))
+```
+
+```{r}
+merged %>%
+  group_by("coutry_name", "year") %>%
+  #summarise(mean = mean(total_enroll)) %>%
+  ggplot() +
+  geom_point(aes(x=median_household_income, y=county_per_poverty))
+  #geom_hline(aes(yintercept=mean(output)))
+```
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
