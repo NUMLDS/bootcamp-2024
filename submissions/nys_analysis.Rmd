@@ -1,0 +1,86 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+library(tidyverse)
+library(here)
+library(reshape2)
+
+# Prep gapminder5
+nys_acs <- read_csv(here("data/nys_acs.csv"))
+nys_schools <- read_csv(here("data/nys_schools.csv"),na = c("NA","-99",""))
+```
+
+Data Structure
+```{r}
+str(nys_acs)
+str(nys_schools)
+```
+```{r}
+nys_schools[nys_schools$total_enroll == '-99',]
+nys_schools[nys_schools$district_name == NA,]
+sum(is.na(nys_schools))
+```
+```{r}
+nys_schools <- na.omit(nys_schools)
+```
+
+```{r}
+nys_acs$category = NA
+low_bar = quantile(nys_acs$county_per_poverty, probs = 0.25)
+high_bar = quantile(nys_acs$county_per_poverty, probs = 0.75)
+
+for (i in 1:nrow(nys_acs)) {
+  if (nys_acs$county_per_poverty[i] > high_bar){
+    nys_acs$category[i] = 'high'
+  }
+  else if (nys_acs$county_per_poverty[i] > low_bar){
+    nys_acs$category[i] = 'medium'
+  }
+  else{
+    nys_acs$category[i] = 'low'
+  }
+      
+}
+```
+
+```{r}
+hist(nys_acs$county_per_poverty, breaks =40)
+```
+```{r}
+data = left_join(nys_acs,nys_schools,by=c("county_name", "year"))
+```
+
+```{r}
+data %>%
+  ggplot() +
+  geom_col(aes(x = year, y = mean(mean_ela_score), group = category, col = category), size = 1.5) +
+  labs(
+    title = "Poverty Level vs ELA Score",
+    y = "ELA Score",
+    x = "Year",
+    color = "Poverty Level"
+  ) +
+  theme_minimal()
+
+```
+```{r}
+data %>%
+  group_by(category)%>%
+  summarise(output=mean(mean_math_score))%>%
+  ggplot()+
+  geom_col(aes(x=category, y=output),, fill="red")+
+  geom_hline(aes(yintercept=mean(output)))+
+  labs(title="Poverty Level vs Math Score", y="Math_Score", x="Poverty_Level")
+```
+
+
+
+
+
+
+
+
