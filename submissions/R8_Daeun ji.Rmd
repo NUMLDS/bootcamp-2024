@@ -1,0 +1,129 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+summary(nys_acs)   # 데이터프레임 요약 정보
+any(is.na(nys_acs))  # 결측값이 있는지 확인
+colSums(is.na(nys_acs))  # 각 열에 있는 결측값의 개수 확인
+```
+```{r}
+```
+
+
+```{r}
+summary(nys_schools)   # 데이터프레임 요약 정보
+any(is.na(nys_schools))  # 결측값이 있는지 확인
+colSums(is.na(nys_schools))  # 각 열에 있는 결측값의 개수 확인
+```
+
+```{r}
+# First, load the dplyr package
+library(dplyr)
+
+# Remove duplicate rows
+```
+
+
+```{r}
+# First, load the dplyr package
+library(dplyr)
+
+# Remove duplicate rows
+dis_nys_acs_clean <- distinct(nys_acs)
+```
+
+```{r}
+# Remove duplicate rows
+dis_nys_schools_clean <- dis_nys_schools[!duplicated(dis_nys_schools), ]
+```
+
+```{r}
+# Remove duplicate rows
+dis_nys_acs_clean <- dis_nys_acs[!duplicated(dis_nys_acs), ]
+```
+```{r}
+# Load necessary library
+library(dplyr)
+
+# Define the thresholds for poverty levels
+dis_nys_schools <- dis_nys_schools %>%
+  mutate(poverty_group = cut(county_per_poverty,
+                             breaks = c(-Inf, 0.1, 0.2, Inf),
+                             labels = c("low", "medium", "high")))
+```
+```{r}
+nys_acs <- nys_acs %>%
+  mutate(poverty_group = ntile(county_per_poverty, 3)) %>%
+  mutate(poverty_group = case_when(
+    poverty_group == 1 ~ "Low",
+    poverty_group == 2 ~ "Medium",
+    poverty_group == 3 ~ "High"
+  ))
+
+```
+
+```{r}
+
+merged_data <- merge(nys_schools, nys_acs, by = c("year", "county_name"))
+
+```
+
+```{r}
+# Export merged data to CSV file
+write.csv(merged_data, "merged_data.csv", row.names = FALSE)
+```
+
+```{r}
+library(dplyr)
+
+county_summary <- merged_data %>%
+  group_by(county_name) %>%
+  summarise(
+    total_enroll = sum(total_enroll, na.rm = TRUE),
+    avg_per_free_lunch = mean(per_free_lunch + per_reduced_lunch, na.rm = TRUE),
+    avg_county_per_poverty = mean(county_per_poverty, na.rm = TRUE)
+  )
+```
+
+```{r}
+top_bottom_poverty <- merged_data %>%
+  arrange(county_per_poverty) %>%
+  filter(county_name %in% c(head(county_name, 5), tail(county_name, 5))) %>%
+  group_by(county_name) %>%
+  summarise(
+    avg_county_per_poverty = mean(county_per_poverty, na.rm = TRUE),
+    avg_per_free_lunch = mean(per_free_lunch + per_reduced_lunch, na.rm = TRUE),
+    avg_ela_score = mean(mean_ela_score, na.rm = TRUE),
+    avg_math_score = mean(mean_math_score, na.rm = TRUE)
+  )
+```
+
+```{r}
+ggplot(merged_data, aes(x = per_free_lunch + per_reduced_lunch, y = mean_math_score)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "Relationship between Free/Reduced Lunch and Math Performance",
+       x = "Percent of Students with Free/Reduced Lunch",
+       y = "Mean Math Score")
+```
+```{r}
+ggplot(merged_data, aes(x = poverty_group, y = mean_math_score)) +
+  geom_boxplot() +
+  labs(title = "Math Performance Across Poverty Groups",
+       x = "Poverty Group",
+       y = "Mean Math Score")
+```
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
