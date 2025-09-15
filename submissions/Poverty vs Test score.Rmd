@@ -1,0 +1,164 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+nys_acs <- read_csv("Desktop/bootcamp-2024/data/nys_acs.csv")
+
+nys_schools <- read_csv("Desktop/bootcamp-2024/data/nys_schools.csv")
+```
+Step 1: Clean the Data
+This is where the majority of your time will be spent.
+
+Task 0: Open RStudio
+Create a new .R or .Rmd file to document your work.
+
+Remember to load necessary packages.
+Remember to comment extensively in your code. If you're working in an RMarkdown file, you can describe your workflow in the text section. But you should also comment within all of your code chunks.
+Task 1: Import your data
+Read the data files nys_schools.csv and nys_acs.csv into R. These data come from two different sources: one is data on schools in New York state from the New York State Department of Education, and the other is data on counties from the American Communities Survey from the US Census Bureau. Review the codebook file so that you know what each variable name means in each dataset.
+
+Task 2: Explore your data
+Getting to know your data is a critical part of data analysis. Take the time to explore the structure of the two dataframes you have imported. What types of variables are there? Is there any missing data? How can you tell? What else do you notice about the data?
+
+Task 3: Recoding and variable manipulation
+Deal with missing values, which are currently coded as -99.
+```{r}
+is.na(nys_schools_clean)
+is.na(nys_acs)
+```
+
+```{r}
+nys_schools[nys_schools == -99] <- NA
+nys_schools_clean <- na.omit(nys_schools)
+dim(nys_schools_clean)
+dim(nys_schools)
+```
+
+```{r}
+nys_acs[nys_acs == -99] <- NA
+nys_acs_clean <- na.omit(nys_acs)
+dim(nys_acs_clean)
+dim(nys_acs)
+```
+
+Create a categorical variable that groups counties into "high", "medium", and "low" poverty groups. Decide how you want to split up the groups and briefly explain your decision.
+
+```{r}
+summary(nys_acs_clean)
+library(dplyr)
+
+# Define the quartiles for median_household_income
+first_quartile <- quantile(nys_acs$median_household_income, 0.25)
+third_quartile <- quantile(nys_acs$median_household_income, 0.75)
+
+# Add a new column 'income_category' based on these quartiles
+nys_acs <- nys_acs %>%
+  mutate(income_category = case_when(
+    median_household_income <= first_quartile ~ "low",
+    median_household_income > third_quartile ~ "high",
+    TRUE ~ "medium"
+  ))
+
+View(nys_acs)
+```
+
+
+The tests that the NYS Department of Education administers changes from time to time, so scale scores are not directly comparable year-to-year. Create a new variable that is the standardized z-score for math and English Language Arts (ELA) for each year (hint: group by year and use the scale() function)
+Task 4: Merge datasets
+Create a dataset that merges variables from the schools dataset and the ACS dataset. Remember that you have learned multiple approaches on how to do this, and that you will have to decide how to combine the two data sets.
+
+```{r}
+library(dplyr)
+
+# Assuming nys_schools and acs_data are the two datasets, merge them using left_join
+merged_data <- left_join(nys_schools_clean, nys_acs, by = c("county_name", "year"))
+
+# View the first few rows of the merged dataset
+View(merged_data)
+```
+
+Step 2: Analyze the Data
+Think back to the original question(s). The best way to answer them and present them to a non-technical audience is using summary tables or visualizations.
+
+Task 5: Create summary tables
+Generate a few summary tables to help answer the questions you were originally asked.
+
+For example:
+
+For each county: total enrollment, percent of students qualifying for free or reduced price lunch, and percent of population in poverty.
+
+```{r}
+View(merged_data %>%
+  group_by(county_name) %>%
+  summarise(
+    total_enroll_sum = sum(total_enroll,na.rm = TRUE),
+    percent_of_free_lunch = mean(per_free_lunch,na.rm = TRUE),
+    per_of_reduce_lunch = mean(per_reduced_lunch,na.rm = TRUE),
+    per_of_pop_poverty = mean(county_per_poverty,na.rm = TRUE)
+  ))
+```
+
+For the counties with the top 5 and bottom 5 poverty rate: percent of population in poverty, percent of students qualifying for free or reduced price lunch, mean reading score, and mean math score.
+
+```{r}
+county_summary <- merged_data %>%
+  group_by(county_name) %>%
+  summarise(
+    percent_population_poverty = mean(county_per_poverty, na.rm = TRUE) * 100,  # Adjust column name as needed
+    percent_free_reduced_lunch = mean(per_free_lunch, na.rm = TRUE) * 100,  # Adjust column name as needed
+    mean_reading_score = mean(reading_score, na.rm = TRUE),  # Adjust column name as needed
+    mean_math_score = mean(math_score, na.rm = TRUE)  # Adjust column name as needed
+  )
+
+top_5_poverty <- county_summary %>%
+  arrange(desc(percent_population_poverty)) %>%
+  slice_head(n = 5)
+
+bottom_5_poverty <- county_summary %>%
+  arrange(percent_population_poverty) %>%
+  slice_head(n = 5)
+```
+
+Task 6: Data visualization
+Using plot or ggplot2, create a few visualizations that you could share with your department.
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+county_summary <- merged_data %>%
+  group_by(county_name) %>%
+  summarise(
+    percent_population_poverty = mean(county_per_poverty, na.rm = TRUE) * 100, 
+    percent_free_reduced_lunch = mean(per_free_lunch, na.rm = TRUE) * 100, 
+    mean_reading_score = mean(mean_ela_score, na.rm = TRUE), 
+    mean_math_score = mean(mean_math_score, na.rm = TRUE) 
+  )
+
+county_summary <- county_summary %>%
+  mutate(poverty_category = case_when(
+    percent_population_poverty < 10 ~ "Low",
+    percent_population_poverty >= 10 & percent_population_poverty < 20 ~ "Medium",
+    TRUE ~ "High"
+  ))
+
+ggplot(county_summary, aes(x = poverty_category, y = mean_reading_score)) +
+  geom_boxplot(fill = "lightgreen") +
+  labs(title = "Mean Reading Scores by Poverty Rate Category",
+       x = "Poverty Rate Category",
+       y = "Mean Reading Score") +
+  theme_minimal()
+
+```
+
+For example:
+
+The relationship between access to free/reduced price lunch and test performance, at the school level.
+Average test performance across counties with high, low, and medium poverty.
+
