@@ -1,0 +1,177 @@
+---
+title: "Final R Exercise"
+author: "ZZ"
+date: "2024-09-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R final exercise
+
+```{r}
+library(dplyr)
+library(ggplot2)
+```
+
+
+```{r}
+str(nys_acs)
+```
+
+```{r}
+str(nys_schools)
+```
+```{r}
+summary(nys_acs)
+```
+
+```{r}
+summary(nys_schools)
+```
+## Recoding and variable manipulation
+### Deal with missing values, which are currently coded as -99.
+#### dplyr
+```{r}
+nys_schools %>% 
+  filter(!if_any(everything(), ~ .x == -99))
+```
+
+
+```{r}
+  num_rows_with_neg99 <- nys_schools %>% 
+  filter(if_any(everything(), ~ .x == -99)) %>%
+  nrow()
+
+num_rows_with_neg99  # not too much, drop all
+
+```
+rm(nys_schools_clean)
+```{r}
+nys_schools %>% 
+  filter(!if_any(everything(), ~ .x == -99)) %>%
+  nrow()
+
+nys_schools %>% 
+  filter(if_any(everything(), ~ .x == -99)) %>%
+  sample_n(size = 10)
+
+
+total_rows <- nrow(nys_schools)
+rows_with_neg99 <- nys_schools %>% 
+  filter(if_any(everything(), ~ .x == -99)) %>%
+  nrow()
+rows_without_neg99 <- nys_schools %>% 
+  filter(!if_any(everything(), ~ .x == -99)) %>%
+  nrow()
+```
+
+
+```{r}
+# Count duplicates
+duplicate_count <- nys_schools %>% 
+  distinct() %>% 
+  nrow() %>% 
+  {total_rows - .}
+print(paste("Duplicate rows:", duplicate_count))
+```
+
+
+```{r}
+# Verify counts directly linked to the condition
+print(nys_schools %>% filter(if_any(everything(), ~ .x == -99)) %>% nrow())
+print(nys_schools %>% filter(!if_any(everything(), ~ .x == -99)) %>% nrow())
+
+```
+
+
+
+#### Base R
+
+```{r}
+nys_schools_clean1 <- nys_schools[!apply(nys_schools == -99, 1, any),]
+nrow(nys_schools_clean1)
+
+
+nrow(nys_schools_clean1)
+head(nys_schools_clean1)
+```
+## Create a categorical variable that groups counties into "high", "medium", and "low" poverty groups.
+
+```{r}
+summary(nys_acs)
+```
+#### Base R
+```{r}
+breaks <- quantile(nys_acs$median_household_income, probs = c(0, 1/3, 2/3, 1), na.rm = T)
+
+nys_acs$poverty_level <- cut(nys_acs$median_household_income, 
+                        breaks = breaks, 
+                        labels = c("High", "Medium", "Low"),
+                        include.lowest = TRUE)
+```
+
+#### dplyr
+```{r}
+nys_acs <- nys_acs %>%
+  mutate( poverty_level1 = case_when(
+    median_household_income < 47680 ~ "High",
+    median_household_income >= 47680 & median_household_income< 53345 ~ "Medium",
+    median_household_income >= 53345 ~ 'Low'
+  ))
+
+table(nys_acs$poverty_level1)
+```
+
+
+
+## The tests that the NYS Department of Education administers changes from time to time, so scale scores are not directly comparable year-to-year. Create a new variable that is the standardized z-score for math and English Language Arts (ELA) for each year (hint: group by year and use the scale() function)
+
+#### dplyr
+```{r}
+nys_schools_clean1 <- nys_schools_clean1 %>%
+  group_by(year) %>%
+  mutate(
+    ELA_normalized = scale(mean_ela_score, center = TRUE, scale = TRUE),
+    Math_normalized  = scale(mean_math_score, center = TRUE, scale = TRUE)
+  ) %>%
+  ungroup()
+```
+
+
+## Merge datasets
+####Create a dataset that merges variables from the schools dataset and the ACS dataset.
+
+```{r}
+data <- left_join(nys_acs, nys_schools_clean1, by = c("county_name", "year"))
+```
+
+
+##  Create Summary Tables
+
+data_summary <- data[c("county_name", "school_name", "year", "poverty_level", "per_free_lunch", "ELA_normalized", "Math_normalized")]
+
+data_summary
+
+```{r}
+library(reshape2)
+
+data_bar_chart <- melt(data %>%
+                         group_by(poverty_level) %>%
+                         summarise(
+                           ela_avg = mean(ELA_normalized, na.rm = TRUE),
+                           math_avg = mean(Math_normalized, na.rm = TRUE)
+                         ),
+                       id.vars = "poverty_level",
+                       variable.name = "test",
+                       value.name = "scores")
+data_bar_chart %>%
+  ggplot()+
+  geom_col(aes(x = poverty_level, y = scores, group = test, fill = test), position = "dodge") + 
+  labs(title = "Test Scores By Poverty Level", x = "Poverty Level", y = "Above or Below Average")
+```
+
+
+
