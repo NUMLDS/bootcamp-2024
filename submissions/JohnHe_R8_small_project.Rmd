@@ -1,0 +1,87 @@
+---
+title: "R8 Education Project"
+output: html_notebook
+---
+
+Empathize: Why is the stakeholder asking these questions?
+- Stakeholder is interested in potentially allocating more resources to counties that perform worse.
+
+Brainstorm: What data and/or visualizations could help answer these questions?
+- Could visualize using a heat map.
+
+Insights: What conclusions and/or recommendations do you expect to come from your analysis?
+- We expect that poverty and test scores will be correlated.
+
+## Import Libraries
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+## Read in CSV files
+```{r}
+nys_acs <- read_csv('C:/Users/John/Desktop/MLDS Bootcamp/bootcamp-2024/data/nys_acs.csv', na = '-99')
+nys_sch <- read_csv('C:/Users/John/Desktop/MLDS Bootcamp/bootcamp-2024/data/nys_schools.csv', na = '-99')
+```
+## Remove 
+```{r}
+nys_sch_2 <- nys_sch %>%
+  filter(!is.na(mean_ela_score)) %>%
+  filter(!is.na(mean_math_score)) %>%
+  group_by(year) %>%
+  mutate(adj_mean_ela = scale(mean_ela_score, center = F),
+         adj_mean_mat = scale(mean_math_score, center = F)) %>%
+  ungroup() %>%
+  mutate(adj_comb_score = (adj_mean_ela + adj_mean_mat)/2)
+
+nys_sch_2 %>%
+  ggplot() +
+  geom_line(aes(x=year, y=adj_mean_ela), col = 'yellow') +
+  geom_line(aes(x=year, y=mean_ela_score), col = 'blue')
+```
+
+## Categorize Poverty
+```{r}
+quantile(nys_acs$county_per_poverty, probs = c(0, 0.33, 0.66, 1))
+
+nys_acs_2 <- nys_acs %>%
+  mutate(poverty_cat = NA,
+         poverty_cat = if_else(county_per_poverty < 0.116,
+                               'low',
+                               poverty_cat),
+         poverty_cat = if_else(county_per_poverty < 0.143 & county_per_poverty >= 0.116,
+                               'med',
+                               poverty_cat),
+         poverty_cat = if_else(county_per_poverty >= .143,
+                               'high',
+                               poverty_cat))
+
+```
+
+## Merge everything
+```{r}
+merged_data <- inner_join(nys_sch_2, nys_acs_2, by = c('year', 'county_name'))
+
+merged_data %>%
+  group_by(poverty_cat) %>%
+  summarize(mean(adj_comb_score))
+
+merged_data %>%
+  ggplot() +
+  geom_col(aes(x=year, y = adj_comb_score, group = poverty_cat, col = poverty_cat), position = 'fill')
+
+
+merged_data %>%
+  ggplot() +
+  geom_frac(aes(x=year, y = adj_comb_score, group = poverty_cat, col = poverty_cat))
+
+
+
+```
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
