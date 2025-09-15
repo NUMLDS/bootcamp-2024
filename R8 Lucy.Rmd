@@ -1,0 +1,81 @@
+1. Deal with missing values, which are currently coded as -99.
+```{r}
+summary(nys_schools)
+summary(nys_acs)
+sum(is.na(nys_schools))
+sum(is.na(nys_acs))
+
+```
+
+2. Create a categorical variable that groups counties into "high", "medium", and "low" poverty groups. Decide how you want to split up the groups and briefly explain your decision.
+
+```{r}
+nys_acs$poverty_level <- NA
+nys_acs$poverty_level[nys_acs$county_per_poverty>quantile(nys_acs$county_per_poverty,0.66) ] <- "high"
+nys_acs$poverty_level[nys_acs$county_per_poverty<=quantile(nys_acs$county_per_poverty,0.66)  & nys_acs$county_per_poverty>quantile(nys_acs$county_per_poverty,0.33) ] <- "medium"
+nys_acs$poverty_level[nys_acs$county_per_poverty<=quantile(nys_acs$county_per_poverty,0.33)] <- "low"
+table(nys_acs$poverty_level)
+```
+
+
+
+3. The tests that the NYS Department of Education administers changes from time to time, so scale scores are not directly comparable year-to-year. Create a new variable that is the standardized z-score for math and English Language Arts (ELA) for each year (hint: group by year and use the scale() function)
+
+```{r}
+scores_std <-nys_schools %>%
+  select(year, contains("score")) %>%
+  group_by(year) %>%
+  summarise(
+    ela_mean = mean(mean_ela_score, na.rm = TRUE),
+    math_mean = mean(mean_math_score, na.rm = TRUE),
+    ela_sd = sd(mean_ela_score, na.rm = TRUE),
+    math_sd = sd(mean_math_score, na.rm = TRUE)
+  )
+
+school_scale <- inner_join(nys_schools, scores_std, by="year") %>%
+  mutate(
+    ela_z_score = (mean_ela_score - ela_mean)/ela_sd,
+    math_z_score = (mean_math_score - math_mean)/math_sd
+  )%>%
+  select(-c(ela_mean, ela_sd, math_mean, math_sd))
+
+school_scale
+```
+
+4. Create a dataset that merges variables from the schools dataset and the ACS dataset. Remember that you have learned multiple approaches on how to do this, and that you will have to decide how to combine the two data sets.
+
+```{r}
+data <- left_join(nys_acs, nys_schools, by = c("county_name","year"))
+```
+5. Summary tables
+```{r}
+nys_schools%>%
+group_by(county_name)%>%
+  summarise(total_enroll=sum(total_enroll)
+            ,per_free_lunch=sum(per_free_lunch)/sum(total_enroll)
+            ,per_reduced_lunch=sum(per_reduced_lunch)/sum(total_enroll)
+            ,per_lep=sum(per_lep)/sum(total_enroll))
+```
+
+6. Data Visualization
+
+```{r}
+data %>%
+  group_by(year, poverty_level) %>%
+  summarize(output = median(z_score)) %>%
+  ggplot() +
+  geom_col(aes(x=year, y=output, group=poverty_level, fill = poverty_level),position="dodge") +
+  labs(title="ELA Performance by Poverty Level and Year", x="Year", y="ela z-score")
+```
+
+```{r}
+data %>%
+  group_by(year, poverty_level) # %>%
+  summarize(output = median(math_z_score)) %>%
+  ggplot() +
+  geom_col(aes(x=year, y=output, group=poverty_level, fill = poverty_level),position="dodge") +
+  labs(title="Math Performance by Poverty Level and Year", x="Year", y="math z-score")
+
+```
+
+
