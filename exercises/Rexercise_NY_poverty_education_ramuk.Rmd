@@ -1,0 +1,167 @@
+---
+title: "R Notebook"
+output: html_notebook
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+
+```{r}
+
+# DATASET1 NYS acs -> 
+
+library(dplyr)
+library(tidyverse)
+library(here)
+library(reshape2)
+
+
+# Sample data frame
+nys_schools <- read_csv("C:/Users/shubh/programming_work/nu/r_bootcamp_day_1/r_bootcamp_day1/data/nys_schools.csv")
+nys_acs <- read_csv("C:/Users/shubh/programming_work/nu/r_bootcamp_day_1/r_bootcamp_day1/data/nys_acs.csv")
+
+# # Dropping rows where column B has the value "x"
+# nys_schools_filtered <- df %>%
+#   filter( total_enroll != -99 | )
+# 
+# print(df_filtered)
+# 
+
+# school_name	district_name	county_name	region	year	total_enroll	per_free_lunch	per_reduced_lunch	per_lep	mean_ela_score	mean_math_score
+
+# Drop rows with -99 in any column
+nys_schools_filtered <- nys_schools %>%
+  filter(!if_any(everything(), ~ . == -99))
+
+write.csv(nys_schools_filtered, "nys_schools_filtered.csv", row.names = FALSE)
+
+
+```
+
+
+```{r}
+# Calculate quartiles
+quartiles <- quantile(nys_acs$county_per_poverty, probs = c(0.25, 0.5, 0.75))
+print(quartiles)
+
+#      25%       50%       75% 
+# 0.1090313 0.1288429 0.1492869 
+
+```
+
+```{r}
+nys_acs <- nys_acs %>%
+  mutate(
+    high_med_low = ifelse(county_per_poverty < quartiles[1], "LOW", ifelse( county_per_poverty > quartiles[3], "HIGH", "MEDIUM" )
+      
+    )
+)
+
+view(nys_acs)
+```
+
+```{r}
+View(nys_acs)
+```
+
+
+```{r}
+
+# mean_ela_score	mean_math_score
+
+
+
+nys_schools_filtered_yearly_sum <- nys_schools_filtered %>%
+  group_by(year) %>%
+  summarise(
+    Sum_ela = sum(mean_ela_score, na.rm = TRUE),
+    Sum_math = sum(mean_math_score, na.rm = TRUE)
+)
+
+view(nys_schools_filtered_yearly_sum)
+
+# Calculate mean and standard deviation
+mean_value_ela <- mean( nys_schools_filtered_yearly_sum$Sum_ela )
+sd_value_ela <- sd( nys_schools_filtered_yearly_sum$Sum_ela )
+
+mean_value_math <- mean( nys_schools_filtered_yearly_sum$Sum_math )
+sd_value_math <- sd( nys_schools_filtered_yearly_sum$Sum_math )
+
+
+
+# Calculate Z-scores
+nys_schools_filtered_yearly_sum$Z_Score_ela <- (nys_schools_filtered_yearly_sum$Sum_ela - mean_value_ela) / sd_value_ela
+nys_schools_filtered_yearly_sum$Z_score_math <- (nys_schools_filtered_yearly_sum$Sum_math - mean_value_math) / sd_value_math
+
+view(nys_schools_filtered_yearly_sum)
+
+
+
+```
+
+
+```{r}
+
+ggplot(nys_schools_filtered, aes(x = , y = )) +
+  geom_point() +
+  labs(title = "Scatter Plot of per_reduced_lunch vs. mean_math_score",
+       x = "per_reduced_lunch",
+       y = "mean_math_score") +
+  theme_minimal()
+
+
+```
+
+
+
+
+```{r}
+
+merged_df <- merge(nys_acs, nys_schools_filtered, by = c("county_name", "year"))
+
+
+```
+
+```{r}
+view(merged_df)
+
+```
+
+
+```{r}
+merged_df$combined_math_scores <- merged_df$mean_math_score * merged_df$total_enroll
+
+
+
+```
+
+
+```{r}
+merged_df %>%
+  ggplot() + 
+  geom_line(aes(x=year, y=mean_math_score, group=high_med_low, col=high_med_low)) + 
+  labs(title="Math score by high-med-low over time", subtitle="math scores over time", x="year", y="Math scores")
+
+
+```
+
+
+
+
+
+
+
+
+
+
