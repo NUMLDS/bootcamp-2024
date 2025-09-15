@@ -1,0 +1,195 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+##Step 1
+
+###Set-up
+```{r}
+library(ggplot2)
+library(dplyr)
+```
+
+
+###Task 2: Explore Your Data
+```{r}
+#Check missing values
+colSums(is.na(nys_acs))
+colSums(is.na(nys_schools))
+```
+```{r}
+#check duplicate values
+sum(duplicated(nys_acs))
+sum(duplicated(nys_schools))
+```
+```{r}
+#check duplicate row detail
+nys_schools[duplicated(nys_schools), ]
+#checked in the dataframe, they are exact duplicates
+```
+
+```{r}
+# drop duplicates
+nys_schools_nodup <- nys_schools[!duplicated(nys_schools), ]
+```
+
+```{r}
+# check data types
+glimpse(nys_acs)
+glimpse(nys_schools_nodup)
+```
+```{r}
+#check data basic stats
+summary(nys_acs)
+summary(nys_schools_nodup)
+```
+```{r}
+# count the number of -99s
+sapply(nys_schools_nodup, function(x) {
+  count <- sum(x == -99, na.rm = TRUE)
+  percentage <- (count / length(x)) * 100
+  c(Count = count, Percentage = percentage)
+})
+```
+
+###Task 3: Recode variables
+Deal with missing values
+```{r}
+# drop missing values -99 because the proportion of -99s in the total data is small (less than 10%), 2226 rows were removed
+nys_schools_clean <- nys_schools_nodup[!apply(nys_schools_nodup == -99, 1, any), ]
+```
+
+```{r}
+hist(nys_acs$county_per_poverty, breaks=50)
+```
+Create a categorical variable that groups counties into "high", "medium", and "low" poverty groups
+```{r}
+# Calculate the average poverty for each county
+county_avg_poverty <- nys_acs %>%
+  group_by(county_name) %>%
+  summarise(avg_poverty = mean(county_per_poverty, na.rm = TRUE))
+```
+
+
+```{r}
+# Label the counties based on percentiles
+county_avg_poverty <- county_avg_poverty %>%
+  mutate(poverty_group = cut(
+    avg_poverty, 
+    breaks = quantile(avg_poverty, probs = c(0, 0.33, 0.66, 1), na.rm = TRUE), 
+    labels = c("Low", "Medium", "High"),
+    include.lowest = TRUE
+  ))
+```
+
+```{r}
+# Merge the labels back to the original dataframe
+nys_acs <- nys_acs %>%
+  left_join(county_avg_poverty, by = "county_name")
+```
+
+```{r}
+# get z-scores for math scores and ela score
+nys_schools_clean <- nys_schools_clean %>%
+  group_by(year) %>%
+  mutate(
+    math_z = scale(mean_math_score, center = TRUE, scale = TRUE),
+    ela_z = scale(mean_ela_score, center = TRUE, scale = TRUE)
+  )
+```
+
+###Task 4: merge 2 datasets
+```{r}
+nys <- left_join(nys_schools_clean, nys_acs, by = c("county_name", "year"))
+```
+
+##Step 2 Analyze the data
+
+###Task 5: create summary tables
+For each county: total enrollment, percent of students qualifying for free or reduced price lunch, and percent of population in poverty
+```{r}
+county_summary <- nys %>%
+  group_by(county_name) %>%
+  summarise(
+    total_enrollment = sum(total_enroll, na.rm = TRUE),
+    percent_free_lunch = mean(per_free_lunch, na.rm = TRUE),
+    percent_reduced_lunch = mean(per_free_lunch, na.rm = TRUE),
+    avg_poverty = mean(county_per_poverty, na.rm=TRUE),
+    mean_reading_score = mean(mean_ela_score, na.rm = TRUE),
+    mean_math_score = mean(mean_math_score, na.rm = TRUE)
+  )
+county_summary
+```
+
+For the counties with the top 5 and bottom 5 poverty rate: percent of population in poverty, percent of students qualifying for free or reduced price lunch, mean reading score, and mean math score.
+```{r}
+# get corresponding counties
+top_5_poverty <- county_summary %>%
+  slice_max(avg_poverty, n = 5)
+
+bottom_5_poverty <- county_summary %>%
+  slice_min(avg_poverty, n = 5)
+
+top_5_poverty
+bottom_5_poverty
+```
+###Task 6 Data Visualization
+Plot the relationship between access to free/reduced price lunch and test performance, at the school level.
+```{r}
+# check how many schools there are in the data
+length(unique(nys$school_name))
+```
+```{r}
+school_summary <- nys %>%
+  group_by(school_name) %>%
+  summarise(
+    mean_per_free_lunch = mean(per_free_lunch, na.rm = TRUE),
+    mean_per_reduced_lunch = mean(per_reduced_lunch, na.rm = TRUE),
+    mean_ela_score = mean(mean_ela_score, na.rm = TRUE),
+    mean_math_score = mean(mean_math_score, na.rm = TRUE)
+  )
+```
+
+```{r}
+ggplot(school_summary, aes(x = mean_per_free_lunch + mean_per_reduced_lunch, y = mean_math_score)) +
+  geom_point() + 
+  labs(
+    x = "Mean Percentage of Students Qualifying for Free or Reduced Lunch",
+    y = "Mean Math Score",
+    title = "Mean Math Score vs. Mean Percentage of Free/Reduced Lunch at Each School"
+  ) +
+  theme_minimal() 
+```
+```{r}
+ggplot(school_summary, aes(x = mean_per_free_lunch + mean_per_reduced_lunch, y = mean_ela_score)) +
+  geom_point() + 
+  labs(
+    x = "Mean Percentage of Students Qualifying for Free or Reduced Lunch",
+    y = "Mean Reading Score",
+    title = "Mean Reading Score vs. Mean Percentage of Free/Reduced Lunch at Each School"
+  ) +
+  theme_minimal() 
+```
+Plot average test performance across counties with high, low, and medium poverty
+
+```{r}
+#TBD
+```
+
+
+
