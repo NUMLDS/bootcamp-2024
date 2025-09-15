@@ -1,0 +1,75 @@
+---
+title: "proverty"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##
+
+
+```{r}
+acs = read_csv("../../bootcamp-2024/data/nys_acs.csv")
+
+schools = read_csv("../../bootcamp-2024/data/nys_schools.csv")
+
+```
+
+```{r}
+colSums(schools == -99)
+colSums(acs == -99)
+colSums(is.na(acs))
+colSums(is.na(schools))
+
+
+schools[schools == -99] = NA
+
+schools_missing_permutated = schools %>% 
+  mutate(mean_ela_score = ifelse(is.na(mean_ela_score), mean(mean_ela_score, na.rm = TRUE), mean_ela_score))%>%
+  mutate(mean_math_score = ifelse(is.na(mean_math_score), mean(mean_math_score, na.rm = TRUE), mean_math_score))
+
+schools_missing_permutated = schools_missing_permutated %>% na.omit()
+
+                                      
+
+```
+
+```{r}
+low_threshold <- quantile(acs$median_household_income, 0.33)
+high_threshold <- quantile(acs$median_household_income, 0.66)
+
+acs$poverty_level <- cut(acs$median_household_income,
+                                 breaks = c(-Inf, low_threshold, high_threshold, Inf),
+                                 labels = c("low", "medium", "high"))
+```
+
+
+```{r}
+data <- left_join(schools_missing_permutated, acs, by = c("county_name","year"))
+```
+
+
+
+
+```{r}
+data %>% group_by(c(county_name)) %>% mutate(total_enroll_count = sum(total_enroll),
+                                                avg_county_per_proverty = mean(county_per_poverty, na.rm = TRUE),
+                                                avg_ela_score = mean(mean_ela_score, na.rm =TRUE)) %>% 
+  ggplot() + geom_point(aes(x = avg_county_per_proverty, y = avg_ela_score)) + 
+  labs(title = "average county proverty rate VS. average ela score",
+       x = "average county proverty rate",
+       y = "average ela score")
+
+
+
+
+
+
+
+
+```
+
+
+
